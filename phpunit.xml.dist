@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="SineMaculaLaravel/Tests/bootstrap.php"
+    colors="true"
+    cacheDirectory=".phpunit.cache"
+>
+    <testsuites>
+        <testsuite name="SineMaculaLaravel">
+            <directory>SineMaculaLaravel/Tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix="Sniff.php">SineMaculaLaravel/Sniffs</directory>
+            <directory suffix="Sniff.php">src</directory>
+            <directory suffix="Rule.php">src</directory>
+        </include>
+    </source>
+</phpunit>

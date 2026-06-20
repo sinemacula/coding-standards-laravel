@@ -1,0 +1,8 @@
+/vendor
+/.idea
+/composer.lock
+.php-cs-fixer.cache
+.phpunit.result.cache
+.phpunit.cache
+clover.xml
+.DS_Store

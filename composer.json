@@ -1,0 +1,68 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "sinemacula/coding-standards-laravel",
+    "type": "phpcodesniffer-standard",
+    "license": "Apache-2.0",
+    "description": "Laravel-specific coding standards, static-analysis rules, and code-quality tooling for Sine Macula's Laravel repositories.",
+    "authors": [
+        {
+            "name": "Ben Carey",
+            "email": "bdmc@sinemacula.co.uk"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "sinemacula/coding-standards": "^1.0",
+        "friendsofphp/php-cs-fixer": "^3.0"
+    },
+    "suggest": {
+        "phpstan/phpstan-phpunit": "PHPUnit-aware PHPStan rules. Auto-registers via phpstan/extension-installer.",
+        "phpstan/extension-installer": "Auto-registers the Laravel PHPStan rules (required for the shared php/phpstan-laravel.neon to load)."
+    },
+    "autoload": {
+        "psr-4": {
+            "SineMacula\\CodingStandardsLaravel\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SineMaculaLaravel\\Tests\\": "SineMaculaLaravel/Tests/"
+        }
+    },
+    "extra": {
+        "phpstan": {
+            "includes": [
+                "php/phpstan-laravel.neon"
+            ]
+        }
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.13",
+        "phpunit/phpunit": "^12",
+        "phpstan/phpstan": "^2.1"
+    },
+    "scripts": {
+        "check": [
+            "qlty check"
+        ],
+        "format": [
+            "qlty fmt"
+        ],
+        "smells": [
+            "qlty smells"
+        ],
+        "test": [
+            "@php vendor/bin/phpunit"
+        ],
+        "test:coverage": [
+            "@php -d pcov.enabled=0 -d xdebug.mode=coverage vendor/bin/phpunit --coverage-clover=clover.xml"
+        ]
+    },
+    "scripts-descriptions": {
+        "check": "Run static analysis and lint checks via qlty.",
+        "format": "Format codebase using qlty.",
+        "smells": "Report code smells (duplication, complexity) via qlty.",
+        "test": "Run the PHPUnit sniff/rule test suite.",
+        "test:coverage": "Run the PHPUnit suite with Clover coverage output (requires Xdebug)."
+    }
+}

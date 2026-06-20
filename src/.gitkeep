@@ -1,0 +1,1 @@
+# Keep the Composer PSR-4 target (src/) present until the first PHPStan rule lands.

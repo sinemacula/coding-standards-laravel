@@ -10,8 +10,6 @@
 # Register Laravel rule classes (from src/PHPStan/Rules/) under `rules:`. They
 # are Composer-autoloaded via the `SineMacula\CodingStandardsLaravel\` PSR-4 map,
 # so they load in a consumer's PHPStan run exactly as the base rules do.
-#
-# Example (uncomment and extend as rules are added):
-#
-# rules:
-#     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\ExampleRule
+rules:
+    - SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowCastsPropertyRule
+    - SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowDatesPropertyRule

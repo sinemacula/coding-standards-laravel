@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace SineMaculaLaravel\Tests\Architecture;
 
+use PHPUnit\Framework\Attributes\CoversNothing;
 use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 
 /**
@@ -9,7 +12,10 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
+ *
+ * @internal
  */
+#[CoversNothing]
 final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
 {
     /**

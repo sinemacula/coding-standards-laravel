@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace SineMaculaLaravel\Sniffs\Architecture;
 
 use PHP_CodeSniffer\Files\File;
@@ -25,6 +27,7 @@ final class DisallowServiceLocationSniff implements Sniff
      *
      * @return array<int, int|string>
      */
+    #[\Override]
     public function register(): array
     {
         return [T_STRING];
@@ -37,11 +40,12 @@ final class DisallowServiceLocationSniff implements Sniff
      * @param  int  $stackPtr
      * @return void
      */
+    #[\Override]
     public function process(File $phpcsFile, $stackPtr): void
     {
         $tokens = $phpcsFile->getTokens();
 
-        if ($this->inClass($tokens, $stackPtr) === false) {
+        if ($this->isInClass($tokens, $stackPtr) === false) {
             return;
         }
 
@@ -52,20 +56,22 @@ final class DisallowServiceLocationSniff implements Sniff
                 'Service location ("%s()") is not allowed in a class body; inject the dependency instead.',
                 $stackPtr,
                 'Helper',
-                [$name]
+                [$name],
             );
 
             return;
         }
 
-        if (($name === 'make' || $name === 'makeWith') && $this->isFacadeMake($phpcsFile, $stackPtr)) {
-            $phpcsFile->addError(
-                'Service location ("App::%s()") is not allowed in a class body; inject the dependency instead.',
-                $stackPtr,
-                'Facade',
-                [$name]
-            );
+        if (($name !== 'make' && $name !== 'makeWith') || !$this->isFacadeMake($phpcsFile, $stackPtr)) {
+            return;
         }
+
+        $phpcsFile->addError(
+            'Service location ("App::%s()") is not allowed in a class body; inject the dependency instead.',
+            $stackPtr,
+            'Facade',
+            [$name],
+        );
     }
 
     /**
@@ -75,7 +81,7 @@ final class DisallowServiceLocationSniff implements Sniff
      * @param  int  $stackPtr
      * @return bool
      */
-    private function inClass(array $tokens, int $stackPtr): bool
+    private function isInClass(array $tokens, int $stackPtr): bool
     {
         foreach ($tokens[$stackPtr]['conditions'] as $code) {
             if (in_array($code, [T_CLASS, T_TRAIT, T_ENUM, T_ANON_CLASS], true)) {
@@ -87,7 +93,8 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Determine whether the string is a direct function call (not a method/definition).
+     * Determine whether the string is a direct function call (not a method or
+     * definition).
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -102,14 +109,15 @@ final class DisallowServiceLocationSniff implements Sniff
             return false;
         }
 
-        $prev      = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true);
+        $prev           = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true);
         $notCallContext = [T_OBJECT_OPERATOR, T_NULLSAFE_OBJECT_OPERATOR, T_DOUBLE_COLON, T_FUNCTION, T_NEW, T_NS_SEPARATOR];
 
         return $prev === false || in_array($tokens[$prev]['code'], $notCallContext, true) === false;
     }
 
     /**
-     * Determine whether the string is the `make`/`makeWith` of an `App::` facade call.
+     * Determine whether the string is the `make`/`makeWith` of an `App::`
+     * facade call.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr

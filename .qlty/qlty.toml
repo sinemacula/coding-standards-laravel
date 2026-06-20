@@ -60,6 +60,10 @@ mode = "comment"
 name = "default"
 default = true
 
+[[source]]
+name = "sinemacula"
+repository = "https://github.com/sinemacula/coding-standards"
+tag = "v1.3.1"
 
 [[plugin]]
 name = "radarlint-php"

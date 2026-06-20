@@ -1,0 +1,10 @@
+parameters:
+    level: 8
+
+    scanDirectories:
+        - %currentWorkingDirectory%/src
+        - %currentWorkingDirectory%/SineMaculaLaravel
+
+    paths:
+        - src
+        - SineMaculaLaravel

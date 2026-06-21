@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/sinemacula/coding-standards-laravel/compare/v1.0.0...v1.0.1) (2026-06-21)
+
+
+### Bug Fixes
+
+* resolve qualified names under PHP_CodeSniffer 4.x ([#15](https://github.com/sinemacula/coding-standards-laravel/issues/15)) ([0c8cd19](https://github.com/sinemacula/coding-standards-laravel/commit/0c8cd19057b95e09132b7b16112ccdd3b8144b30))
+
 ## 1.0.0 (2026-06-21)
 
 

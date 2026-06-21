@@ -6,7 +6,7 @@ namespace SineMaculaLaravel\Tests\PHPStan;
 
 use PHPStan\Rules\Rule;
 use PHPStan\Testing\RuleTestCase;
-use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\CoversClass;
 use SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowDatesPropertyRule;
 
 /**
@@ -19,7 +19,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowDatesPropertyRule;
  *
  * @internal
  */
-#[CoversNothing]
+#[CoversClass(DisallowDatesPropertyRule::class)]
 final class DisallowDatesPropertyRuleTest extends RuleTestCase
 {
     /**

@@ -4,7 +4,8 @@ declare(strict_types = 1);
 
 namespace SineMaculaLaravel\Tests\Configuration;
 
-use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\CoversClass;
+use SineMaculaLaravel\Sniffs\Configuration\DisallowEnvOutsideConfigSniff;
 use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 
 /**
@@ -15,7 +16,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
  *
  * @internal
  */
-#[CoversNothing]
+#[CoversClass(DisallowEnvOutsideConfigSniff::class)]
 final class DisallowEnvOutsideConfigSniffTest extends AbstractSniffTestCase
 {
     /**

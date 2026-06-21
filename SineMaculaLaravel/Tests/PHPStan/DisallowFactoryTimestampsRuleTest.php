@@ -6,7 +6,7 @@ namespace SineMaculaLaravel\Tests\PHPStan;
 
 use PHPStan\Rules\Rule;
 use PHPStan\Testing\RuleTestCase;
-use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\CoversClass;
 use SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowFactoryTimestampsRule;
 
 /**
@@ -19,7 +19,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowFactoryTimestampsRul
  *
  * @internal
  */
-#[CoversNothing]
+#[CoversClass(DisallowFactoryTimestampsRule::class)]
 final class DisallowFactoryTimestampsRuleTest extends RuleTestCase
 {
     /**

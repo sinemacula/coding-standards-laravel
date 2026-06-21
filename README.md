@@ -54,6 +54,71 @@ own `level` / `paths`.
 If Laravel-specific fixer rules are present, reference the Laravel factory from your
 `.php-cs-fixer.dist.php`; otherwise keep using the base `PhpCsFixerConfig::make()`.
 
+## Rules
+
+These are the Laravel-specific rules this package adds on top of the base `sinemacula/coding-standards`.
+A deliberate exception can be bypassed with the native directive - `// phpcs:ignore <code>` for a sniff,
+`@phpstan-ignore <identifier>` for a rule.
+
+### PHPCS sniffs
+
+| Sniff | Enforces |
+|-------|----------|
+| `SineMaculaLaravel.Architecture.DisallowServiceLocation` | No service location (`app()`, `resolve()`, `App::make()`) inside a class body - inject collaborators instead. |
+| `SineMaculaLaravel.Configuration.DisallowEnvOutsideConfig` | `env()` only inside `config/` files; use `config()` everywhere else. |
+| `SineMaculaLaravel.Controllers.DisallowDatabaseAccess` | No `DB::` facade or direct Eloquent model queries in a controller - read through a repository. |
+| `SineMaculaLaravel.Controllers.DisallowInlineValidation` | No inline validation (`$request->validate()`, `Validator::make()`) in a controller - use a form request. |
+| `SineMaculaLaravel.Controllers.DisallowNonRestActions` | A controller's public methods are limited to the REST actions (`index`/`show`/`store`/`update`/`destroy`/`create`/`edit`) or a single `__invoke`. |
+| `SineMaculaLaravel.Debug.DisallowDebugStatements` | No debug calls (`dd`, `dump`, `ray`, `var_dump`, `print_r`) in committed code. |
+| `SineMaculaLaravel.Eloquent.DisallowLegacyAttributeAccessor` | No legacy `getXAttribute()` / `setXAttribute()` accessors - use `Attribute::make()`. |
+| `SineMaculaLaravel.Services.DisallowHttpAbort` | No `abort()` / `abort_if` / `abort_unless` / `HttpException` in a service - throw a domain exception. |
+| `SineMaculaLaravel.Structure.RequireBladeLocation` | A `*.blade.php` template must live under a `resources/views` (or module `Resources/views`) directory. |
+| `SineMaculaLaravel.Structure.RequireRoleDirectory` | A role class must live under its canonical directory (e.g. `*Controller` under `Http/Controllers`, `*Repository` under `Repositories`). |
+| `SineMaculaLaravel.Structure.RequireRoleNaming` | A class under a role directory must carry that role's suffix. |
+| `SineMaculaLaravel.Structure.RoutesLocation` | A `routes.php` file, if present, must sit at the root of an `Http` directory. |
+
+### PHPStan rules
+
+| Identifier | Enforces |
+|------------|----------|
+| `sineMaculaLaravel.castsProperty` | No `$casts` property on a model - use the `casts()` method. |
+| `sineMaculaLaravel.datesProperty` | No `$dates` property on a model (deprecated) - cast dates via `casts()`. |
+| `sineMaculaLaravel.massAssignment` | Every concrete model declares `$fillable` or `$guarded` explicitly. |
+| `sineMaculaLaravel.relationshipReturnType` | A relationship method declares a return-type hint. |
+| `sineMaculaLaravel.modelAttribute` | Prefer model attributes over their legacy forms: `$table`/`$hidden`/`$touches` → `#[Table]`/`#[Hidden]`/`#[Touches]`; `newFactory()`/`newCollection()`/`newEloquentBuilder()` → `#[UseFactory]`/`#[CollectedBy]`/`#[UseEloquentBuilder]`. |
+| `sineMaculaLaravel.migrationMethods` | A migration defines both `up()` and `down()`. |
+| `sineMaculaLaravel.formRequestRules` | A form request (under `Http\Requests`) defines a `rules()` method. |
+| `sineMaculaLaravel.factoryTimestamps` | A factory `definition()` must not set `created_at` / `updated_at`. |
+
+## Requirements
+
+- PHP ^8.3
+
+## Testing
+
+```bash
+composer test           # PHPUnit sniff/rule suite
+composer test:coverage  # suite with Clover coverage output (requires Xdebug)
+composer analyse        # PHPStan over the package's own sniffs and rules
+composer check          # static analysis and lint via qlty
+composer format         # format via qlty
+composer smells         # duplication / complexity smells via qlty
+```
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a list of notable changes.
+
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on branching, commits, code
+quality, and pull requests.
+
+## Security
+
+If you discover a security vulnerability, please report it responsibly. See [SECURITY.md](SECURITY.md) for the
+disclosure policy and contact details.
+
 ## License
 
 Licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).

@@ -32,16 +32,20 @@ trait ResolvesNamespace
             return false;
         }
 
-        $segments = [];
+        $name  = '';
+        $parts = [T_STRING, T_NS_SEPARATOR, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED];
 
+        // PHP_CodeSniffer 3.x splits a namespace into T_STRING/T_NS_SEPARATOR
+        // tokens, but 4.x keeps it as one T_NAME_QUALIFIED token, so both forms
+        // are collected to rebuild the name.
         for ($i = $namespace + 1; isset($tokens[$i]) && $tokens[$i]['code'] !== T_SEMICOLON; $i++) {
-            if ($tokens[$i]['code'] !== T_STRING) {
+            if (!in_array($tokens[$i]['code'], $parts, true)) {
                 continue;
             }
 
-            $segments[] = $tokens[$i]['content'];
+            $name .= $tokens[$i]['content'];
         }
 
-        return str_contains('\\' . implode('\\', $segments) . '\\', '\\' . $path . '\\');
+        return str_contains('\\' . trim($name, '\\') . '\\', '\\' . $path . '\\');
     }
 }

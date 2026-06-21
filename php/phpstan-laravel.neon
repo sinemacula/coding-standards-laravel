@@ -1,0 +1,17 @@
+# ==============================================================================
+# Laravel-specific PHPStan rules for Sine Macula projects.
+# ==============================================================================
+#
+# This file is auto-included in consuming projects via the package's
+# `extra.phpstan.includes` (resolved by phpstan/extension-installer). It carries
+# ONLY Laravel-specific custom rules - the framework-agnostic PHPStan config is
+# provided separately by sinemacula/coding-standards' own php/phpstan.neon.
+#
+# Register Laravel rule classes (from src/PHPStan/Rules/) under `rules:`. They
+# are Composer-autoloaded via the `SineMacula\CodingStandardsLaravel\` PSR-4 map,
+# so they load in a consumer's PHPStan run exactly as the base rules do.
+#
+# Example (uncomment and extend as rules are added):
+#
+# rules:
+#     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\ExampleRule

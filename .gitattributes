@@ -1,0 +1,11 @@
+.github export-ignore
+SineMaculaLaravel/Tests export-ignore
+
+phpunit.xml.dist export-ignore
+.qlty export-ignore
+
+CLAUDE.md export-ignore
+.editorconfig export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
+.sinemacula export-ignore

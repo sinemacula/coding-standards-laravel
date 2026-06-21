@@ -6,6 +6,7 @@ namespace SineMaculaLaravel\Sniffs\Controllers;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\IdentifiesControllers;
 
 /**
  * Disallow inline validation in controllers.
@@ -19,6 +20,8 @@ use PHP_CodeSniffer\Sniffs\Sniff;
  */
 final class DisallowInlineValidationSniff implements Sniff
 {
+    use IdentifiesControllers;
+
     /**
      * Register the tokens this sniff listens for.
      *
@@ -79,32 +82,6 @@ final class DisallowInlineValidationSniff implements Sniff
             return $class !== false
                 && $tokens[$class]['code']    === T_STRING
                 && $tokens[$class]['content'] === 'Validator';
-        }
-
-        return false;
-    }
-
-    /**
-     * Determine whether the token sits inside a class named `*Controller`.
-     *
-     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
-     * @param  int  $stackPtr
-     * @return bool
-     */
-    private function isInController(File $phpcsFile, int $stackPtr): bool
-    {
-        $tokens = $phpcsFile->getTokens();
-
-        foreach ($tokens[$stackPtr]['conditions'] as $ptr => $code) {
-            if ($code !== T_CLASS) {
-                continue;
-            }
-
-            $name = $phpcsFile->getDeclarationName($ptr);
-
-            if ($name !== null && str_ends_with($name, 'Controller')) {
-                return true;
-            }
         }
 
         return false;

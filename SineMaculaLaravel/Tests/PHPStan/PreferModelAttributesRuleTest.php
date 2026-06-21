@@ -23,8 +23,8 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\PreferModelAttributesRule;
 final class PreferModelAttributesRuleTest extends RuleTestCase
 {
     /**
-     * Model properties with an attribute equivalent are flagged; $hidden over
-     * the limit, unrelated properties and non-models are not.
+     * Model properties and method overrides with an attribute equivalent are
+     * flagged; $hidden over the limit, other members and non-models are not.
      *
      * @return void
      */
@@ -42,6 +42,18 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
             [
                 'Use the #[Touches] attribute instead of the $touches property.',
                 13,
+            ],
+            [
+                'Use the #[UseFactory] attribute instead of overriding the newFactory() method.',
+                17,
+            ],
+            [
+                'Use the #[CollectedBy] attribute instead of overriding the newCollection() method.',
+                28,
+            ],
+            [
+                'Use the #[UseEloquentBuilder] attribute instead of overriding the newEloquentBuilder() method.',
+                32,
             ],
         ]);
     }

@@ -13,6 +13,25 @@ class Post extends Model
     protected $touches = ['author'];
 
     protected $fillable = ['title'];
+
+    public function newFactory()
+    {
+    }
+
+    public function publish(): void
+    {
+    }
+}
+
+class Comment extends Model
+{
+    public function newCollection()
+    {
+    }
+
+    public function newEloquentBuilder()
+    {
+    }
 }
 
 class Account extends Model
@@ -23,4 +42,8 @@ class Account extends Model
 class PlainObject
 {
     protected $table = 'plain';
+
+    public function newFactory()
+    {
+    }
 }

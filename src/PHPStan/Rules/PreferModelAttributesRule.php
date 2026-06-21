@@ -14,12 +14,13 @@ use PHPStan\Rules\RuleError;
 use PHPStan\Rules\RuleErrorBuilder;
 
 /**
- * Prefer model attributes over their legacy configuration properties.
+ * Prefer model attributes over their legacy property and method forms.
  *
- * Eloquent exposes attribute classes (#[Table], #[Hidden], #[Touches]) that
- * replace the matching configuration properties. On a model those properties
- * must be expressed as attributes instead - except $hidden, which stays a
- * property once it lists more than five fields.
+ * Eloquent exposes attribute classes that replace configuration properties
+ * (#[Table], #[Hidden], #[Touches]) and method overrides (#[UseFactory],
+ * #[CollectedBy], #[UseEloquentBuilder]). On a model those must be expressed
+ * as attributes instead - except $hidden, which stays a property once it lists
+ * more than five fields.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -33,6 +34,13 @@ final class PreferModelAttributesRule implements Rule
         'table'   => 'Table',
         'hidden'  => 'Hidden',
         'touches' => 'Touches',
+    ];
+
+    /** @var array<string, string> Map of overridden model method to its attribute. */
+    private const array METHODS = [
+        'newFactory'         => 'UseFactory',
+        'newCollection'      => 'CollectedBy',
+        'newEloquentBuilder' => 'UseEloquentBuilder',
     ];
 
     /** @var int Maximum fields before the property form is preferred. */
@@ -63,6 +71,17 @@ final class PreferModelAttributesRule implements Rule
             return [];
         }
 
+        return array_merge($this->propertyErrors($node), $this->methodErrors($node));
+    }
+
+    /**
+     * Collect errors for properties with a preferred attribute equivalent.
+     *
+     * @param  \PhpParser\Node\Stmt\Class_  $node
+     * @return array<int, \PHPStan\Rules\RuleError>
+     */
+    private function propertyErrors(Class_ $node): array
+    {
         $errors = [];
 
         foreach ($node->getProperties() as $property) {
@@ -75,6 +94,33 @@ final class PreferModelAttributesRule implements Rule
 
                 $errors[] = $error;
             }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Collect errors for method overrides with an attribute equivalent.
+     *
+     * @param  \PhpParser\Node\Stmt\Class_  $node
+     * @return array<int, \PHPStan\Rules\RuleError>
+     */
+    private function methodErrors(Class_ $node): array
+    {
+        $errors = [];
+
+        foreach ($node->getMethods() as $method) {
+            $name = $method->name->toString();
+
+            if (!isset(self::METHODS[$name])) {
+                continue;
+            }
+
+            $errors[] = RuleErrorBuilder::message(sprintf(
+                'Use the #[%s] attribute instead of overriding the %s() method.',
+                self::METHODS[$name],
+                $name,
+            ))->identifier('sineMaculaLaravel.modelAttribute')->line($method->getStartLine())->build();
         }
 
         return $errors;

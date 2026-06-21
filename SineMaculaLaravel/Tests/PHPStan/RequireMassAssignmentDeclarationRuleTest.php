@@ -6,7 +6,7 @@ namespace SineMaculaLaravel\Tests\PHPStan;
 
 use PHPStan\Rules\Rule;
 use PHPStan\Testing\RuleTestCase;
-use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\CoversClass;
 use SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireMassAssignmentDeclarationRule;
 
 /**
@@ -19,7 +19,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireMassAssignmentDeclara
  *
  * @internal
  */
-#[CoversNothing]
+#[CoversClass(RequireMassAssignmentDeclarationRule::class)]
 final class RequireMassAssignmentDeclarationRuleTest extends RuleTestCase
 {
     /**

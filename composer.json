@@ -12,7 +12,7 @@
     ],
     "require": {
         "php": "^8.3",
-        "sinemacula/coding-standards": "^1.3.1",
+        "sinemacula/coding-standards": "^1.4.0",
         "friendsofphp/php-cs-fixer": "^3.0"
     },
     "suggest": {

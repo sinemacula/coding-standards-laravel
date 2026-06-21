@@ -134,24 +134,26 @@ final class DisallowDatabaseAccessSniff implements Sniff
      */
     private function modelImportName(File $phpcsFile, int $use): ?string
     {
-        $tokens    = $phpcsFile->getTokens();
-        $last      = null;
-        $hasModels = false;
+        $tokens   = $phpcsFile->getTokens();
+        $segments = [];
+
+        // PHP_CodeSniffer 4.x keeps an import as one T_NAME_QUALIFIED token
+        // rather than splitting it into T_STRING segments, so the name is
+        // exploded back into segments to find the Models marker and short name.
+        $parts = [T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED];
 
         for ($i = $use + 1; isset($tokens[$i]) && $tokens[$i]['code'] !== T_SEMICOLON; $i++) {
-            if ($tokens[$i]['code'] !== T_STRING) {
+            if (!in_array($tokens[$i]['code'], $parts, true)) {
                 continue;
             }
 
-            $last = $tokens[$i]['content'];
-
-            if ($last !== 'Models') {
-                continue;
-            }
-
-            $hasModels = true;
+            $segments = array_merge($segments, explode('\\', trim($tokens[$i]['content'], '\\')));
         }
 
-        return $hasModels ? $last : null;
+        if ($segments === [] || !in_array('Models', $segments, true)) {
+            return null;
+        }
+
+        return $segments[array_key_last($segments)];
     }
 }

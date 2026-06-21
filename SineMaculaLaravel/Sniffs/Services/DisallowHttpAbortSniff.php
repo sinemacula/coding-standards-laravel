@@ -7,6 +7,7 @@ namespace SineMaculaLaravel\Sniffs\Services;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsFunctionCalls;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
 
 /**
  * Disallow HTTP aborts in services.
@@ -22,6 +23,7 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsFunctionCalls;
 final class DisallowHttpAbortSniff implements Sniff
 {
     use DetectsFunctionCalls;
+    use ResolvesNamespace;
 
     /** @var array<int, string> The HTTP-abort helper functions. */
     public array $functions = ['abort', 'abort_if', 'abort_unless'];
@@ -47,7 +49,7 @@ final class DisallowHttpAbortSniff implements Sniff
     #[\Override]
     public function process(File $phpcsFile, $stackPtr): void
     {
-        if ($this->isInServiceNamespace($phpcsFile) === false) {
+        if ($this->isInNamespacePath($phpcsFile, 'Services') === false) {
             return;
         }
 
@@ -101,7 +103,7 @@ final class DisallowHttpAbortSniff implements Sniff
         for ($i = $phpcsFile->findNext(T_WHITESPACE, $stackPtr + 1, null, true); $i !== false; $i++) {
             $code = $tokens[$i]['code'];
 
-            if ($code === T_STRING) {
+            if (in_array($code, [T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED], true)) {
                 $class = $tokens[$i]['content'];
             } elseif ($code !== T_NS_SEPARATOR) {
                 break;
@@ -118,35 +120,5 @@ final class DisallowHttpAbortSniff implements Sniff
             'HttpException',
             [$class],
         );
-    }
-
-    /**
-     * Determine whether the file's namespace has a `Services` segment.
-     *
-     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
-     * @return bool
-     */
-    private function isInServiceNamespace(File $phpcsFile): bool
-    {
-        $tokens    = $phpcsFile->getTokens();
-        $namespace = $phpcsFile->findNext(T_NAMESPACE, 0);
-
-        if ($namespace === false) {
-            return false;
-        }
-
-        for ($i = $namespace + 1; isset($tokens[$i]); $i++) {
-            $code = $tokens[$i]['code'];
-
-            if (in_array($code, [T_SEMICOLON, T_OPEN_CURLY_BRACKET], true)) {
-                break;
-            }
-
-            if ($code === T_STRING && $tokens[$i]['content'] === 'Services') {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

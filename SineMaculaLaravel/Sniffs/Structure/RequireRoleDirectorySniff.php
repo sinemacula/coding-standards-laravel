@@ -6,6 +6,7 @@ namespace SineMaculaLaravel\Sniffs\Structure;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
 
 /**
  * Require role classes to live in their canonical directory.
@@ -20,6 +21,8 @@ use PHP_CodeSniffer\Sniffs\Sniff;
  */
 final class RequireRoleDirectorySniff implements Sniff
 {
+    use ResolvesNamespace;
+
     /** @var array<string, string> Map of class-name suffix to its required namespace path. */
     public array $directories = [
         'Controller'      => 'Http\Controllers',
@@ -89,34 +92,5 @@ final class RequireRoleDirectorySniff implements Sniff
         }
 
         return null;
-    }
-
-    /**
-     * Determine whether the file's namespace contains the given segment path.
-     *
-     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
-     * @param  string  $path
-     * @return bool
-     */
-    private function isInNamespacePath(File $phpcsFile, string $path): bool
-    {
-        $tokens    = $phpcsFile->getTokens();
-        $namespace = $phpcsFile->findNext(T_NAMESPACE, 0);
-
-        if ($namespace === false) {
-            return false;
-        }
-
-        $segments = [];
-
-        for ($i = $namespace + 1; isset($tokens[$i]) && $tokens[$i]['code'] !== T_SEMICOLON; $i++) {
-            if ($tokens[$i]['code'] !== T_STRING) {
-                continue;
-            }
-
-            $segments[] = $tokens[$i]['content'];
-        }
-
-        return str_contains('\\' . implode('\\', $segments) . '\\', '\\' . $path . '\\');
     }
 }

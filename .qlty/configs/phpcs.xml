@@ -46,4 +46,12 @@
         <exclude-pattern>*/Tests/*</exclude-pattern>
     </rule>
 
+    <!--
+        PHPStan's Rule::processNode(Node $node, Scope $scope) interface mandates
+        the $scope parameter even for rules that do not consult the scope.
+    -->
+    <rule ref="SlevomatCodingStandard.Functions.UnusedParameter">
+        <exclude-pattern>*/PHPStan/*</exclude-pattern>
+    </rule>
+
 </ruleset>

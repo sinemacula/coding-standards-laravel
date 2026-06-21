@@ -6,6 +6,7 @@ namespace SineMaculaLaravel\Sniffs\Architecture;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsFunctionCalls;
 
 /**
  * Disallow service location in class bodies.
@@ -19,6 +20,8 @@ use PHP_CodeSniffer\Sniffs\Sniff;
  */
 final class DisallowServiceLocationSniff implements Sniff
 {
+    use DetectsFunctionCalls;
+
     /** @var array<int, string> Container helper functions forbidden inside a class body. */
     public array $helpers = ['app', 'resolve'];
 
@@ -90,29 +93,6 @@ final class DisallowServiceLocationSniff implements Sniff
         }
 
         return false;
-    }
-
-    /**
-     * Determine whether the string is a direct function call (not a method or
-     * definition).
-     *
-     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
-     * @param  int  $stackPtr
-     * @return bool
-     */
-    private function isFunctionCall(File $phpcsFile, int $stackPtr): bool
-    {
-        $tokens = $phpcsFile->getTokens();
-        $next   = $phpcsFile->findNext(T_WHITESPACE, $stackPtr + 1, null, true);
-
-        if ($next === false || $tokens[$next]['code'] !== T_OPEN_PARENTHESIS) {
-            return false;
-        }
-
-        $prev           = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true);
-        $notCallContext = [T_OBJECT_OPERATOR, T_NULLSAFE_OBJECT_OPERATOR, T_DOUBLE_COLON, T_FUNCTION, T_NEW, T_NS_SEPARATOR];
-
-        return $prev === false || in_array($tokens[$prev]['code'], $notCallContext, true) === false;
     }
 
     /**

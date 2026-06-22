@@ -105,7 +105,7 @@ Opt a class out entirely with an `@role-exempt` docblock tag or a `#[NotARole]` 
 |------------|----------|
 | `sineMaculaLaravel.castsProperty` | No `$casts` property on a model - use the `casts()` method. |
 | `sineMaculaLaravel.datesProperty` | No `$dates` property on a model (deprecated) - cast dates via `casts()`. |
-| `sineMaculaLaravel.massAssignment` | Every concrete model declares `$fillable` or `$guarded` explicitly. |
+| `sineMaculaLaravel.massAssignment` | Every concrete production model declares mass assignment explicitly via `$fillable`/`$guarded` or the `#[Fillable]`/`#[Guarded]` attribute; models declared in tests are exempt. |
 | `sineMaculaLaravel.relationshipReturnType` | A relationship method declares a return-type hint. |
 | `sineMaculaLaravel.modelAttribute` | Prefer a model attribute over its legacy property/method form, for the attributes a project enables (default `#[Table]`/`#[Fillable]`/`#[Hidden]`; configurable via the `sineMaculaLaravel.modelAttributes` parameter to match the minimum Laravel version). |
 | `sineMaculaLaravel.migrationMethods` | A migration defines both `up()` and `down()`. |

@@ -19,6 +19,16 @@ class Tag extends Model
     protected $guarded = [];
 }
 
+#[Fillable(['title'])]
+class Article extends Model
+{
+}
+
+#[Guarded([])]
+class Comment extends Model
+{
+}
+
 abstract class BaseModel extends Model
 {
 }

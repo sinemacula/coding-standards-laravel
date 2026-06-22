@@ -22,39 +22,39 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\PreferModelAttributesRule;
 #[CoversClass(PreferModelAttributesRule::class)]
 final class PreferModelAttributesRuleTest extends RuleTestCase
 {
+    /** @var array<int, string> Attributes the rule under test mandates. */
+    private array $attributes = ['Table', 'Fillable', 'Hidden'];
+
     /**
-     * Model properties and method overrides with an attribute equivalent are
-     * flagged; $hidden over the limit, other members and non-models are not.
+     * The default expressive set flags $table/$fillable/$hidden; a $hidden over
+     * the limit, the disabled attributes, and non-models are not.
      *
      * @return void
      */
-    public function testFlagsLegacyModelProperties(): void
+    public function testFlagsTheDefaultExpressiveSet(): void
     {
         $this->analyse([__DIR__ . '/data/prefer-model-attributes.inc'], [
-            [
-                'Use the #[Table] attribute instead of the $table property.',
-                9,
-            ],
-            [
-                'Use the #[Hidden] attribute instead of the $hidden property.',
-                11,
-            ],
-            [
-                'Use the #[Touches] attribute instead of the $touches property.',
-                13,
-            ],
-            [
-                'Use the #[UseFactory] attribute instead of overriding the newFactory() method.',
-                17,
-            ],
-            [
-                'Use the #[CollectedBy] attribute instead of overriding the newCollection() method.',
-                28,
-            ],
-            [
-                'Use the #[UseEloquentBuilder] attribute instead of overriding the newEloquentBuilder() method.',
-                32,
-            ],
+            ['Use the #[Table] attribute instead of the $table property.', 9],
+            ['Use the #[Hidden] attribute instead of the $hidden property.', 11],
+            ['Use the #[Fillable] attribute instead of the $fillable property.', 15],
+        ]);
+    }
+
+    /**
+     * A project enables only the attributes its Laravel version provides; the
+     * configured set is honoured for both properties and method overrides.
+     *
+     * @return void
+     */
+    public function testHonoursAConfiguredSet(): void
+    {
+        $this->attributes = ['Touches', 'UseFactory', 'CollectedBy', 'UseEloquentBuilder'];
+
+        $this->analyse([__DIR__ . '/data/prefer-model-attributes.inc'], [
+            ['Use the #[Touches] attribute instead of the $touches property.', 13],
+            ['Use the #[UseFactory] attribute instead of overriding the newFactory() method.', 17],
+            ['Use the #[CollectedBy] attribute instead of overriding the newCollection() method.', 28],
+            ['Use the #[UseEloquentBuilder] attribute instead of overriding the newEloquentBuilder() method.', 32],
         ]);
     }
 
@@ -66,6 +66,6 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     #[\Override]
     protected function getRule(): Rule
     {
-        return new PreferModelAttributesRule;
+        return new PreferModelAttributesRule($this->attributes);
     }
 }

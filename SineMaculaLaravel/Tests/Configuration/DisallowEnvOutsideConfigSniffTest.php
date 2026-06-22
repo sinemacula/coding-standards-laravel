@@ -39,4 +39,34 @@ final class DisallowEnvOutsideConfigSniffTest extends AbstractSniffTestCase
     {
         $this->assertErrorsOnLines('config/EnvInConfig.inc', []);
     }
+
+    /**
+     * env() is allowed in a testbench TestCase, which reads it to boot the app.
+     *
+     * @return void
+     */
+    public function testAllowsEnvInATestCaseClass(): void
+    {
+        $this->assertErrorsOnLines('EnvInTestCase.inc', []);
+    }
+
+    /**
+     * env() is allowed in a class whose name ends in `Test`.
+     *
+     * @return void
+     */
+    public function testAllowsEnvInATestSuffixedClass(): void
+    {
+        $this->assertErrorsOnLines('EnvInTestSuffix.inc', []);
+    }
+
+    /**
+     * env() is allowed in any file that lives under a tests/ directory.
+     *
+     * @return void
+     */
+    public function testAllowsEnvUnderTheTestsDirectory(): void
+    {
+        $this->assertErrorsOnLines('tests/EnvUnderTestsDir.inc', []);
+    }
 }

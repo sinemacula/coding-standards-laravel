@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.1.0...v1.2.0) (2026-06-22)
+
+
+### Features
+
+* **typehints:** Laravel-aware native type-hint sniffs ([#30](https://github.com/sinemacula/coding-standards-laravel/issues/30)) ([797ae22](https://github.com/sinemacula/coding-standards-laravel/commit/797ae22353cc61cf394ae080cef40523bca8ac35))
+
 ## [1.1.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.0.1...v1.1.0) (2026-06-22)
 
 

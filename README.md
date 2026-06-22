@@ -32,7 +32,13 @@ automatically).
 
 ### PHPCS
 
-Reference the `SineMaculaLaravel` standard (it pulls in `SineMacula`, so it replaces it - don't reference both):
+Two standards ship; reference exactly one (each pulls in `SineMacula`, so it replaces it - don't reference both):
+
+- **`SineMaculaLaravel`** - for applications. The full standard, including the role-based structure
+  rules (placement and naming of controllers, models, providers, …) and the controller rules.
+- **`SineMaculaLaravelPackage`** - for libraries and packages. The same standard with the app-skeleton
+  rules (`Structure.*`, `Controllers.*`) excluded, since a package is organised by domain rather than
+  Laravel's app directory layout. Composition only - it redefines nothing.
 
 ```xml
 <?xml version="1.0"?>
@@ -73,9 +79,25 @@ A deliberate exception can be bypassed with the native directive - `// phpcs:ign
 | `SineMaculaLaravel.Eloquent.DisallowLegacyAttributeAccessor` | No legacy `getXAttribute()` / `setXAttribute()` accessors - use `Attribute::make()`. |
 | `SineMaculaLaravel.Services.DisallowHttpAbort` | No `abort()` / `abort_if` / `abort_unless` / `HttpException` in a service - throw a domain exception. |
 | `SineMaculaLaravel.Structure.RequireBladeLocation` | A `*.blade.php` template must live under a `resources/views` (or module `Resources/views`) directory. |
-| `SineMaculaLaravel.Structure.RequireRoleDirectory` | A role class must live under its canonical directory (e.g. `*Controller` under `Http/Controllers`, `*Repository` under `Repositories`). |
-| `SineMaculaLaravel.Structure.RequireRoleNaming` | A class under a role directory must carry that role's suffix. |
+| `SineMaculaLaravel.Structure.RequireRoleDirectory` | A class whose role is recognised by identity (what it extends/implements) must live under that role's directory - a controller under `Http/Controllers`; an entry-point provider may sit at the package root. |
+| `SineMaculaLaravel.Structure.RequireRoleNaming` | A class is named for its role: controllers/providers/form-requests/resources/policies require a suffix, models forbid `Model`/`Entity`, and the rest (jobs, listeners, events, mailables, middleware, commands, casts, rules) stay bare. |
 | `SineMaculaLaravel.Structure.RoutesLocation` | A `routes.php` file, if present, must sit at the root of an `Http` directory. |
+
+#### Role-based structure
+
+`RequireRoleNaming` and `RequireRoleDirectory` resolve a class's role by **identity first** - what it
+`extends`, `implements`, `use`s or is attributed with - and fall back to its **location** (a concrete
+class under a role directory, minus exempt sub-namespaces such as `Concerns`/`Support`/`Contracts`). A
+class with neither is unconstrained, so genuine domain classes are never flagged.
+
+The default role table is convention-correct for Laravel: it never requires a suffix the framework
+leaves bare, and the idiomatic bare `User` model is honoured (the `Model` role's identity covers
+`Authenticatable` and `Pivot`). Every list - `roleIdentities`, `roleLocations`, `requireSuffix`,
+`forbidSuffix`, `exemptNamespaces`, `moduleRootRoles` - is a public sniff property a ruleset can
+override. Identity is matched on the immediate base by short name, so a project's own intermediate
+base (e.g. a `BaseController`) is supported by adding it to `roleIdentities`.
+
+Opt a class out entirely with an `@role-exempt` docblock tag or a `#[NotARole]` attribute.
 
 ### PHPStan rules
 

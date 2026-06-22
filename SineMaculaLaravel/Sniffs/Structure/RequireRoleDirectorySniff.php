@@ -6,38 +6,27 @@ namespace SineMaculaLaravel\Sniffs\Structure;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
-use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
 
 /**
- * Require role classes to live in their canonical directory.
+ * Require a role class to live under its canonical directory.
  *
- * A class is recognised by its name suffix (e.g. `*Controller`, `*Repository`,
- * `*Exception`) and must live somewhere under the matching directory segment -
- * a `*Controller` under `Http/Controllers`. Classes with no recognised role
- * are unaffected.
+ * The inverse of the naming rule: a class whose role is resolved (chiefly by
+ * identity - what it extends, implements, uses or is attributed with) must live
+ * somewhere under that role's configured location, e.g. a controller under
+ * `Http/Controllers`. Roles listed in `moduleRootRoles` may instead sit at the
+ * package/module root (an entry-point `*ServiceProvider` at `src/`). Classes
+ * with no role, or a role that configures no location, are left alone.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */
 final class RequireRoleDirectorySniff implements Sniff
 {
-    use ResolvesNamespace;
+    use ResolvesRole;
 
-    /** @var array<string, string> Map of class-name suffix to its required namespace path. */
-    public array $directories = [
-        'Controller'      => 'Http\Controllers',
-        'Request'         => 'Http\Requests',
-        'Resource'        => 'Http\Resources',
-        'Mail'            => 'Mail',
-        'Notification'    => 'Notifications',
-        'Observer'        => 'Observers',
-        'Listener'        => 'Listeners',
-        'Policy'          => 'Policies',
-        'ServiceProvider' => 'Providers',
-        'Repository'      => 'Repositories',
-        'Command'         => 'Console\Commands',
-        'Exception'       => 'Exceptions',
-    ];
+    /** @var array<int, string> Roles whose classes may also sit at the package/module root. */
+    public array $moduleRootRoles = ['ServiceProvider'];
 
     /**
      * Register the tokens this sniff listens for.
@@ -60,37 +49,67 @@ final class RequireRoleDirectorySniff implements Sniff
     #[\Override]
     public function process(File $phpcsFile, $stackPtr): void
     {
-        $required = $this->requiredDirectory($phpcsFile, $stackPtr);
+        $role  = $this->resolveRole($phpcsFile, $stackPtr);
+        $paths = $role === null ? [] : $this->split($this->roleLocations[$role] ?? '');
 
-        if ($required === null || $this->isInNamespacePath($phpcsFile, $required)) {
+        if ($paths === [] || $this->isInAnyLocation($phpcsFile, $paths) || $this->isAllowedAtRoot($phpcsFile, $role)) {
             return;
         }
 
         $phpcsFile->addError(
-            'This class must live under a "%s" directory.',
+            'A %s class must live under a "%s" directory.',
             $stackPtr,
             'Misplaced',
-            [str_replace('\\', '/', $required)],
+            [$role, implode('" or "', array_map(static fn (string $p): string => str_replace('\\', '/', $p), $paths))],
         );
     }
 
     /**
-     * Resolve the directory a class must live under, or null for no role.
+     * Whether the file's namespace sits under one of the given location paths.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
-     * @param  int  $stackPtr
-     * @return string|null
+     * @param  array<int, string>  $paths
+     * @return bool
      */
-    private function requiredDirectory(File $phpcsFile, int $stackPtr): ?string
+    private function isInAnyLocation(File $phpcsFile, array $paths): bool
     {
-        $name = $phpcsFile->getDeclarationName($stackPtr) ?? '';
-
-        foreach ($this->directories as $suffix => $path) {
-            if (str_ends_with($name, $suffix)) {
-                return $path;
+        foreach ($paths as $path) {
+            if ($this->isInNamespacePath($phpcsFile, $path)) {
+                return true;
             }
         }
 
-        return null;
+        return false;
+    }
+
+    /**
+     * Whether the role may sit at the module root and the class is there.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  string|null  $role
+     * @return bool
+     */
+    private function isAllowedAtRoot(File $phpcsFile, ?string $role): bool
+    {
+        return $role !== null && in_array($role, $this->moduleRootRoles, true) && $this->isAtModuleRoot($phpcsFile);
+    }
+
+    /**
+     * Whether the class sits outside every configured role location (the root).
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @return bool
+     */
+    private function isAtModuleRoot(File $phpcsFile): bool
+    {
+        foreach ($this->roleLocations as $paths) {
+            foreach ($this->split($paths) as $path) {
+                if ($this->isInNamespacePath($phpcsFile, $path)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

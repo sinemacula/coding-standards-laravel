@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<ruleset name="SineMaculaLaravelPackage">
+
+    <description>Sine Macula coding standard for Laravel packages and libraries.</description>
+
+    <!--
+        Compose the full Laravel standard, then drop the rules that enforce an
+        application's directory skeleton. A package is organised by domain, not
+        by Laravel's app layout, so the role-structure sniffs (placement and
+        naming by directory) and the controller sniffs do not apply. Everything
+        else - the base SineMacula rules and the Laravel-universal sniffs - is
+        inherited unchanged. Composition only; no rules are redefined here.
+    -->
+    <rule ref="SineMaculaLaravel">
+        <exclude name="SineMaculaLaravel.Structure"/>
+        <exclude name="SineMaculaLaravel.Controllers"/>
+    </rule>
+
+</ruleset>

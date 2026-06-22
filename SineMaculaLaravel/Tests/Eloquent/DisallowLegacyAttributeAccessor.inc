@@ -2,25 +2,59 @@
 
 namespace App\Models;
 
-class User
+use Illuminate\Database\Eloquent\Model;
+
+class User extends Model
 {
-    public function getFullNameAttribute(): string
+    public function getNameAttribute(): string
     {
-        return 'x';
+        $format = function (): string {
+            return '';
+        };
+
+        return $format();
     }
 
-    public function setEmailAttribute(string $value): void
+    public function setNameAttribute($value): void
     {
-        //
     }
 
-    public function getAttribute(string $key): mixed
+    public function getProfileAttribute(string $key): string
     {
-        return null;
+        return $key;
     }
 
-    public function name(): string
+    public function setTagsAttribute($value, $extra): void
     {
-        return 'x';
     }
+
+    public function fullName(): string
+    {
+        return '';
+    }
+}
+
+class ProfileService
+{
+    public function setFooAttribute(Model $model, string $key, mixed $value): void
+    {
+    }
+
+    public function getBarAttribute(): string
+    {
+        return '';
+    }
+}
+
+class Money extends ValueObject
+{
+    public function getCentsAttribute(): int
+    {
+        return 0;
+    }
+}
+
+function getSystemAttribute(): string
+{
+    return '';
 }

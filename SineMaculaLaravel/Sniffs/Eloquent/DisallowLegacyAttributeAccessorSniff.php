@@ -11,15 +11,20 @@ use PHP_CodeSniffer\Sniffs\Sniff;
  * Disallow legacy Eloquent accessors and mutators.
  *
  * The legacy `getXAttribute()` / `setXAttribute()` accessor and mutator methods
- * are superseded by `Attribute::make()`. This flags any method whose name
- * matches that pattern. The base `getAttribute()` / `setAttribute()` methods
- * are left alone.
+ * are superseded by `Attribute::make()`. To avoid flagging unrelated methods
+ * that merely share the name, two gates must both hold: the declaring class
+ * extends an Eloquent model base (Model, Authenticatable, Pivot - configurable,
+ * matched on the immediate base by short name), and the signature matches a
+ * real accessor (a getter takes no parameters, a setter takes exactly one).
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */
 final class DisallowLegacyAttributeAccessorSniff implements Sniff
 {
+    /** @var array<int, string> Eloquent model base classes (matched by short name). */
+    public array $modelBaseClasses = ['Model', 'Authenticatable', 'Pivot'];
+
     /**
      * Register the tokens this sniff listens for.
      *
@@ -43,11 +48,17 @@ final class DisallowLegacyAttributeAccessorSniff implements Sniff
     {
         $name = $phpcsFile->getDeclarationName($stackPtr);
 
-        if ($name === null) {
-            return; // @codeCoverageIgnore
+        if ($name === null || preg_match('/^(get|set)[A-Z]\w*Attribute$/', $name, $matches) !== 1) {
+            return;
         }
 
-        if (preg_match('/^(get|set)[A-Z]\w*Attribute$/', $name) !== 1) {
+        $classPtr = $phpcsFile->getCondition($stackPtr, T_CLASS, false);
+
+        if ($classPtr === false || $this->isModel($phpcsFile, $classPtr) === false) {
+            return;
+        }
+
+        if (count($phpcsFile->getMethodParameters($stackPtr)) !== ($matches[1] === 'get' ? 0 : 1)) {
             return;
         }
 
@@ -57,5 +68,26 @@ final class DisallowLegacyAttributeAccessorSniff implements Sniff
             'Found',
             [$name],
         );
+    }
+
+    /**
+     * Whether the class extends a configured Eloquent model base.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  int  $classPtr
+     * @return bool
+     */
+    private function isModel(File $phpcsFile, int $classPtr): bool
+    {
+        $parent = $phpcsFile->findExtendedClassName($classPtr);
+
+        if ($parent === false) {
+            return false;
+        }
+
+        $position = strrpos($parent, '\\');
+        $short    = $position === false ? $parent : substr($parent, $position + 1);
+
+        return in_array($short, $this->modelBaseClasses, true);
     }
 }

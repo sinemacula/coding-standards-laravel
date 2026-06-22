@@ -7,14 +7,17 @@ namespace SineMaculaLaravel\Sniffs\Configuration;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsFunctionCalls;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsTestClasses;
 
 /**
  * Disallow env() outside config files.
  *
  * `env()` returns null once `config:cache` has run, so reading it anywhere
  * other than a `config/` file means the value silently disappears in
- * production. Everywhere else must read through `config()`. Method and static
- * calls named `env()` are not flagged.
+ * production. Everywhere else must read through `config()`. Test code (a file
+ * under `tests/`, a `*Test` class, or a testbench `*TestCase`) is exempt, since
+ * config caching never happens there. Method and static calls named `env()`
+ * are not flagged.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -22,6 +25,7 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsFunctionCalls;
 final class DisallowEnvOutsideConfigSniff implements Sniff
 {
     use DetectsFunctionCalls;
+    use DetectsTestClasses;
 
     /**
      * Register the tokens this sniff listens for.
@@ -50,11 +54,11 @@ final class DisallowEnvOutsideConfigSniff implements Sniff
             return;
         }
 
-        if ($this->isFunctionCall($phpcsFile, $stackPtr) === false) {
-            return;
-        }
-
-        if ($this->isConfigFile($phpcsFile) === true) {
+        if (
+            $this->isFunctionCall($phpcsFile, $stackPtr) === false
+            || $this->isConfigFile($phpcsFile)
+            || $this->isTestFile($phpcsFile)
+        ) {
             return;
         }
 

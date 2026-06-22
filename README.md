@@ -71,7 +71,7 @@ A deliberate exception can be bypassed with the native directive - `// phpcs:ign
 | Sniff | Enforces |
 |-------|----------|
 | `SineMaculaLaravel.Architecture.DisallowServiceLocation` | No service location (`app()`, `resolve()`, `App::make()`) inside a class body - inject collaborators instead. |
-| `SineMaculaLaravel.Configuration.DisallowEnvOutsideConfig` | `env()` only inside `config/` files; use `config()` everywhere else. |
+| `SineMaculaLaravel.Configuration.DisallowEnvOutsideConfig` | `env()` only inside `config/` files (test code exempt); use `config()` everywhere else. |
 | `SineMaculaLaravel.Controllers.DisallowDatabaseAccess` | No `DB::` facade or direct Eloquent model queries in a controller - read through a repository. |
 | `SineMaculaLaravel.Controllers.DisallowInlineValidation` | No inline validation (`$request->validate()`, `Validator::make()`) in a controller - use a form request. |
 | `SineMaculaLaravel.Controllers.DisallowNonRestActions` | A controller's public methods are limited to the REST actions (`index`/`show`/`store`/`update`/`destroy`/`create`/`edit`) or a single `__invoke`. |

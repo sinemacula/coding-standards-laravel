@@ -40,6 +40,7 @@ rules:
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireMassAssignmentDeclarationRule
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireMigrationMethodsRule
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireRelationshipReturnTypeRule
+    - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireSnakeCaseSchemaRule
 
 # PreferModelAttributesRule is registered as a service (not under `rules:`) so
 # its mandated attribute set can be injected from the parameter above.

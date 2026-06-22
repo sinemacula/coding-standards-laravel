@@ -20,13 +20,15 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class DisallowNonRestActionsSniffTest extends AbstractSniffTestCase
 {
     /**
-     * Non-canonical public actions are flagged on a *Controller; REST actions,
-     * __invoke, __construct, non-public helpers and non-controllers are not.
+     * Only a genuine non-canonical action is flagged: the REST verbs, __invoke,
+     * the constructor, framework overrides, static and non-public helpers,
+     * abstract bases, non-controllers, and methods marked utility or
+     * non-rest-action.
      *
      * @return void
      */
-    public function testFlagsNonRestControllerActions(): void
+    public function testFlagsOnlyGenuineNonRestActions(): void
     {
-        $this->assertErrorsOnLines('DisallowNonRestActions.inc', [19]);
+        $this->assertErrorsOnLines('DisallowNonRestActions.inc', [65]);
     }
 }

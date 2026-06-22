@@ -74,7 +74,7 @@ A deliberate exception can be bypassed with the native directive - `// phpcs:ign
 | `SineMaculaLaravel.Configuration.DisallowEnvOutsideConfig` | `env()` only inside `config/` files (test code exempt); use `config()` everywhere else. |
 | `SineMaculaLaravel.Controllers.DisallowDatabaseAccess` | No `DB::` facade or direct Eloquent model queries in a controller - read through a repository. |
 | `SineMaculaLaravel.Controllers.DisallowInlineValidation` | No inline validation (`$request->validate()`, `Validator::make()`) in a controller - use a form request. |
-| `SineMaculaLaravel.Controllers.DisallowNonRestActions` | A controller's public methods are limited to the REST actions (`index`/`show`/`store`/`update`/`destroy`/`create`/`edit`) or a single `__invoke`. |
+| `SineMaculaLaravel.Controllers.DisallowNonRestActions` | A controller's candidate actions (public, non-static instance methods) must be REST verbs or `__invoke`; statics, the constructor and framework overrides are auto-exempt. Mark a method `@non-rest-action` (a deliberate non-CRUD action) or `@utility` (not an action) to allow it. |
 | `SineMaculaLaravel.Debug.DisallowDebugStatements` | No debug calls (`dd`, `dump`, `ray`, `var_dump`, `print_r`) in committed code. |
 | `SineMaculaLaravel.Eloquent.DisallowLegacyAttributeAccessor` | No legacy `getXAttribute()` / `setXAttribute()` accessors - use `Attribute::make()`. |
 | `SineMaculaLaravel.Services.DisallowHttpAbort` | No `abort()` / `abort_if` / `abort_unless` / `HttpException` in a service - throw a domain exception. |

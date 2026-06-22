@@ -12,6 +12,7 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleError;
 use PHPStan\Rules\RuleErrorBuilder;
+use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsLaravelVersion;
 
 /**
  * Prefer model attributes over their legacy property and method forms.
@@ -20,11 +21,12 @@ use PHPStan\Rules\RuleErrorBuilder;
  * (#[Table], #[Fillable], #[Hidden]) and method overrides (#[UseFactory],
  * #[CollectedBy], #[UseEloquentBuilder]). On a model the legacy form is flagged
  * in favour of its attribute - but only for the attributes a project enables,
- * since they vary by Laravel version (the expressive set from 13.2, the
- * ObservedBy/ScopedBy/CollectedBy family from 11). The mandated set defaults to
- * #[Table]/#[Fillable]/#[Hidden] and is configurable via the
- * `sineMaculaLaravel.modelAttributes` parameter. $hidden stays a property once
- * it lists more than five fields.
+ * configurable via the `sineMaculaLaravel.modelAttributes` parameter.
+ *
+ * #[Table]/#[Fillable]/#[Hidden] landed in 13.2, so they are enforced only when
+ * the project's Laravel floor reaches 13.2 - taken from `minLaravelVersion` or
+ * detected from composer.json; below that, or when unknown, the property form
+ * is left alone. $hidden stays a property once it lists more than five fields.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -33,6 +35,8 @@ use PHPStan\Rules\RuleErrorBuilder;
  */
 final class PreferModelAttributesRule implements Rule
 {
+    use DetectsLaravelVersion;
+
     /** @var array<string, string> Known model property name => its attribute. */
     private const array PROPERTY_ATTRIBUTES = [
         'table'    => 'Table',
@@ -48,18 +52,29 @@ final class PreferModelAttributesRule implements Rule
         'newEloquentBuilder' => 'UseEloquentBuilder',
     ];
 
+    /** @var array<int, string> Attributes only available from Laravel 13.2. */
+    private const array VERSION_GATED_ATTRIBUTES = ['Table', 'Fillable', 'Hidden'];
+
+    /** @var string The Laravel floor the gated attributes require. */
+    private const string ATTRIBUTE_FLOOR = '13.2.0';
+
     /** @var int Maximum fields before the property form is preferred. */
     private const int HIDDEN_LIMIT = 5;
 
     /** @var array<int, string> Mandated attribute names. */
     private readonly array $attributes;
 
+    /** @var string Explicit Laravel floor overriding composer.json detection. */
+    private readonly string $minLaravelVersion;
+
     /**
      * @param  array<int, string>  $attributes
+     * @param  string  $minLaravelVersion
      */
-    public function __construct(array $attributes = ['Table', 'Fillable', 'Hidden'])
+    public function __construct(array $attributes = ['Table', 'Fillable', 'Hidden'], string $minLaravelVersion = '')
     {
-        $this->attributes = $attributes;
+        $this->attributes        = $attributes;
+        $this->minLaravelVersion = $minLaravelVersion;
     }
 
     /**
@@ -87,22 +102,23 @@ final class PreferModelAttributesRule implements Rule
             return [];
         }
 
-        return array_merge($this->propertyErrors($node), $this->methodErrors($node));
+        return array_merge($this->propertyErrors($node, $scope), $this->methodErrors($node, $scope));
     }
 
     /**
      * Collect errors for properties with an enabled attribute equivalent.
      *
      * @param  \PhpParser\Node\Stmt\Class_  $node
+     * @param  \PHPStan\Analyser\Scope  $scope
      * @return array<int, \PHPStan\Rules\RuleError>
      */
-    private function propertyErrors(Class_ $node): array
+    private function propertyErrors(Class_ $node, Scope $scope): array
     {
         $errors = [];
 
         foreach ($node->getProperties() as $property) {
             foreach ($property->props as $item) {
-                $error = $this->propertyError($item->name->toString(), $item->default, $item->getStartLine());
+                $error = $this->propertyError($item->name->toString(), $item->default, $item->getStartLine(), $scope);
 
                 if ($error === null) {
                     continue;
@@ -119,9 +135,10 @@ final class PreferModelAttributesRule implements Rule
      * Collect errors for method overrides with an enabled attribute equivalent.
      *
      * @param  \PhpParser\Node\Stmt\Class_  $node
+     * @param  \PHPStan\Analyser\Scope  $scope
      * @return array<int, \PHPStan\Rules\RuleError>
      */
-    private function methodErrors(Class_ $node): array
+    private function methodErrors(Class_ $node, Scope $scope): array
     {
         $errors = [];
 
@@ -129,7 +146,7 @@ final class PreferModelAttributesRule implements Rule
             $name      = $method->name->toString();
             $attribute = self::METHOD_ATTRIBUTES[$name] ?? null;
 
-            if ($attribute === null || in_array($attribute, $this->attributes, true) === false) {
+            if ($attribute === null || $this->isEnabled($attribute, $scope) === false) {
                 continue;
             }
 
@@ -149,13 +166,14 @@ final class PreferModelAttributesRule implements Rule
      * @param  string  $name
      * @param  \PhpParser\Node\Expr|null  $default
      * @param  int  $line
+     * @param  \PHPStan\Analyser\Scope  $scope
      * @return \PHPStan\Rules\RuleError|null
      */
-    private function propertyError(string $name, ?Expr $default, int $line): ?RuleError
+    private function propertyError(string $name, ?Expr $default, int $line, Scope $scope): ?RuleError
     {
         $attribute = self::PROPERTY_ATTRIBUTES[$name] ?? null;
 
-        if ($attribute === null || in_array($attribute, $this->attributes, true) === false) {
+        if ($attribute === null || $this->isEnabled($attribute, $scope) === false) {
             return null;
         }
 
@@ -168,5 +186,40 @@ final class PreferModelAttributesRule implements Rule
             $attribute,
             $name,
         ))->identifier('sineMaculaLaravel.modelAttribute')->line($line)->build();
+    }
+
+    /**
+     * Whether an attribute is enabled here, honouring the 13.2 version gate.
+     *
+     * @param  string  $attribute
+     * @param  \PHPStan\Analyser\Scope  $scope
+     * @return bool
+     */
+    private function isEnabled(string $attribute, Scope $scope): bool
+    {
+        if (in_array($attribute, $this->attributes, true) === false) {
+            return false;
+        }
+
+        if (in_array($attribute, self::VERSION_GATED_ATTRIBUTES, true) === false) {
+            return true;
+        }
+
+        return $this->supportsGatedAttributes($scope);
+    }
+
+    /**
+     * Whether the project's Laravel floor reaches the gated-attribute version.
+     *
+     * @param  \PHPStan\Analyser\Scope  $scope
+     * @return bool
+     */
+    private function supportsGatedAttributes(Scope $scope): bool
+    {
+        $version = $this->minLaravelVersion !== ''
+            ? $this->minLaravelVersion
+            : $this->detectLaravelVersion($scope->getFile());
+
+        return $version !== null && $this->isLaravelVersionAtLeast($version, self::ATTRIBUTE_FLOOR);
     }
 }

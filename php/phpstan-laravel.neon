@@ -21,9 +21,15 @@ parameters:
             - Fillable
             - Hidden
 
+        # Explicit minimum Laravel version for the 13.2-only attributes
+        # (#[Table]/#[Fillable]/#[Hidden]). Leave empty to detect it from the
+        # nearest composer.json; set e.g. "13.2" to enforce them regardless.
+        minLaravelVersion: ''
+
 parametersSchema:
     sineMaculaLaravel: structure([
         modelAttributes: listOf(string())
+        minLaravelVersion: string()
     ])
 
 rules:
@@ -42,5 +48,6 @@ services:
         class: SineMacula\CodingStandardsLaravel\PHPStan\Rules\PreferModelAttributesRule
         arguments:
             attributes: %sineMaculaLaravel.modelAttributes%
+            minLaravelVersion: %sineMaculaLaravel.minLaravelVersion%
         tags:
             - phpstan.rules.rule

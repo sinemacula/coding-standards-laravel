@@ -15,6 +15,7 @@
         <include>
             <directory suffix="Sniff.php">SineMaculaLaravel/Sniffs</directory>
             <directory suffix=".php">src/Sniffs</directory>
+            <directory suffix=".php">src/PHPStan/Concerns</directory>
             <directory suffix="Rule.php">src</directory>
         </include>
     </source>

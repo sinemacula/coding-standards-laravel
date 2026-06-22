@@ -107,7 +107,7 @@ Opt a class out entirely with an `@role-exempt` docblock tag or a `#[NotARole]` 
 | `sineMaculaLaravel.datesProperty` | No `$dates` property on a model (deprecated) - cast dates via `casts()`. |
 | `sineMaculaLaravel.massAssignment` | Every concrete production model declares mass assignment explicitly via `$fillable`/`$guarded` or the `#[Fillable]`/`#[Guarded]` attribute; models declared in tests are exempt. |
 | `sineMaculaLaravel.relationshipReturnType` | A relationship method declares a return-type hint. |
-| `sineMaculaLaravel.modelAttribute` | Prefer a model attribute over its legacy property/method form, for the attributes a project enables (default `#[Table]`/`#[Fillable]`/`#[Hidden]`; configurable via the `sineMaculaLaravel.modelAttributes` parameter to match the minimum Laravel version). |
+| `sineMaculaLaravel.modelAttribute` | Prefer a model attribute over its legacy property/method form, for the attributes a project enables (default `#[Table]`/`#[Fillable]`/`#[Hidden]`, configurable via `sineMaculaLaravel.modelAttributes`). The 13.2-only attributes are enforced only when the project's Laravel floor reaches 13.2 - taken from `sineMaculaLaravel.minLaravelVersion` or detected from the nearest `composer.json`; below that, or when undetectable, the property form is left alone. |
 | `sineMaculaLaravel.migrationMethods` | A migration defines both `up()` and `down()`. |
 | `sineMaculaLaravel.formRequestRules` | A form request (under `Http\Requests`) defines a `rules()` method. |
 | `sineMaculaLaravel.factoryTimestamps` | A factory `definition()` must not set `created_at` / `updated_at`. |

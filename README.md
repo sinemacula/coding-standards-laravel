@@ -112,6 +112,7 @@ Opt a class out entirely with an `@role-exempt` docblock tag or a `#[NotARole]` 
 | `sineMaculaLaravel.schemaNaming` | Table and column names in a migration use snake_case. Inspects the literal name arguments of the `Schema` table calls and the Blueprint column/index methods (value arguments and dynamic names are left alone). Digits are allowed (`line_1`, `oauth2`); only casing is enforced. |
 | `sineMaculaLaravel.formRequestRules` | A form request (under `Http\Requests`) defines a `rules()` method. |
 | `sineMaculaLaravel.factoryTimestamps` | A factory `definition()` must not set `created_at` / `updated_at`. |
+| `sineMaculaLaravel.resourceFieldNaming` | Field keys in a resource's `toArray()` result use snake_case, nested arrays included. Inspects the string-literal keys of the array returned directly from `toArray()` on a `JsonResource`; computed keys, a non-literal return, and non-resource classes are left alone. Digits are allowed (`line_1`); only casing is enforced. |
 
 ## Requirements
 

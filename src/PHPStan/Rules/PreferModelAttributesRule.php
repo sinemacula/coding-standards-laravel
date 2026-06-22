@@ -17,10 +17,14 @@ use PHPStan\Rules\RuleErrorBuilder;
  * Prefer model attributes over their legacy property and method forms.
  *
  * Eloquent exposes attribute classes that replace configuration properties
- * (#[Table], #[Hidden], #[Touches]) and method overrides (#[UseFactory],
- * #[CollectedBy], #[UseEloquentBuilder]). On a model those must be expressed
- * as attributes instead - except $hidden, which stays a property once it lists
- * more than five fields.
+ * (#[Table], #[Fillable], #[Hidden]) and method overrides (#[UseFactory],
+ * #[CollectedBy], #[UseEloquentBuilder]). On a model the legacy form is flagged
+ * in favour of its attribute - but only for the attributes a project enables,
+ * since they vary by Laravel version (the expressive set from 13.2, the
+ * ObservedBy/ScopedBy/CollectedBy family from 11). The mandated set defaults to
+ * #[Table]/#[Fillable]/#[Hidden] and is configurable via the
+ * `sineMaculaLaravel.modelAttributes` parameter. $hidden stays a property once
+ * it lists more than five fields.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -29,15 +33,16 @@ use PHPStan\Rules\RuleErrorBuilder;
  */
 final class PreferModelAttributesRule implements Rule
 {
-    /** @var array<string, string> Map of model property name to its attribute. */
-    private const array PROPERTIES = [
-        'table'   => 'Table',
-        'hidden'  => 'Hidden',
-        'touches' => 'Touches',
+    /** @var array<string, string> Known model property name => its attribute. */
+    private const array PROPERTY_ATTRIBUTES = [
+        'table'    => 'Table',
+        'fillable' => 'Fillable',
+        'hidden'   => 'Hidden',
+        'touches'  => 'Touches',
     ];
 
-    /** @var array<string, string> Map of overridden model method to its attribute. */
-    private const array METHODS = [
+    /** @var array<string, string> Known overridden model method => its attribute. */
+    private const array METHOD_ATTRIBUTES = [
         'newFactory'         => 'UseFactory',
         'newCollection'      => 'CollectedBy',
         'newEloquentBuilder' => 'UseEloquentBuilder',
@@ -45,6 +50,17 @@ final class PreferModelAttributesRule implements Rule
 
     /** @var int Maximum fields before the property form is preferred. */
     private const int HIDDEN_LIMIT = 5;
+
+    /** @var array<int, string> Mandated attribute names. */
+    private readonly array $attributes;
+
+    /**
+     * @param  array<int, string>  $attributes
+     */
+    public function __construct(array $attributes = ['Table', 'Fillable', 'Hidden'])
+    {
+        $this->attributes = $attributes;
+    }
 
     /**
      * The node type this rule inspects.
@@ -58,7 +74,7 @@ final class PreferModelAttributesRule implements Rule
     }
 
     /**
-     * Flag model properties that have a preferred attribute equivalent.
+     * Flag model members whose enabled attribute equivalent should be used.
      *
      * @param  \PhpParser\Node\Stmt\Class_  $node
      * @param  \PHPStan\Analyser\Scope  $scope
@@ -75,7 +91,7 @@ final class PreferModelAttributesRule implements Rule
     }
 
     /**
-     * Collect errors for properties with a preferred attribute equivalent.
+     * Collect errors for properties with an enabled attribute equivalent.
      *
      * @param  \PhpParser\Node\Stmt\Class_  $node
      * @return array<int, \PHPStan\Rules\RuleError>
@@ -100,7 +116,7 @@ final class PreferModelAttributesRule implements Rule
     }
 
     /**
-     * Collect errors for method overrides with an attribute equivalent.
+     * Collect errors for method overrides with an enabled attribute equivalent.
      *
      * @param  \PhpParser\Node\Stmt\Class_  $node
      * @return array<int, \PHPStan\Rules\RuleError>
@@ -110,15 +126,16 @@ final class PreferModelAttributesRule implements Rule
         $errors = [];
 
         foreach ($node->getMethods() as $method) {
-            $name = $method->name->toString();
+            $name      = $method->name->toString();
+            $attribute = self::METHOD_ATTRIBUTES[$name] ?? null;
 
-            if (!isset(self::METHODS[$name])) {
+            if ($attribute === null || in_array($attribute, $this->attributes, true) === false) {
                 continue;
             }
 
             $errors[] = RuleErrorBuilder::message(sprintf(
                 'Use the #[%s] attribute instead of overriding the %s() method.',
-                self::METHODS[$name],
+                $attribute,
                 $name,
             ))->identifier('sineMaculaLaravel.modelAttribute')->line($method->getStartLine())->build();
         }
@@ -136,21 +153,19 @@ final class PreferModelAttributesRule implements Rule
      */
     private function propertyError(string $name, ?Expr $default, int $line): ?RuleError
     {
-        if (!isset(self::PROPERTIES[$name])) {
+        $attribute = self::PROPERTY_ATTRIBUTES[$name] ?? null;
+
+        if ($attribute === null || in_array($attribute, $this->attributes, true) === false) {
             return null;
         }
 
-        if (
-            $name === 'hidden'
-            && $default instanceof Array_
-            && count($default->items) > self::HIDDEN_LIMIT
-        ) {
+        if ($name === 'hidden' && $default instanceof Array_ && count($default->items) > self::HIDDEN_LIMIT) {
             return null;
         }
 
         return RuleErrorBuilder::message(sprintf(
             'Use the #[%s] attribute instead of the $%s property.',
-            self::PROPERTIES[$name],
+            $attribute,
             $name,
         ))->identifier('sineMaculaLaravel.modelAttribute')->line($line)->build();
     }

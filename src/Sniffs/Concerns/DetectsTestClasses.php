@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace SineMacula\CodingStandardsLaravel\Sniffs\Concerns;
 
 use PHP_CodeSniffer\Files\File;
+use SineMacula\CodingStandards\Sniffs\Concerns\DetectsTestClasses as BaseDetectsTestClasses;
 
 /**
  * Detect PHPUnit test files and classes.
@@ -14,15 +15,16 @@ use PHP_CodeSniffer\Files\File;
  * Sniffs whose correctness basis only holds for runtime `src` - env()
  * disappearing once config is cached, for instance - use this to exempt tests.
  *
- * Mirrors the base sinemacula/coding-standards DetectsTestClasses (class-level)
- * and adds the file-level check; once that base trait ships in a release the
- * class-level method here can defer to it.
+ * The class-level check defers to the base sinemacula/coding-standards
+ * DetectsTestClasses; this trait adds only the file-level wrapper.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */
 trait DetectsTestClasses
 {
+    use BaseDetectsTestClasses;
+
     /**
      * Whether the processed file is a test file.
      *
@@ -44,23 +46,5 @@ trait DetectsTestClasses
         }
 
         return false;
-    }
-
-    /**
-     * Whether the class declared at the pointer is a test class.
-     *
-     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
-     * @param  int  $classPtr
-     * @return bool
-     */
-    protected function isTestClass(File $phpcsFile, int $classPtr): bool
-    {
-        if (str_ends_with((string) $phpcsFile->getDeclarationName($classPtr), 'Test')) {
-            return true;
-        }
-
-        $parent = $phpcsFile->findExtendedClassName($classPtr);
-
-        return $parent !== false && str_ends_with($parent, 'TestCase');
     }
 }

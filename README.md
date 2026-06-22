@@ -82,6 +82,9 @@ A deliberate exception can be bypassed with the native directive - `// phpcs:ign
 | `SineMaculaLaravel.Structure.RequireRoleDirectory` | A class whose role is recognised by identity (what it extends/implements) must live under that role's directory - a controller under `Http/Controllers`; an entry-point provider may sit at the package root. |
 | `SineMaculaLaravel.Structure.RequireRoleNaming` | A class is named for its role: controllers/providers/form-requests/resources/policies require a suffix, models forbid `Model`/`Entity`, and the rest (jobs, listeners, events, mailables, middleware, commands, casts, rules) stay bare. |
 | `SineMaculaLaravel.Structure.RoutesLocation` | A `routes.php` file, if present, must sit at the root of an `Http` directory. |
+| `SineMaculaLaravel.TypeHints.PropertyTypeHint` | A class property declares a native type - except the framework-magic properties (`$table`, `$fillable`, `$signature`, …, the configurable `magicProperties` set) that override an untyped parent and so cannot be typed. |
+| `SineMaculaLaravel.TypeHints.ParameterTypeHint` | A function or method parameter declares a native type - except on a method carrying `#[\Override]`, whose signature the parent fixes. |
+| `SineMaculaLaravel.TypeHints.ReturnTypeHint` | A function, method or closure declares a native return type - except constructors/destructors/clone handlers and methods carrying `#[\Override]`. |
 
 #### Role-based structure
 
@@ -98,6 +101,17 @@ override. Identity is matched on the immediate base by short name, so a project'
 base (e.g. a `BaseController`) is supported by adding it to `roleIdentities`.
 
 Opt a class out entirely with an `@role-exempt` docblock tag or a `#[NotARole]` attribute.
+
+#### Type hints
+
+The `TypeHints.*` sniffs replace the base standard's Slevomat native-type requirements with
+Laravel-aware equivalents (the base Slevomat `MissingNativeTypeHint` / `MissingAnyTypeHint` codes are
+excluded; the traversable-specification checks are kept). They are needed because the Slevomat sniffs
+are inheritance-blind: PHP forbids typing a property that overrides an untyped parent (`$table`,
+`$fillable`, …) or changing an inherited method signature, so the original rules force types that
+fatal at class load. Native types are still required everywhere else. The exempt property set is the
+configurable `magicProperties` list on `PropertyTypeHint`, and an overriding method opts its
+signature out with the native `#[\Override]` attribute.
 
 ### PHPStan rules
 

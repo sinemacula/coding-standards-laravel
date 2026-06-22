@@ -7,8 +7,22 @@
         Pull in the full framework-agnostic SineMacula standard so a Laravel project
         references a single standard (`SineMaculaLaravel`) and gets both layers. The
         sinemacula/coding-standards package must be installed alongside this one.
+
+        The Slevomat native/any type-hint requirements are dropped here and replaced
+        by the Laravel-aware SineMaculaLaravel.TypeHints sniffs below: those Slevomat
+        sniffs are inheritance-blind, so they force types onto members that override
+        an untyped framework declaration ($table, #[\Override] methods, …), which
+        fatals at class load. The traversable-specification checks (which require
+        `@param array<int, Foo>` and never fatal) are kept.
     -->
-    <rule ref="SineMacula"/>
+    <rule ref="SineMacula">
+        <exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint"/>
+        <exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingAnyTypeHint"/>
+        <exclude name="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint"/>
+        <exclude name="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingAnyTypeHint"/>
+        <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingNativeTypeHint"/>
+        <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingAnyTypeHint"/>
+    </rule>
 
     <!--
         Laravel-specific sniffs live in this standard's Sniffs/ directory and are

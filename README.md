@@ -115,6 +115,14 @@ signature out with the native `#[\Override]` attribute. A non-private trait meth
 from the parameter requirement, since its effective parent is whatever the consuming class extends
 and a token sniff cannot resolve that.
 
+#### Readonly properties
+
+The base standard requires every public property to be `readonly`. An Eloquent model is exempt: it
+overrides the framework's public magic properties (`$timestamps`, `$incrementing`, …), which are
+declared non-readonly on the base class, and PHP forbids making an inherited property readonly. This
+standard sets the base sniff's `ignoredParentClasses` to the model bases (`Model`, `Authenticatable`,
+`Pivot`), matched by the immediate parent name as written.
+
 ### PHPStan rules
 
 | Identifier | Enforces |

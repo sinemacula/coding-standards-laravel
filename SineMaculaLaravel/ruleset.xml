@@ -25,6 +25,25 @@
     </rule>
 
     <!--
+        Exempt Eloquent models from the readonly-public-property requirement. A
+        model overrides the framework's public magic properties ($timestamps,
+        $incrementing, $preventsLazyLoading, …), which are declared non-readonly
+        on the base class - PHP forbids making an inherited property readonly, so
+        the requirement cannot be satisfied. The base sniff matches the immediate
+        parent name as written, so the model bases are listed by short name
+        (a model extends Model, Authenticatable, or Pivot).
+    -->
+    <rule ref="SineMacula.Classes.RequireReadonlyPublicProperty">
+        <properties>
+            <property name="ignoredParentClasses" type="array">
+                <element value="Model"/>
+                <element value="Authenticatable"/>
+                <element value="Pivot"/>
+            </property>
+        </properties>
+    </rule>
+
+    <!--
         Laravel-specific sniffs live in this standard's Sniffs/ directory and are
         auto-discovered by PHP_CodeSniffer - no <rule ref> lines are needed for them.
     -->

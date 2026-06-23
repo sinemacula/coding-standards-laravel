@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.2.1...v1.3.0) (2026-06-23)
+
+
+### Features
+
+* **architecture:** refine DisallowServiceLocation exemptions ([#36](https://github.com/sinemacula/coding-standards-laravel/issues/36)) ([93183e5](https://github.com/sinemacula/coding-standards-laravel/commit/93183e5fd078eb176676635b5c305a673cfa9d6d))
+* **classes:** exempt Eloquent models from readonly-public-property rule ([#37](https://github.com/sinemacula/coding-standards-laravel/issues/37)) ([2e88a8b](https://github.com/sinemacula/coding-standards-laravel/commit/2e88a8bac2990cd6a773f9817ac6f44a7b664d07))
+
+
+### Bug Fixes
+
+* **phpstan:** exempt leading-underscore meta-keys from resource field naming ([#38](https://github.com/sinemacula/coding-standards-laravel/issues/38)) ([08565b0](https://github.com/sinemacula/coding-standards-laravel/commit/08565b001404c1722e7bdd98f9720fae191ad20e))
+* **typehints:** exempt non-private trait method params from ParameterTypeHint ([#34](https://github.com/sinemacula/coding-standards-laravel/issues/34)) ([4428769](https://github.com/sinemacula/coding-standards-laravel/commit/44287698ea70a5417f3978e3797f752231edbb2a))
+
 ## [1.2.1](https://github.com/sinemacula/coding-standards-laravel/compare/v1.2.0...v1.2.1) (2026-06-23)
 
 

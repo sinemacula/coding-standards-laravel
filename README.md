@@ -83,7 +83,7 @@ A deliberate exception can be bypassed with the native directive - `// phpcs:ign
 | `SineMaculaLaravel.Structure.RequireRoleNaming` | A class is named for its role: controllers/providers/form-requests/resources/policies require a suffix, models forbid `Model`/`Entity`, and the rest (jobs, listeners, events, mailables, middleware, commands, casts, rules) stay bare. |
 | `SineMaculaLaravel.Structure.RoutesLocation` | A `routes.php` file, if present, must sit at the root of an `Http` directory. |
 | `SineMaculaLaravel.TypeHints.PropertyTypeHint` | A class property declares a native type - except the framework-magic properties (`$table`, `$fillable`, `$signature`, …, the configurable `magicProperties` set) that override an untyped parent and so cannot be typed. |
-| `SineMaculaLaravel.TypeHints.ParameterTypeHint` | A function or method parameter declares a native type - except on a method carrying `#[\Override]`, whose signature the parent fixes. |
+| `SineMaculaLaravel.TypeHints.ParameterTypeHint` | A function or method parameter declares a native type - except where a parent fixes the signature: a method carrying `#[\Override]`, or a non-private trait method (whose effective parent is the consuming class's, invisible to a token sniff). |
 | `SineMaculaLaravel.TypeHints.ReturnTypeHint` | A function, method or closure declares a native return type - except constructors/destructors/clone handlers and methods carrying `#[\Override]`. |
 
 #### Role-based structure
@@ -111,7 +111,9 @@ are inheritance-blind: PHP forbids typing a property that overrides an untyped p
 `$fillable`, …) or changing an inherited method signature, so the original rules force types that
 fatal at class load. Native types are still required everywhere else. The exempt property set is the
 configurable `magicProperties` list on `PropertyTypeHint`, and an overriding method opts its
-signature out with the native `#[\Override]` attribute.
+signature out with the native `#[\Override]` attribute. A non-private trait method is also exempt
+from the parameter requirement, since its effective parent is whatever the consuming class extends
+and a token sniff cannot resolve that.
 
 ### PHPStan rules
 

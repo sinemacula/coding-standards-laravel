@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/sinemacula/coding-standards-laravel/compare/v1.2.0...v1.2.1) (2026-06-23)
+
+
+### Bug Fixes
+
+* **typehints,phpstan:** complete magic-property set + gate castsProperty ([#32](https://github.com/sinemacula/coding-standards-laravel/issues/32)) ([a8fe6e7](https://github.com/sinemacula/coding-standards-laravel/commit/a8fe6e76578305eee0631fd0d44210a0ded7f651))
+
 ## [1.2.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.1.0...v1.2.0) (2026-06-22)
 
 

@@ -23,3 +23,16 @@ class ProcessThing
     {
     }
 }
+
+trait ThrottleRequestsTrait
+{
+    protected function resolveRequestSignature($request): string
+    {
+        return '';
+    }
+
+    private function buildKey($value): string
+    {
+        return '';
+    }
+}

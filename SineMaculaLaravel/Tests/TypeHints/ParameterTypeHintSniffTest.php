@@ -20,13 +20,14 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class ParameterTypeHintSniffTest extends AbstractSniffTestCase
 {
     /**
-     * An untyped parameter is flagged; a typed parameter and every parameter of
-     * a method carrying #[\Override] are not.
+     * An untyped parameter is flagged; a typed one, those on an #[\Override]
+     * method, and those on a non-private trait method are not. A private trait
+     * method's parameters still are.
      *
      * @return void
      */
     public function testFlagsUntypedParametersExceptOnOverrides(): void
     {
-        $this->assertErrorsOnLines('ParameterTypeHint.inc', [7, 18]);
+        $this->assertErrorsOnLines('ParameterTypeHint.inc', [7, 18, 34]);
     }
 }

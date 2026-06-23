@@ -2,9 +2,19 @@
 
 namespace SineMaculaLaravel\Tests\PHPStan\Data;
 
-class CastsModel
+use Illuminate\Database\Eloquent\Model;
+
+class CastsModel extends Model
 {
     protected $casts = ['active' => 'bool'];
+}
 
-    protected $table = 'users';
+class PlainModel extends Model
+{
+    protected $table = 'plain';
+}
+
+final class AttributeSetter
+{
+    private $casts = [];
 }

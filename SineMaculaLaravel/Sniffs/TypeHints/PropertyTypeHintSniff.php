@@ -25,9 +25,10 @@ final class PropertyTypeHintSniff implements Sniff
     /** @var array<int, string> Property names exempt from the native-type requirement. */
     public array $magicProperties = [
         'signature', 'description', 'table', 'primaryKey', 'keyType', 'incrementing',
-        'timestamps', 'with', 'withCount', 'perPage', 'fillable', 'guarded', 'hidden',
-        'visible', 'casts', 'dates', 'appends', 'dispatchesEvents', 'touches', 'observables',
-        'connection', 'bindings', 'singletons', 'defer',
+        'timestamps', 'dateFormat', 'with', 'withCount', 'perPage', 'fillable', 'guarded',
+        'hidden', 'visible', 'casts', 'dates', 'appends', 'attributes', 'dispatchesEvents',
+        'touches', 'observables', 'connection', 'escapeWhenCastingToString', 'bindings',
+        'singletons', 'defer',
     ];
 
     /** @var array<int, int|string> Scopes whose direct variables are properties. */

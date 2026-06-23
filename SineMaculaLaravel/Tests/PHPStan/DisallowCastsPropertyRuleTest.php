@@ -23,7 +23,8 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowCastsPropertyRule;
 final class DisallowCastsPropertyRuleTest extends RuleTestCase
 {
     /**
-     * The $casts property is flagged; other properties are not.
+     * The $casts property is flagged on an Eloquent model; a non-model class
+     * with its own $casts, and a model without one, are not.
      *
      * @return void
      */
@@ -32,7 +33,7 @@ final class DisallowCastsPropertyRuleTest extends RuleTestCase
         $this->analyse([__DIR__ . '/data/casts-property.inc'], [
             [
                 'The $casts property is not allowed; declare casts via the casts() method instead.',
-                7,
+                9,
             ],
         ]);
     }
@@ -40,7 +41,7 @@ final class DisallowCastsPropertyRuleTest extends RuleTestCase
     /**
      * Provide the rule under test.
      *
-     * @return \PHPStan\Rules\Rule<\PhpParser\Node\Stmt\Property>
+     * @return \PHPStan\Rules\Rule<\PhpParser\Node\Stmt\Class_>
      */
     #[\Override]
     protected function getRule(): Rule

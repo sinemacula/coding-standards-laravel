@@ -23,7 +23,8 @@ use PHPStan\Rules\RuleErrorBuilder;
  * flags non-snake_case string-literal keys in the array returned directly from
  * toArray(), recursing into nested array literals. Computed keys, a toArray()
  * that does not return an array literal, and non-resource classes are left
- * alone. Digits are permitted (line_1); only casing is enforced.
+ * alone. Digits are permitted (line_1) and leading-underscore keys are exempt
+ * meta-fields (e.g. _type); only casing is enforced on data fields.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -108,7 +109,12 @@ final class RequireSnakeCaseResourceFieldsRule implements Rule
         $errors = [];
 
         foreach ($array->items as $item) {
-            if ($item->key instanceof String_ && !$this->isSnakeCase($item->key->value)) {
+            // Leading-underscore keys (e.g. _type) are exempt meta-fields.
+            if (
+                $item->key instanceof String_
+                && !str_starts_with($item->key->value, '_')
+                && !$this->isSnakeCase($item->key->value)
+            ) {
                 $errors[] = $this->keyError($item->key);
             }
 

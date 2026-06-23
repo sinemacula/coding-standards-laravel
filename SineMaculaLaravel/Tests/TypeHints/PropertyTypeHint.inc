@@ -10,6 +10,8 @@ class User extends Model
 
     protected $fillable = ['name'];
 
+    protected $dateFormat = 'Y-m-d';
+
     public $nickname;
 
     public int $age = 0;

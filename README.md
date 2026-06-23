@@ -117,7 +117,7 @@ signature out with the native `#[\Override]` attribute.
 
 | Identifier | Enforces |
 |------------|----------|
-| `sineMaculaLaravel.castsProperty` | No `$casts` property on a model - use the `casts()` method. |
+| `sineMaculaLaravel.castsProperty` | No `$casts` property on an Eloquent model (a class extending `Model`/`Authenticatable`/`Pivot`) - use the `casts()` method. A non-model class with its own `$casts` is left alone. |
 | `sineMaculaLaravel.datesProperty` | No `$dates` property on a model (deprecated) - cast dates via `casts()`. |
 | `sineMaculaLaravel.massAssignment` | Every concrete production model declares mass assignment explicitly via `$fillable`/`$guarded` or the `#[Fillable]`/`#[Guarded]` attribute; models declared in tests are exempt. |
 | `sineMaculaLaravel.relationshipReturnType` | A relationship method declares a return-type hint. |

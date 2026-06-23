@@ -20,13 +20,14 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class PropertyTypeHintSniffTest extends AbstractSniffTestCase
 {
     /**
-     * An untyped class property is flagged; a framework-magic property, a typed
-     * property, parameters, locals and top-level variables are not.
+     * An untyped class property is flagged; framework-magic properties (incl.
+     * $dateFormat), a typed property, parameters, locals and top-level vars are
+     * not.
      *
      * @return void
      */
     public function testFlagsUntypedNonMagicProperties(): void
     {
-        $this->assertErrorsOnLines('PropertyTypeHint.inc', [13]);
+        $this->assertErrorsOnLines('PropertyTypeHint.inc', [15]);
     }
 }

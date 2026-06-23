@@ -24,16 +24,16 @@ final class RequireSnakeCaseResourceFieldsRuleTest extends RuleTestCase
 {
     /**
      * Non-snake_case keys in a resource's toArray() result are flagged, nested
-     * arrays included; snake_case keys, list values, a spread, a non-literal
-     * return and non-resource classes are not.
+     * arrays included; snake_case keys, leading-underscore meta-keys, list
+     * values, a spread, a non-literal return and non-resource classes are not.
      *
      * @return void
      */
     public function testFlagsNonSnakeCaseFieldKeys(): void
     {
         $this->analyse([__DIR__ . '/data/snake-case-resource-fields.inc'], [
-            ['Resource field "createdAt" must use snake_case.', 14],
-            ['Resource field "postCode" must use snake_case.', 17],
+            ['Resource field "createdAt" must use snake_case.', 15],
+            ['Resource field "postCode" must use snake_case.', 18],
         ]);
     }
 

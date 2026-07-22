@@ -64,8 +64,8 @@ final class DisallowNonRestActionsSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A method is judged against its innermost enclosing class, so an action
-     * on a controller nested inside a non-controller wrapper is still flagged.
+     * A method is judged against its innermost enclosing class, so an action on
+     * a controller nested inside a non-controller wrapper is still flagged.
      *
      * @return void
      */

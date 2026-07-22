@@ -40,8 +40,8 @@ final class RequireBladeLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A Blade template under a directory whose path merely ends in a views
-     * path is flagged.
+     * A Blade template under a directory whose path merely ends in a views path
+     * is flagged.
      *
      * @return void
      */
@@ -51,8 +51,8 @@ final class RequireBladeLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A Blade template under a directory whose name merely starts with views
-     * is flagged.
+     * A Blade template under a directory whose name merely starts with views is
+     * flagged.
      *
      * @return void
      */

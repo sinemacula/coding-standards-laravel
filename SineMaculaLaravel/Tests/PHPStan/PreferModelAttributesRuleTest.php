@@ -28,6 +28,12 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     /** @var string The expected-property error message. */
     private const string TABLE_ERROR = 'Use the #[Table] attribute instead of the $table property.';
 
+    /** @var string The expected error message. */
+    private const string FILLABLE_ERROR = 'Use the #[Fillable] attribute instead of the $fillable property.';
+
+    /** @var string The expected error message. */
+    private const string HIDDEN_ERROR = 'Use the #[Hidden] attribute instead of the $hidden property.';
+
     /** @var string A model whose composer.json floor is below 13.2. */
     private const string UNSUPPORTED_MODEL = __DIR__ . '/data/version/unsupported/model.inc';
 
@@ -51,11 +57,11 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
 
         $this->analyse([__DIR__ . '/data/prefer-model-attributes.inc'], [
             [self::TABLE_ERROR, 9],
-            ['Use the #[Hidden] attribute instead of the $hidden property.', 11],
-            ['Use the #[Fillable] attribute instead of the $fillable property.', 15],
-            ['Use the #[Fillable] attribute instead of the $fillable property.', 53],
-            ['Use the #[Fillable] attribute instead of the $fillable property.', 66],
-            ['Use the #[Hidden] attribute instead of the $hidden property.', 71],
+            [self::HIDDEN_ERROR, 11],
+            [self::FILLABLE_ERROR, 15],
+            [self::FILLABLE_ERROR, 53],
+            [self::FILLABLE_ERROR, 66],
+            [self::HIDDEN_ERROR, 71],
         ]);
     }
 
@@ -89,7 +95,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     {
         $this->analyse([__DIR__ . '/data/version/supported/app/model.inc'], [
             [self::TABLE_ERROR, 9],
-            ['Use the #[Hidden] attribute instead of the $hidden property.', 11],
+            [self::HIDDEN_ERROR, 11],
         ]);
     }
 

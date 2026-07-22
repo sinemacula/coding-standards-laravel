@@ -22,6 +22,12 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireMigrationMethodsRule;
 #[CoversClass(RequireMigrationMethodsRule::class)]
 final class RequireMigrationMethodsRuleTest extends RuleTestCase
 {
+    /** @var string The expected missing-down() error message. */
+    private const string DOWN_ERROR = 'A migration must define the down() method.';
+
+    /** @var string The expected missing-up() error message. */
+    private const string UP_ERROR = 'A migration must define the up() method.';
+
     /**
      * A migration missing up() or down() is flagged (an empty one for both); a
      * complete migration, one whose method names differ only by case, and a
@@ -33,19 +39,19 @@ final class RequireMigrationMethodsRuleTest extends RuleTestCase
     {
         $this->analyse([__DIR__ . '/data/migration-methods.inc'], [
             [
-                'A migration must define the down() method.',
+                self::DOWN_ERROR,
                 18,
             ],
             [
-                'A migration must define the up() method.',
+                self::UP_ERROR,
                 25,
             ],
             [
-                'A migration must define the up() method.',
+                self::UP_ERROR,
                 50,
             ],
             [
-                'A migration must define the down() method.',
+                self::DOWN_ERROR,
                 50,
             ],
         ]);
@@ -60,7 +66,7 @@ final class RequireMigrationMethodsRuleTest extends RuleTestCase
     {
         $this->analyse([__DIR__ . '/data/migration-anonymous.inc'], [
             [
-                'A migration must define the down() method.',
+                self::DOWN_ERROR,
                 5,
             ],
         ]);

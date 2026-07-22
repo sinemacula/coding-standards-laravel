@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/sinemacula/coding-standards-laravel/compare/v1.3.1...v1.3.2) (2026-07-22)
+
+
+### Bug Fixes
+
+* resolve role identity collisions and exemption gaps ([#65](https://github.com/sinemacula/coding-standards-laravel/issues/65)) ([8965762](https://github.com/sinemacula/coding-standards-laravel/commit/89657622bfbae338cb2e093f457acee5622ed6ca))
+
 ## [1.3.1](https://github.com/sinemacula/coding-standards-laravel/compare/v1.3.0...v1.3.1) (2026-07-22)
 
 

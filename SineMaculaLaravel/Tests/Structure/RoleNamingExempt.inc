@@ -20,3 +20,30 @@ class Bar extends Controller
 class BazController extends Controller
 {
 }
+
+#[NotARole]class Snug extends Controller
+{
+}
+
+/**
+ * @role-exempt
+ */class Tight extends Controller
+{
+}
+
+/**
+ * @ROLE-EXEMPT
+ */
+class Grault extends Controller
+{
+}
+
+#[SomeMeta(3)]#[NotARole]
+class Adjacent extends Controller
+{
+}
+
+#[SomeMeta(1), NotARole]
+class Corge extends Controller
+{
+}

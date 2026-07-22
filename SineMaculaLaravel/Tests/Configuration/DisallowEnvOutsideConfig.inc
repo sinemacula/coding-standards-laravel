@@ -11,7 +11,8 @@ class EnvReader
         $a = env('APP_NAME');
         $b = config('app.name');
         $c = $config->env('FALLBACK');
+        $d = ENV('APP_KEY');
 
-        return $a . $b . $c;
+        return $a . $b . $c . $d;
     }
 }

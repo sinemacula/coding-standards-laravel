@@ -57,3 +57,12 @@ class Helper
 class DocumentedHelper
 {
 }
+
+class Gateway extends \Illuminate\Routing\Controller
+{
+}
+
+class Registry
+{
+    public const Controller = 'ok';
+}

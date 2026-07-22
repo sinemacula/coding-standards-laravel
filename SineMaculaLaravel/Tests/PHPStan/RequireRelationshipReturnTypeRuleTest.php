@@ -24,7 +24,8 @@ final class RequireRelationshipReturnTypeRuleTest extends RuleTestCase
 {
     /**
      * Relationship methods without a return type are flagged (including chained
-     * ones); typed and non-relationship methods are not.
+     * ones); typed methods, non-relationship methods and relationship calls on
+     * something other than $this are not.
      *
      * @return void
      */

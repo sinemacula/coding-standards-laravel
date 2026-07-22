@@ -35,3 +35,18 @@ class NotAMigration
     {
     }
 }
+
+class UppercaseMigration extends Migration
+{
+    public function Up(): void
+    {
+    }
+
+    public function Down(): void
+    {
+    }
+}
+
+class EmptyMigration extends Migration
+{
+}

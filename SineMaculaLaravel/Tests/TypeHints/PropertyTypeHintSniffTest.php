@@ -30,4 +30,16 @@ final class PropertyTypeHintSniffTest extends AbstractSniffTestCase
     {
         $this->assertErrorsOnLines('PropertyTypeHint.inc', [15]);
     }
+
+    /**
+     * The error names the offending property.
+     *
+     * @return void
+     */
+    public function testRendersPropertyNameInErrorMessage(): void
+    {
+        $this->assertErrorMessagesOnLines('PropertyTypeHint.inc', [
+            15 => ['Property $nickname must have a native type hint.'],
+        ]);
+    }
 }

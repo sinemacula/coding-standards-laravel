@@ -5,6 +5,9 @@ declare(strict_types = 1);
 namespace SineMaculaLaravel\Tests\Structure;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
 use SineMaculaLaravel\Sniffs\Structure\RequireRoleDirectorySniff;
 use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 
@@ -17,6 +20,8 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
  * @internal
  */
 #[CoversClass(RequireRoleDirectorySniff::class)]
+#[CoversTrait(ResolvesNamespace::class)]
+#[CoversTrait(ResolvesRole::class)]
 final class RequireRoleDirectorySniffTest extends AbstractSniffTestCase
 {
     /**
@@ -79,5 +84,18 @@ final class RequireRoleDirectorySniffTest extends AbstractSniffTestCase
     public function testRespectsTheEscapeHatch(): void
     {
         $this->assertErrorsOnLines('RoleDirectoryExempt.inc', []);
+    }
+
+    /**
+     * The misplaced message names the role and its directory in slash form.
+     *
+     * @return void
+     */
+    public function testRendersTheMisplacedMessage(): void
+    {
+        $this->assertErrorMessagesOnLines('RoleDirectoryMisplaced.inc', [
+            8  => ['A Controller class must live under a "Http/Controllers" directory.'],
+            12 => ['A Model class must live under a "Models" directory.'],
+        ]);
     }
 }

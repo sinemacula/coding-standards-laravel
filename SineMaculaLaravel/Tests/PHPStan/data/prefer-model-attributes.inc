@@ -47,3 +47,26 @@ class PlainObject
     {
     }
 }
+
+class Draft extends Model
+{
+    protected $touches = ['author'], $fillable = ['draft_title'];
+
+    public function refresh(): void
+    {
+    }
+
+    public function newCollection()
+    {
+    }
+}
+
+class Wide extends Model
+{
+    protected $fillable = ['a', 'b', 'c', 'd', 'e', 'f'];
+}
+
+class Five extends Model
+{
+    protected $hidden = ['a', 'b', 'c', 'd', 'e'];
+}

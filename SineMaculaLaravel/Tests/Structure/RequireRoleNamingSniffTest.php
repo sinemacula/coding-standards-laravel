@@ -5,6 +5,9 @@ declare(strict_types = 1);
 namespace SineMaculaLaravel\Tests\Structure;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
 use SineMaculaLaravel\Sniffs\Structure\RequireRoleNamingSniff;
 use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 
@@ -17,6 +20,8 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
  * @internal
  */
 #[CoversClass(RequireRoleNamingSniff::class)]
+#[CoversTrait(ResolvesNamespace::class)]
+#[CoversTrait(ResolvesRole::class)]
 final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
 {
     /** @var array<string, mixed> Per-test property overrides for the sniff. */
@@ -31,7 +36,7 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
      */
     public function testFlagsNamesAgainstResolvedRole(): void
     {
-        $this->assertErrorsOnLines('RoleNaming.inc', [13, 25]);
+        $this->assertErrorsOnLines('RoleNaming.inc', [13, 25, 61]);
     }
 
     /**
@@ -78,6 +83,97 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
     public function testLeavesLocationResolvedFreeRolesBare(): void
     {
         $this->assertErrorsOnLines('RoleNamingFree.inc', []);
+    }
+
+    /**
+     * A concrete class with no identity resolves its role from the namespace
+     * location; an abstract class in the same location never does.
+     *
+     * @return void
+     */
+    public function testResolvesARoleFromTheClassLocation(): void
+    {
+        $this->assertErrorsOnLines('RoleNamingLocation.inc', [5]);
+    }
+
+    /**
+     * A class in an exempt sub-namespace of a role location resolves no role.
+     *
+     * @return void
+     */
+    public function testIgnoresExemptSubNamespacesForLocation(): void
+    {
+        $this->assertErrorsOnLines('RoleNamingConcerns.inc', []);
+    }
+
+    /**
+     * Trait use resolves identity in every declaration shape: single and
+     * repeated statements, grouped and fully-qualified names, and a compact
+     * class body.
+     *
+     * @return void
+     */
+    public function testResolvesIdentityFromTraitUse(): void
+    {
+        $this->overrides = [
+            'roleIdentities' => ['Job' => 'ShouldQueue, Dispatchable'],
+            'requireSuffix'  => ['Job' => 'Job'],
+        ];
+
+        $this->assertErrorsOnLines('RoleNamingTraitIdentity.inc', [8, 13, 19, 25, 30, 35]);
+    }
+
+    /**
+     * Class attributes resolve identity, skipping their arguments and working
+     * across stacked groups and a final class.
+     *
+     * @return void
+     */
+    public function testResolvesIdentityFromAttributes(): void
+    {
+        $this->overrides = [
+            'roleIdentities' => ['Command' => 'AsCommand'],
+            'requireSuffix'  => ['Command' => 'Command'],
+        ];
+
+        $this->assertErrorsOnLines('RoleNamingAttributes.inc', [6, 12, 22]);
+    }
+
+    /**
+     * A docblock without the exempt tag, or an attribute argument merely named
+     * NotARole, does not opt a class out.
+     *
+     * @return void
+     */
+    public function testFlagsClassesThatOnlyResembleExemptions(): void
+    {
+        $this->assertErrorsOnLines('RoleNamingNotExempt.inc', [17, 22]);
+    }
+
+    /**
+     * Only the first matching forbidden suffix is reported for a class.
+     *
+     * @return void
+     */
+    public function testReportsOneForbiddenSuffixPerClass(): void
+    {
+        $this->overrides = ['forbidSuffix' => ['Model' => 'DataModel,Model']];
+
+        $this->assertErrorMessagesOnLines('RoleNamingForbiddenOverride.inc', [
+            7 => ['A Model class must not be named with a "DataModel" suffix; Laravel names it bare.'],
+        ]);
+    }
+
+    /**
+     * The docblock escape hatch reads only the docblock attached to the class:
+     * a following bare class is still flagged, and an implements-only identity
+     * still resolves its role.
+     *
+     * @return void
+     */
+    public function testScopesTheDocblockExemptionToItsOwnClass(): void
+    {
+        $this->assertErrorsOnLines('RoleNamingDocblockExempt.inc', [15, 19]);
     }
 
     /**

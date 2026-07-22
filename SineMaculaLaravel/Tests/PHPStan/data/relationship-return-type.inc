@@ -31,4 +31,11 @@ class User extends Model
     {
         return $this->title;
     }
+
+    public function viaBuilder()
+    {
+        $builder = new PostBuilder();
+
+        return $builder->hasMany(Post::class);
+    }
 }

@@ -23,8 +23,9 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireFormRequestRulesRule;
 final class RequireFormRequestRulesRuleTest extends RuleTestCase
 {
     /**
-     * A concrete form request without rules() is flagged; one with rules(), an
-     * abstract base request and a class outside Http\Requests are not.
+     * A concrete form request without rules() is flagged; one with rules() in
+     * any case, an abstract base request and a class outside Http\Requests are
+     * not.
      *
      * @return void
      */

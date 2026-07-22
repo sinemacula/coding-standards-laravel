@@ -17,6 +17,10 @@ class DebugExample
         $collection->dump();
         Collection::dump();
         $this->dump($value);
+
+        DD($value);
+        sprintf('%s', $value);
+        $alias = dd;
     }
 
     private function dump(mixed $value): void

@@ -32,6 +32,11 @@ class User extends Model
     {
         return '';
     }
+
+    public function applyDiscount(int $amount): int
+    {
+        return $amount;
+    }
 }
 
 class ProfileService

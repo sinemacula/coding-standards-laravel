@@ -14,6 +14,8 @@ return new class extends Migration
         DB::statement('set foreign_key_checks = 0');
 
         Schema::hasTable('blog_posts');
+        Schema::hasTable('CamelCheck');
+        Legacy::drop('BadTable');
 
         Schema::create('blogPosts', function (Blueprint $table): void {
             $table->id();
@@ -25,12 +27,18 @@ return new class extends Migration
             $table->enum('status', ['Active', 'Inactive']);
             $table->string('title')->default('Hello World');
             $table->index(['authorId', 'created_at']);
+            $table->primary(['BadOne', 'BadTwo']);
 
             $audit = 'updated_at';
             $table->index(['user_id', $audit]);
+            $table->unique([$audit, 'BadUnique']);
+            $table->unique(['author_id', 'BadIndex']);
         });
 
-        Schema::rename('oldName', 'new_name');
+        Schema::rename('OldName', 'NewThings');
+
+        $archive = 'legacy_logs';
+        Schema::drop($archive);
 
         Schema::table('comments', function (Blueprint $table): void {
             $table->boolean('is_approved');

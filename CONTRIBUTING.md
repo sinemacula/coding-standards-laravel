@@ -72,7 +72,8 @@ vendor/bin/phpunit --filter testDetectsViolations SineMaculaLaravel/Tests/Sniffs
 
 ### Standards
 
-- New sniffs and PHPStan rules ship with tests and maintain 100% line coverage
+- New sniffs and PHPStan rules ship with tests and maintain 100% line coverage; the package's mutation-testing gate
+  (`composer test:mutation`) is the enforced floor
 - Sniffs are token-based and must not reference Laravel classes (they see tokens, not types)
 - PHPStan rules are pure AST/reflection; this package does not require `laravel/framework`, so rules cannot reflect on
   `Illuminate\...` types directly

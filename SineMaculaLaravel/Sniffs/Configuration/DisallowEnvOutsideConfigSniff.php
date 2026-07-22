@@ -16,8 +16,8 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsTestClasses;
  * other than a `config/` file means the value silently disappears in
  * production. Everywhere else must read through `config()`. Test code (a file
  * under `tests/`, a `*Test` class, or a testbench `*TestCase`) is exempt, since
- * config caching never happens there. Method and static calls named `env()`
- * are not flagged.
+ * config caching never happens there. Method and static calls named `env()` are
+ * not flagged.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited

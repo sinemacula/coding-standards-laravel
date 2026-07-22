@@ -16,8 +16,8 @@ use PHPUnit\Framework\TestCase;
  *
  * Building the real standard proves the ruleset wiring: it sets the base
  * RequireReadonlyPublicProperty sniff's ignoredParentClasses to the model
- * bases, so a model's public magic properties are not flagged while an
- * ordinary class still is.
+ * bases, so a model's public magic properties are not flagged while an ordinary
+ * class still is.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited

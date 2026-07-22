@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/sinemacula/coding-standards-laravel/compare/v1.3.0...v1.3.1) (2026-07-22)
+
+
+### Bug Fixes
+
+* resolve braced namespaces and comment-separated instantiations ([#62](https://github.com/sinemacula/coding-standards-laravel/issues/62)) ([9f70a8d](https://github.com/sinemacula/coding-standards-laravel/commit/9f70a8d9ec17f0315267a0a11d7cc11e49c860bd))
+
 ## [1.3.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.2.1...v1.3.0) (2026-06-23)
 
 

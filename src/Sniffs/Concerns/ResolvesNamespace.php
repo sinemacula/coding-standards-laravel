@@ -37,8 +37,9 @@ trait ResolvesNamespace
 
         // PHP_CodeSniffer 3.x splits a namespace into T_STRING/T_NS_SEPARATOR
         // tokens, but 4.x keeps it as one T_NAME_QUALIFIED token, so both forms
-        // are collected to rebuild the name.
-        for ($i = $namespace + 1; isset($tokens[$i]) && $tokens[$i]['code'] !== T_SEMICOLON; $i++) {
+        // are collected to rebuild the name. The declaration ends at `;` or, in
+        // the braced syntax, at `{`.
+        for ($i = $namespace; isset($tokens[$i]) && !in_array($tokens[$i]['code'], [T_SEMICOLON, T_OPEN_CURLY_BRACKET], true); $i++) {
             if (!in_array($tokens[$i]['code'], $parts, true)) {
                 continue;
             }

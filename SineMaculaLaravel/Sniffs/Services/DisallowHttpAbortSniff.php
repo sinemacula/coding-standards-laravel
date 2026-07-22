@@ -6,6 +6,7 @@ namespace SineMaculaLaravel\Sniffs\Services;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Util\Tokens;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsFunctionCalls;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
 
@@ -100,7 +101,7 @@ final class DisallowHttpAbortSniff implements Sniff
         $tokens = $phpcsFile->getTokens();
         $class  = '';
 
-        for ($i = $phpcsFile->findNext(T_WHITESPACE, $stackPtr + 1, null, true); $i !== false; $i++) {
+        for ($i = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true); $i !== false; $i++) {
             $code = $tokens[$i]['code'];
 
             if (in_array($code, [T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED], true)) {

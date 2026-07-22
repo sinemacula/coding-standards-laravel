@@ -11,11 +11,11 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
 /**
  * Require a class to follow its role's naming convention.
  *
- * The role is resolved by identity (extends/implements/uses/attribute) and
- * then by location. A role names in one of three modes: require a suffix
+ * The role is resolved by identity (extends/implements/uses/attribute) and then
+ * by location. A role names in one of three modes: require a suffix
  * (Controller, ServiceProvider, FormRequest as `Request`, Resource, Policy),
- * forbid a suffix (a Model must not end in `Model` or `Entity`), or free -
- * the idiomatic default for jobs, listeners, events, mailables, middleware,
+ * forbid a suffix (a Model must not end in `Model` or `Entity`), or free - the
+ * idiomatic default for jobs, listeners, events, mailables, middleware,
  * commands, casts and rules, which stay bare. Classes with no role are left
  * alone; both maps are public so a ruleset can tighten or relax a role.
  *

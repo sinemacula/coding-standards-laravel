@@ -9,12 +9,12 @@ use PHP_CodeSniffer\Files\File;
 /**
  * Resolve the Laravel "role" a class plays, for the structure sniffs.
  *
- * Detection is identity-first: a class is matched to at most one role by
- * what it extends, implements, uses or is attributed with - resolved against
- * a configurable list of identity short names - and only then by a
- * tightly-scoped location fallback (concrete classes, recursive, minus exempt
- * sub-namespaces). A class with neither is unconstrained. An `@role-exempt`
- * docblock tag or a `#[NotARole]` attribute opts a class out entirely.
+ * Detection is identity-first: a class is matched to at most one role by what
+ * it extends, implements, uses or is attributed with - resolved against a
+ * configurable list of identity short names - and only then by a tightly-scoped
+ * location fallback (concrete classes, recursive, minus exempt sub-namespaces).
+ * A class with neither is unconstrained. An `@role-exempt` docblock tag or a
+ * `#[NotARole]` attribute opts a class out entirely.
  *
  * The role table and every list are public properties so a consuming ruleset
  * can override or extend them.

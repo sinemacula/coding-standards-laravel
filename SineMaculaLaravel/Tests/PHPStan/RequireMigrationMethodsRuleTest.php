@@ -23,8 +23,8 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireMigrationMethodsRule;
 final class RequireMigrationMethodsRuleTest extends RuleTestCase
 {
     /**
-     * A migration missing up() or down() is flagged; a complete migration and
-     * a non-migration are not.
+     * A migration missing up() or down() is flagged; a complete migration and a
+     * non-migration are not.
      *
      * @return void
      */

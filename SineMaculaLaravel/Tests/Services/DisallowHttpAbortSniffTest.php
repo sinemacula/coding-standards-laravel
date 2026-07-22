@@ -51,15 +51,25 @@ final class DisallowHttpAbortSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * An uppercase abort call and a fully qualified HTTP exception are
-     * flagged; a same-named method call and a `new` separated from its class
-     * only by a comment are not.
+     * An uppercase abort call, a fully qualified HTTP exception and a `new`
+     * separated from its class only by a comment are flagged; a same-named
+     * method call is not.
      *
      * @return void
      */
     public function testFlagsAbortEdgeCases(): void
     {
-        $this->assertErrorsOnLines('DisallowHttpAbortEdgeCases.inc', [9, 12]);
+        $this->assertErrorsOnLines('DisallowHttpAbortEdgeCases.inc', [9, 12, 13]);
+    }
+
+    /**
+     * A namespace declared with the braced syntax is still resolved.
+     *
+     * @return void
+     */
+    public function testFlagsAbortsInBracedNamespaces(): void
+    {
+        $this->assertErrorsOnLines('DisallowHttpAbortBracedNamespace.inc', [8]);
     }
 
     /**

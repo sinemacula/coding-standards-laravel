@@ -22,3 +22,11 @@ class Waldo extends Controller
 class Quux extends Controller
 {
 }
+
+/**
+ * @internal
+ */
+#[SomeMeta(2)]
+class Fred extends Controller
+{
+}

@@ -6,6 +6,7 @@ namespace SineMaculaLaravel\Tests\Structure;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversTrait;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesImports;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
 use SineMaculaLaravel\Sniffs\Structure\RequireRoleDirectorySniff;
@@ -20,6 +21,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
  * @internal
  */
 #[CoversClass(RequireRoleDirectorySniff::class)]
+#[CoversTrait(ResolvesImports::class)]
 #[CoversTrait(ResolvesNamespace::class)]
 #[CoversTrait(ResolvesRole::class)]
 final class RequireRoleDirectorySniffTest extends AbstractSniffTestCase
@@ -84,6 +86,43 @@ final class RequireRoleDirectorySniffTest extends AbstractSniffTestCase
     public function testRespectsTheEscapeHatch(): void
     {
         $this->assertErrorsOnLines('RoleDirectoryExempt.inc', []);
+    }
+
+    /**
+     * An idiomatic event using the Events `Dispatchable` trait is not a Job:
+     * the qualified Job identity resolves through the file's imports, so the
+     * short-name collision with the Bus trait never fires.
+     *
+     * @return void
+     */
+    public function testLeavesEventsDistinctFromJobs(): void
+    {
+        $this->assertErrorsOnLines('RoleDirectoryEventDispatch.inc', []);
+    }
+
+    /**
+     * A sync job is identified through every import shape - plain, aliased,
+     * grouped, namespace-headed and fully-qualified - while the aliased event
+     * trait, a relative unimported name, a same-suffix segment (MiniBus), and
+     * function/constant imports of the colliding name all stay out of the Job
+     * identity.
+     *
+     * @return void
+     */
+    public function testResolvesJobIdentityThroughImports(): void
+    {
+        $this->assertErrorsOnLines('RoleDirectorySyncJob.inc', [15, 20, 25, 30, 35]);
+    }
+
+    /**
+     * A trait `use` inside an earlier class body never leaks into the import
+     * map of a later class, and an import between classes still resolves.
+     *
+     * @return void
+     */
+    public function testKeepsClassBodyUseOutOfTheImportMap(): void
+    {
+        $this->assertErrorsOnLines('RoleDirectoryTraitUseIsolation.inc', [5]);
     }
 
     /**

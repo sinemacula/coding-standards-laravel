@@ -50,6 +50,17 @@ final class RequireFormRequestRulesRuleTest extends RuleTestCase
     }
 
     /**
+     * A class declared under a tests/ directory is never flagged, even in a
+     * namespace mirroring Http\Requests.
+     *
+     * @return void
+     */
+    public function testIgnoresClassesDeclaredInTests(): void
+    {
+        $this->analyse([__DIR__ . '/data/tests/form-request-tests.inc'], []);
+    }
+
+    /**
      * Provide the rule under test.
      *
      * @return \PHPStan\Rules\Rule<\PhpParser\Node\Stmt\Class_>

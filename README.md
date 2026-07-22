@@ -99,9 +99,16 @@ leaves bare, and the idiomatic bare `User` model is honoured (the `Model` role's
 `Authenticatable` and `Pivot`). Every list - `roleIdentities`, `roleLocations`, `requireSuffix`,
 `forbidSuffix`, `exemptNamespaces`, `moduleRootRoles` - is a public sniff property a ruleset can
 override. Identity is matched on the immediate base by short name, so a project's own intermediate
-base (e.g. a `BaseController`) is supported by adding it to `roleIdentities`.
+base (e.g. a `BaseController`) is supported by adding it to `roleIdentities`. An identity entry
+containing `\` instead matches the qualified name resolved through the file's imports, which keeps
+same-named traits distinct: the `Job` role's `Bus\Dispatchable` entry identifies a sync job without
+ever matching the Events `Dispatchable` an idiomatic event uses. Test classes - by name, test-case
+base, or a `tests/` path - play no role at all, so a test mirroring a role namespace
+(`Tests\Unit\Policies\...`) is never constrained.
 
-Opt a class out entirely with an `@role-exempt` docblock tag or a `#[NotARole]` attribute.
+Opt a class out entirely with an `@role-exempt` docblock tag or a `#[NotARole]` attribute (matched
+by short name; `SineMacula\CodingStandardsLaravel\Attributes\NotARole` ships so the reference also
+resolves under static analysis). Both hatches work with other attributes present on the class.
 
 #### Type hints
 
@@ -135,7 +142,7 @@ standard sets the base sniff's `ignoredParentClasses` to the model bases (`Model
 | `sineMaculaLaravel.modelAttribute` | Prefer a model attribute over its legacy property/method form, for the attributes a project enables (default `#[Table]`/`#[Fillable]`/`#[Hidden]`, configurable via `sineMaculaLaravel.modelAttributes`). The 13.2-only attributes are enforced only when the project's Laravel floor reaches 13.2 - taken from `sineMaculaLaravel.minLaravelVersion` or detected from the nearest `composer.json`; below that, or when undetectable, the property form is left alone. |
 | `sineMaculaLaravel.migrationMethods` | A migration defines both `up()` and `down()`. |
 | `sineMaculaLaravel.schemaNaming` | Table and column names in a migration use snake_case. Inspects the literal name arguments of the `Schema` table calls and the Blueprint column/index methods (value arguments and dynamic names are left alone). Digits are allowed (`line_1`, `oauth2`); only casing is enforced. |
-| `sineMaculaLaravel.formRequestRules` | A form request (under `Http\Requests`) defines a `rules()` method. |
+| `sineMaculaLaravel.formRequestRules` | A form request (under `Http\Requests`) defines a `rules()` method. Classes declared in tests, where the namespace merely mirrors the production tree, are exempt. |
 | `sineMaculaLaravel.factoryTimestamps` | A factory `definition()` must not set `created_at` / `updated_at`. |
 | `sineMaculaLaravel.resourceFieldNaming` | Field keys in a resource's `toArray()` result use snake_case, nested arrays included. Inspects the string-literal keys of the array returned directly from `toArray()` on a `JsonResource`; computed keys, a non-literal return, and non-resource classes are left alone. Digits are allowed (`line_1`); only casing is enforced. |
 

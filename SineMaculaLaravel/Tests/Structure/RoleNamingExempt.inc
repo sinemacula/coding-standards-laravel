@@ -47,3 +47,25 @@ class Adjacent extends Controller
 class Corge extends Controller
 {
 }
+
+/**
+ * @role-exempt
+ */
+#[SomeMeta(4)]
+final class Attributed extends Controller
+{
+}
+
+/**
+ * @role-exempt
+ */
+#[SomeMeta(5)]
+#[OtherMeta]
+abstract class Stacked extends Controller
+{
+}
+
+#[\SineMacula\CodingStandardsLaravel\Attributes\NotARole]
+class Qualified extends Controller
+{
+}

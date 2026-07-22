@@ -25,11 +25,22 @@ trait ResolvesNamespace
      */
     private function isInNamespacePath(File $phpcsFile, string $path): bool
     {
+        return str_contains('\\' . $this->namespaceName($phpcsFile) . '\\', '\\' . $path . '\\');
+    }
+
+    /**
+     * Resolve the file's namespace name, or an empty string without one.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @return string
+     */
+    private function namespaceName(File $phpcsFile): string
+    {
         $tokens    = $phpcsFile->getTokens();
         $namespace = $phpcsFile->findNext(T_NAMESPACE, 0);
 
         if ($namespace === false) {
-            return false;
+            return '';
         }
 
         $name  = '';
@@ -47,6 +58,6 @@ trait ResolvesNamespace
             $name .= $tokens[$i]['content'];
         }
 
-        return str_contains('\\' . trim($name, '\\') . '\\', '\\' . $path . '\\');
+        return trim($name, '\\');
     }
 }

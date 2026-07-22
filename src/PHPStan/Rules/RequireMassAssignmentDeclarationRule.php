@@ -9,6 +9,7 @@ use PhpParser\Node\Stmt\Class_;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
+use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsTestFiles;
 
 /**
  * Require an explicit mass-assignment declaration on Eloquent models.
@@ -27,6 +28,8 @@ use PHPStan\Rules\RuleErrorBuilder;
  */
 final class RequireMassAssignmentDeclarationRule implements Rule
 {
+    use DetectsTestFiles;
+
     /**
      * The node type this rule inspects.
      *
@@ -60,17 +63,6 @@ final class RequireMassAssignmentDeclarationRule implements Rule
         return [RuleErrorBuilder::message(
             'Model must declare mass assignment explicitly via $fillable or $guarded.',
         )->identifier('sineMaculaLaravel.massAssignment')->build()];
-    }
-
-    /**
-     * Whether the analysed file lives under a tests/ directory.
-     *
-     * @param  \PHPStan\Analyser\Scope  $scope
-     * @return bool
-     */
-    private function isTestFile(Scope $scope): bool
-    {
-        return str_contains(str_replace('\\', '/', $scope->getFile()), '/tests/');
     }
 
     /**

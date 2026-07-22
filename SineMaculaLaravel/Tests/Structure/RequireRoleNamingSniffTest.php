@@ -6,6 +6,7 @@ namespace SineMaculaLaravel\Tests\Structure;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversTrait;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesImports;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
 use SineMaculaLaravel\Sniffs\Structure\RequireRoleNamingSniff;
@@ -20,6 +21,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
  * @internal
  */
 #[CoversClass(RequireRoleNamingSniff::class)]
+#[CoversTrait(ResolvesImports::class)]
 #[CoversTrait(ResolvesNamespace::class)]
 #[CoversTrait(ResolvesRole::class)]
 final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
@@ -140,14 +142,36 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A docblock without the exempt tag, or an attribute argument merely named
-     * NotARole, does not opt a class out.
+     * A docblock without the exempt tag - attributed or not - or an attribute
+     * argument merely named NotARole, does not opt a class out.
      *
      * @return void
      */
     public function testFlagsClassesThatOnlyResembleExemptions(): void
     {
-        $this->assertErrorsOnLines('RoleNamingNotExempt.inc', [17, 22]);
+        $this->assertErrorsOnLines('RoleNamingNotExempt.inc', [17, 22, 30]);
+    }
+
+    /**
+     * A test class - by name or by its test-case base - plays no role even in a
+     * namespace mirroring a role location; a non-test helper beside it is still
+     * located.
+     *
+     * @return void
+     */
+    public function testExemptsTestClassesFromRoles(): void
+    {
+        $this->assertErrorsOnLines('RoleNamingTestMirror.inc', [15]);
+    }
+
+    /**
+     * Every class in a file under a tests/ directory plays no role.
+     *
+     * @return void
+     */
+    public function testExemptsFilesUnderATestsDirectory(): void
+    {
+        $this->assertErrorsOnLines('tests/RoleNamingTestPath.inc', []);
     }
 
     /**

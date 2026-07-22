@@ -28,9 +28,9 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
     private array $overrides = [];
 
     /**
-     * A class is named by its role: a controller must end with `Controller`,
-     * a model must not end with `Model`/`Entity`, and free roles (commands,
-     * jobs, mailables) carry no constraint. Detection is by identity.
+     * A class is named by its role: a controller must end with `Controller`, a
+     * model must not end with `Model`/`Entity`, and free roles (commands, jobs,
+     * mailables) carry no constraint. Detection is by identity.
      *
      * @return void
      */

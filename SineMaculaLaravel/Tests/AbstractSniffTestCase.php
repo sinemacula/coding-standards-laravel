@@ -13,10 +13,10 @@ use PHPUnit\Framework\TestCase;
  * Base test case for Sine Macula Laravel PHP_CodeSniffer sniffs.
  *
  * A concrete test is named "<SniffName>SniffTest" and lives under
- * SineMaculaLaravel/Tests/<Category>/ alongside its fixtures. The sniff
- * under test, its file path and its dotted code are all derived from the
- * test class by convention, so a sniff test is just a fixture plus one
- * assertion per scenario.
+ * SineMaculaLaravel/Tests/<Category>/ alongside its fixtures. The sniff under
+ * test, its file path and its dotted code are all derived from the test class
+ * by convention, so a sniff test is just a fixture plus one assertion per
+ * scenario.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited

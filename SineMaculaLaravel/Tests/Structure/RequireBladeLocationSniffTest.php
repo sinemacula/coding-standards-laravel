@@ -30,6 +30,50 @@ final class RequireBladeLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
+     * A Blade template that opens with a PHP tag is still flagged.
+     *
+     * @return void
+     */
+    public function testFlagsBladeStartingWithPhpTag(): void
+    {
+        $this->assertErrorsOnLines('script.blade.inc', [1]);
+    }
+
+    /**
+     * A Blade template under a directory whose path merely ends in a views
+     * path is flagged.
+     *
+     * @return void
+     */
+    public function testFlagsBladeUnderSuffixedViewsPath(): void
+    {
+        $this->assertErrorsOnLines('resources/notresources/views/template.blade.inc', [1]);
+    }
+
+    /**
+     * A Blade template under a directory whose name merely starts with views
+     * is flagged.
+     *
+     * @return void
+     */
+    public function testFlagsBladeUnderPrefixedViewsDirectory(): void
+    {
+        $this->assertErrorsOnLines('resources/viewsmore/template.blade.inc', [1]);
+    }
+
+    /**
+     * The misplaced error names the first allowed directory.
+     *
+     * @return void
+     */
+    public function testReportsFirstAllowedDirectoryInMessage(): void
+    {
+        $this->assertErrorMessagesOnLines('template.blade.inc', [
+            1 => ['A Blade template must live under a "resources/views" directory.'],
+        ]);
+    }
+
+    /**
      * A Blade template under resources/views is not flagged.
      *
      * @return void

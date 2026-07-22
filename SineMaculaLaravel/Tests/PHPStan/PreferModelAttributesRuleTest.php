@@ -7,6 +7,8 @@ namespace SineMaculaLaravel\Tests\PHPStan;
 use PHPStan\Rules\Rule;
 use PHPStan\Testing\RuleTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
+use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsLaravelVersion;
 use SineMacula\CodingStandardsLaravel\PHPStan\Rules\PreferModelAttributesRule;
 
 /**
@@ -20,6 +22,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\PreferModelAttributesRule;
  * @internal
  */
 #[CoversClass(PreferModelAttributesRule::class)]
+#[CoversTrait(DetectsLaravelVersion::class)]
 final class PreferModelAttributesRuleTest extends RuleTestCase
 {
     /** @var string The expected-property error message. */
@@ -28,16 +31,17 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     /** @var string A model whose composer.json floor is below 13.2. */
     private const string UNSUPPORTED_MODEL = __DIR__ . '/data/version/unsupported/model.inc';
 
-    /** @var array<int, string> Attributes the rule under test mandates. */
-    private array $attributes = ['Table', 'Fillable', 'Hidden'];
+    /** @var array<int, string>|null Attributes the rule under test mandates, or null for the constructor default. */
+    private ?array $attributes = null;
 
     /** @var string Explicit Laravel floor for the rule under test. */
     private string $minLaravelVersion = '';
 
     /**
-     * On a supporting version the default expressive set flags
-     * $table/$fillable/$hidden; a $hidden over the limit, the disabled
-     * attributes and non-models are not.
+     * On a supporting version the constructor's default expressive set flags
+     * $table/$fillable/$hidden - including a $fillable declared alongside an
+     * exempt property and a $hidden at exactly the field limit; a $hidden over
+     * the limit, the disabled attributes and non-models are not.
      *
      * @return void
      */
@@ -49,6 +53,9 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
             [self::TABLE_ERROR, 9],
             ['Use the #[Hidden] attribute instead of the $hidden property.', 11],
             ['Use the #[Fillable] attribute instead of the $fillable property.', 15],
+            ['Use the #[Fillable] attribute instead of the $fillable property.', 53],
+            ['Use the #[Fillable] attribute instead of the $fillable property.', 66],
+            ['Use the #[Hidden] attribute instead of the $hidden property.', 71],
         ]);
     }
 
@@ -67,6 +74,8 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
             ['Use the #[UseFactory] attribute instead of overriding the newFactory() method.', 17],
             ['Use the #[CollectedBy] attribute instead of overriding the newCollection() method.', 28],
             ['Use the #[UseEloquentBuilder] attribute instead of overriding the newEloquentBuilder() method.', 32],
+            ['Use the #[Touches] attribute instead of the $touches property.', 53],
+            ['Use the #[CollectedBy] attribute instead of overriding the newCollection() method.', 59],
         ]);
     }
 
@@ -103,6 +112,19 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     public function testFallsBackToLaravelFramework(): void
     {
         $this->analyse([__DIR__ . '/data/version/framework/model.inc'], [
+            [self::TABLE_ERROR, 9],
+        ]);
+    }
+
+    /**
+     * When both constraints are declared, illuminate/database wins over
+     * laravel/framework - here it supplies the supporting floor.
+     *
+     * @return void
+     */
+    public function testPrefersIlluminateDatabaseOverFramework(): void
+    {
+        $this->analyse([__DIR__ . '/data/version/both/model.inc'], [
             [self::TABLE_ERROR, 9],
         ]);
     }
@@ -165,6 +187,10 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     #[\Override]
     protected function getRule(): Rule
     {
+        if ($this->attributes === null) {
+            return new PreferModelAttributesRule(minLaravelVersion: $this->minLaravelVersion);
+        }
+
         return new PreferModelAttributesRule($this->attributes, $this->minLaravelVersion);
     }
 }

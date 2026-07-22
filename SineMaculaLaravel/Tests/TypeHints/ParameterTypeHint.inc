@@ -36,3 +36,10 @@ trait ThrottleRequestsTrait
         return '';
     }
 }
+
+class MixedParams
+{
+    public function combine(int $first, $second): void
+    {
+    }
+}

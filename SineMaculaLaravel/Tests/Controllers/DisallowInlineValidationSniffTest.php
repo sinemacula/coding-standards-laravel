@@ -29,4 +29,15 @@ final class DisallowInlineValidationSniffTest extends AbstractSniffTestCase
     {
         $this->assertErrorsOnLines('DisallowInlineValidation.inc', [11, 12, 13]);
     }
+
+    /**
+     * Only Validator::make() is flagged on the Validator facade; another
+     * static Validator call in the same controller is not.
+     *
+     * @return void
+     */
+    public function testFlagsOnlyMakeOnTheValidatorFacade(): void
+    {
+        $this->assertErrorsOnLines('DisallowInlineValidationStatics.inc', [12]);
+    }
 }

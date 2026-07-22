@@ -60,3 +60,26 @@ function appHelperOutsideClass(): void
 {
     $x = app(Foo::class);
 }
+
+class MiscService
+{
+    public function methodNamedResolve(): void
+    {
+        $this->resolve('thing');
+    }
+
+    public function facadeEnvironment(): void
+    {
+        App::environment('production');
+    }
+
+    public function facadeMakeWith(): void
+    {
+        $logger = App::makeWith(Logger::class, ['level' => 'debug']);
+    }
+
+    public function propertyNamedApp(Container $container): void
+    {
+        $container->App->make(Logger::class);
+    }
+}

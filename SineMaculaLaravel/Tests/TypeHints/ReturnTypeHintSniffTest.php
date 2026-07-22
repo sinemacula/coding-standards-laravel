@@ -5,6 +5,8 @@ declare(strict_types = 1);
 namespace SineMaculaLaravel\Tests\TypeHints;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsAttributes;
 use SineMaculaLaravel\Sniffs\TypeHints\ReturnTypeHintSniff;
 use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 
@@ -17,6 +19,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
  * @internal
  */
 #[CoversClass(ReturnTypeHintSniff::class)]
+#[CoversTrait(ReadsAttributes::class)]
 final class ReturnTypeHintSniffTest extends AbstractSniffTestCase
 {
     /**
@@ -28,5 +31,33 @@ final class ReturnTypeHintSniffTest extends AbstractSniffTestCase
     public function testFlagsMissingReturnTypesExceptConstructorsAndOverrides(): void
     {
         $this->assertErrorsOnLines('ReturnTypeHint.inc', [7, 26, 30]);
+    }
+
+    /**
+     * The error names the offending declaration: a method or function by name
+     * with parentheses, a closure as "Closure".
+     *
+     * @return void
+     */
+    public function testRendersDeclarationNameInErrorMessage(): void
+    {
+        $this->assertErrorMessagesOnLines('ReturnTypeHint.inc', [
+            7  => ['compute() must declare a native return type hint.'],
+            26 => ['helper() must declare a native return type hint.'],
+            30 => ['Closure must declare a native return type hint.'],
+        ]);
+    }
+
+    /**
+     * #[\Override] is recognised in every written form: unqualified, stacked
+     * across groups (adjacent or not), grouped after another attribute with
+     * arguments, flush against the declaration, and on a closure inside a call.
+     * An Override name inside another attribute's arguments does not count.
+     *
+     * @return void
+     */
+    public function testReadsOverrideAcrossAttributeForms(): void
+    {
+        $this->assertErrorsOnLines('ReturnTypeHintAttributes.inc', [29]);
     }
 }

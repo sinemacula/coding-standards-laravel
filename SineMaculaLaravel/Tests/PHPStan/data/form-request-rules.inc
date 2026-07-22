@@ -21,3 +21,11 @@ class UpdateUserRequest
 abstract class BaseRequest
 {
 }
+
+class DeleteUserRequest
+{
+    public function Rules(): array
+    {
+        return [];
+    }
+}

@@ -23,8 +23,9 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireMigrationMethodsRule;
 final class RequireMigrationMethodsRuleTest extends RuleTestCase
 {
     /**
-     * A migration missing up() or down() is flagged; a complete migration and
-     * a non-migration are not.
+     * A migration missing up() or down() is flagged (an empty one for both);
+     * a complete migration, one whose method names differ only by case, and a
+     * non-migration are not.
      *
      * @return void
      */
@@ -38,6 +39,14 @@ final class RequireMigrationMethodsRuleTest extends RuleTestCase
             [
                 'A migration must define the up() method.',
                 25,
+            ],
+            [
+                'A migration must define the up() method.',
+                50,
+            ],
+            [
+                'A migration must define the down() method.',
+                50,
             ],
         ]);
     }

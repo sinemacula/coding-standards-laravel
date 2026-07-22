@@ -2,6 +2,7 @@
 
 [![Latest Stable Version](https://img.shields.io/packagist/v/sinemacula/coding-standards-laravel.svg)](https://packagist.org/packages/sinemacula/coding-standards-laravel)
 [![Build Status](https://github.com/sinemacula/coding-standards-laravel/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/sinemacula/coding-standards-laravel/actions/workflows/tests.yml)
+[![Quality Gates](https://github.com/sinemacula/coding-standards-laravel/actions/workflows/quality-gates.yml/badge.svg?branch=master)](https://github.com/sinemacula/coding-standards-laravel/actions/workflows/quality-gates.yml)
 [![Maintainability](https://qlty.sh/gh/sinemacula/projects/coding-standards-laravel/maintainability.svg)](https://qlty.sh/gh/sinemacula/projects/coding-standards-laravel)
 [![Code Coverage](https://qlty.sh/gh/sinemacula/projects/coding-standards-laravel/coverage.svg)](https://qlty.sh/gh/sinemacula/projects/coding-standards-laravel)
 [![Total Downloads](https://img.shields.io/packagist/dt/sinemacula/coding-standards-laravel.svg)](https://packagist.org/packages/sinemacula/coding-standards-laravel)
@@ -145,12 +146,14 @@ standard sets the base sniff's `ignoredParentClasses` to the model bases (`Model
 ## Testing
 
 ```bash
-composer test           # PHPUnit sniff/rule suite
-composer test:coverage  # suite with Clover coverage output (requires Xdebug)
-composer analyse        # PHPStan over the package's own sniffs and rules
-composer check          # static analysis and lint via qlty
-composer format         # format via qlty
-composer smells         # duplication / complexity smells via qlty
+composer test                # PHPUnit sniff/rule suite
+composer test:coverage       # suite with Clover coverage output (requires Xdebug)
+composer test:mutation       # Infection mutation gate (min MSI 90)
+composer test:mutation:full  # full mutation suite without thresholds
+composer analyse             # PHPStan over the package's own sniffs and rules
+composer check               # static analysis and lint via qlty
+composer format              # format via qlty
+composer smells              # duplication / complexity smells via qlty
 ```
 
 ## Changelog

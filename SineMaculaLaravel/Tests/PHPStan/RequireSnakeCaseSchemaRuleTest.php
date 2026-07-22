@@ -31,12 +31,17 @@ final class RequireSnakeCaseSchemaRuleTest extends RuleTestCase
     public function testFlagsNonSnakeCaseNames(): void
     {
         $this->analyse([__DIR__ . '/data/snake-case-schema.inc'], [
-            ['Table name "blogPosts" must use snake_case.', 18],
-            ['Column name "firstName" must use snake_case.', 21],
-            ['Column name "authorId" must use snake_case.', 23],
-            ['Column name "authorId" must use snake_case.', 27],
-            ['Table name "oldName" must use snake_case.', 33],
-            ['Table name "blogPosts" must use snake_case.', 42],
+            ['Table name "blogPosts" must use snake_case.', 20],
+            ['Column name "firstName" must use snake_case.', 23],
+            ['Column name "authorId" must use snake_case.', 25],
+            ['Column name "authorId" must use snake_case.', 29],
+            ['Column name "BadOne" must use snake_case.', 30],
+            ['Column name "BadTwo" must use snake_case.', 30],
+            ['Column name "BadUnique" must use snake_case.', 34],
+            ['Column name "BadIndex" must use snake_case.', 35],
+            ['Table name "OldName" must use snake_case.', 38],
+            ['Table name "NewThings" must use snake_case.', 38],
+            ['Table name "blogPosts" must use snake_case.', 50],
         ]);
     }
 

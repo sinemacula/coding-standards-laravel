@@ -1,0 +1,6 @@
+{
+    "require": {
+        "illuminate/database": "^13.2",
+        "laravel/framework": "^12.0"
+    }
+}

@@ -5,6 +5,8 @@ declare(strict_types = 1);
 namespace SineMaculaLaravel\Tests\Configuration;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsTestClasses;
 use SineMaculaLaravel\Sniffs\Configuration\DisallowEnvOutsideConfigSniff;
 use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 
@@ -17,17 +19,18 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
  * @internal
  */
 #[CoversClass(DisallowEnvOutsideConfigSniff::class)]
+#[CoversTrait(DetectsTestClasses::class)]
 final class DisallowEnvOutsideConfigSniffTest extends AbstractSniffTestCase
 {
     /**
-     * env() is flagged outside config/, while config() and same-named method
-     * calls are not.
+     * env() is flagged outside config/ in any letter case, while config() and
+     * same-named method calls are not.
      *
      * @return void
      */
     public function testFlagsEnvOutsideConfigFiles(): void
     {
-        $this->assertErrorsOnLines('DisallowEnvOutsideConfig.inc', [11]);
+        $this->assertErrorsOnLines('DisallowEnvOutsideConfig.inc', [11, 14]);
     }
 
     /**
@@ -38,6 +41,25 @@ final class DisallowEnvOutsideConfigSniffTest extends AbstractSniffTestCase
     public function testAllowsEnvInsideConfigFiles(): void
     {
         $this->assertErrorsOnLines('config/EnvInConfig.inc', []);
+    }
+
+    /**
+     * env() is allowed in a config/ path written with Windows separators.
+     *
+     * @return void
+     */
+    public function testAllowsEnvInAWindowsStyleConfigPath(): void
+    {
+        // A literal backslash in the fixture name simulates a Windows path.
+        $fixture = 'winpath\config\EnvBackslashConfig.inc';
+
+        file_put_contents(__DIR__ . '/' . $fixture, "<?php\n\n\$value = env('APP_ENV');\n");
+
+        try {
+            $this->assertErrorsOnLines($fixture, []);
+        } finally {
+            unlink(__DIR__ . '/' . $fixture);
+        }
     }
 
     /**
@@ -61,6 +83,16 @@ final class DisallowEnvOutsideConfigSniffTest extends AbstractSniffTestCase
     }
 
     /**
+     * env() is allowed in a test class declared directly after the open tag.
+     *
+     * @return void
+     */
+    public function testAllowsEnvInATestClassOnTheOpenTagLine(): void
+    {
+        $this->assertErrorsOnLines('EnvImmediateTestClass.inc', []);
+    }
+
+    /**
      * env() is allowed in any file that lives under a tests/ directory.
      *
      * @return void
@@ -68,5 +100,34 @@ final class DisallowEnvOutsideConfigSniffTest extends AbstractSniffTestCase
     public function testAllowsEnvUnderTheTestsDirectory(): void
     {
         $this->assertErrorsOnLines('tests/EnvUnderTestsDir.inc', []);
+    }
+
+    /**
+     * env() is allowed in a classless script under a tests/ directory.
+     *
+     * @return void
+     */
+    public function testAllowsEnvInAClasslessFileUnderTests(): void
+    {
+        $this->assertErrorsOnLines('tests/EnvStatementsUnderTestsDir.inc', []);
+    }
+
+    /**
+     * env() is allowed in a tests/ path written with Windows separators.
+     *
+     * @return void
+     */
+    public function testAllowsEnvInAWindowsStyleTestsPath(): void
+    {
+        // A literal backslash in the fixture name simulates a Windows path.
+        $fixture = 'winpath\tests\EnvBackslashTests.inc';
+
+        file_put_contents(__DIR__ . '/' . $fixture, "<?php\n\n\$value = env('APP_ENV');\n");
+
+        try {
+            $this->assertErrorsOnLines($fixture, []);
+        } finally {
+            unlink(__DIR__ . '/' . $fixture);
+        }
     }
 }

@@ -41,6 +41,32 @@ abstract class AbstractSniffTestCase extends TestCase
     }
 
     /**
+     * Assert that the sniff reports exactly the given error messages, keyed by
+     * line number.
+     *
+     * @param  string  $fixture
+     * @param  array<int, list<string>>  $expectedMessages
+     * @return void
+     */
+    protected function assertErrorMessagesOnLines(string $fixture, array $expectedMessages): void
+    {
+        $actualMessages = [];
+
+        foreach ($this->process($fixture)->getErrors() as $line => $columns) {
+            foreach ($columns as $errors) {
+                foreach ($errors as $error) {
+                    $actualMessages[$line][] = $error['message'];
+                }
+            }
+        }
+
+        ksort($actualMessages);
+        ksort($expectedMessages);
+
+        static::assertSame($expectedMessages, $actualMessages);
+    }
+
+    /**
      * Property overrides to apply to the sniff under test (e.g. lowered
      * limits).
      *

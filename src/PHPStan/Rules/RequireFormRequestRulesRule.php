@@ -9,13 +9,15 @@ use PhpParser\Node\Stmt\Class_;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
+use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsTestFiles;
 
 /**
  * Require form requests to define a rules() method.
  *
  * A concrete class under an `Http\Requests` namespace is a form request and
- * must declare the validation rules it enforces. Abstract base requests and
- * classes outside that namespace are not affected.
+ * must declare the validation rules it enforces. Abstract base requests,
+ * classes outside that namespace and classes declared in tests (where the
+ * namespace merely mirrors the production tree) are not affected.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -24,6 +26,8 @@ use PHPStan\Rules\RuleErrorBuilder;
  */
 final class RequireFormRequestRulesRule implements Rule
 {
+    use DetectsTestFiles;
+
     /**
      * The node type this rule inspects.
      *
@@ -47,6 +51,7 @@ final class RequireFormRequestRulesRule implements Rule
     {
         if (
             $node->isAbstract()
+            || $this->isTestFile($scope)
             || !$this->isInRequestsNamespace($scope)
             || $this->hasRulesMethod($node)
         ) {

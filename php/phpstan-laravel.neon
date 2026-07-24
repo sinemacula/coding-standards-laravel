@@ -36,6 +36,7 @@ rules:
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowCastsPropertyRule
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowDatesPropertyRule
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowFactoryTimestampsRule
+    - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireFillableCastsRule
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireFormRequestRulesRule
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireMassAssignmentDeclarationRule
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireMigrationMethodsRule

@@ -26,6 +26,17 @@ parameters:
         # nearest composer.json; set e.g. "13.2" to enforce them regardless.
         minLaravelVersion: ''
 
+    # Extend the base standard's unchecked-exception set with Laravel exceptions
+    # that are effectively unchecked in an application: a ValidationException is
+    # turned into a 422 response by the framework's handler, and a
+    # BindingResolutionException signals a container misconfiguration - a
+    # programming error - so a @throws for either everywhere is noise rather than
+    # signal. This list is appended to the base's, not a replacement for it.
+    exceptions:
+        uncheckedExceptionClasses:
+            - Illuminate\Contracts\Container\BindingResolutionException
+            - Illuminate\Validation\ValidationException
+
 parametersSchema:
     sineMaculaLaravel: structure([
         modelAttributes: listOf(string())

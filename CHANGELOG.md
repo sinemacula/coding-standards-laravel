@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.3.2...v1.4.0) (2026-07-25)
+
+
+### Features
+
+* fillable-casts rule and resource route collapse sniff ([#70](https://github.com/sinemacula/coding-standards-laravel/issues/70)) ([2472b29](https://github.com/sinemacula/coding-standards-laravel/commit/2472b29fb8ace658ab87fadd690e6a2e04e6382d))
+
 ## [1.3.2](https://github.com/sinemacula/coding-standards-laravel/compare/v1.3.1...v1.3.2) (2026-07-22)
 
 

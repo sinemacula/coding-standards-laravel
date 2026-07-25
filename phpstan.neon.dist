@@ -25,3 +25,10 @@ parameters:
         - identifier: assignOp.invalid
         - identifier: postInc.type
         - identifier: foreach.nonIterable
+
+        # composer/semver's parseConstraints() throws UnexpectedValueException on
+        # a malformed constraint but does not declare it, so with implicit throws
+        # disabled the reachable guard in lowerBound() is misread as a dead catch.
+        -
+            identifier: catch.neverThrown
+            path: src/PHPStan/Concerns/DetectsLaravelVersion.php

@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.4.0...v1.5.0) (2026-07-25)
+
+
+### Features
+
+* treat Laravel container and validation exceptions as unchecked ([#75](https://github.com/sinemacula/coding-standards-laravel/issues/75)) ([2145451](https://github.com/sinemacula/coding-standards-laravel/commit/21454510bcac2180a9f9ea123d960f03d7402479))
+
+
+### Bug Fixes
+
+* silence false dead-catch on composer/semver constraint parsing ([#76](https://github.com/sinemacula/coding-standards-laravel/issues/76)) ([bfbdbed](https://github.com/sinemacula/coding-standards-laravel/commit/bfbdbed06e5652d16404080e44235cba14a4ede5))
+
 ## [1.4.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.3.2...v1.4.0) (2026-07-25)
 
 

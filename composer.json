@@ -13,7 +13,7 @@
     "require": {
         "php": "^8.3",
         "composer/semver": "^3.0",
-        "sinemacula/coding-standards": "^1.20.2",
+        "sinemacula/coding-standards": "^1.21.0",
         "friendsofphp/php-cs-fixer": "^3.0"
     },
     "suggest": {

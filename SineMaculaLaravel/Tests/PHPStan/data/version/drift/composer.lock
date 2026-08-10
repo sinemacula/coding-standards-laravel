@@ -1,0 +1,15 @@
+{
+    "packages": [
+        "not-an-object",
+        {
+            "name": "vendor/package"
+        },
+        {
+            "name": "laravel/framework",
+            "version": "v13.23.0"
+        },
+        {
+            "name": "laravel/framework"
+        }
+    ]
+}

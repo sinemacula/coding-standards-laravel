@@ -70,3 +70,19 @@ class Five extends Model
 {
     protected $hidden = ['a', 'b', 'c', 'd', 'e'];
 }
+
+class Untouched extends Model
+{
+    protected $connection = 'mysql';
+}
+
+class Ordered extends Model
+{
+    public function newFactory()
+    {
+    }
+
+    public function newCollection()
+    {
+    }
+}

@@ -25,8 +25,13 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsLaravelVersion;
  *
  * #[Table]/#[Fillable]/#[Hidden] landed in 13.2, so they are enforced only when
  * the project's Laravel floor reaches 13.2 - taken from `minLaravelVersion` or
- * detected from composer.json; below that, or when unknown, the property form
- * is left alone. $hidden stays a property once it lists more than five fields.
+ * detected from composer.json. Below that the property form stands, because a
+ * project supporting older versions cannot emit the attribute at all; but where
+ * composer.lock shows it already resolves to 13.2 or above, the legacy form is
+ * reported as a lagging floor rather than passed over in silence, so the
+ * migration surfaces one model at a time instead of arriving all at once when
+ * the floor is eventually raised. $hidden stays a property once it lists more
+ * than five fields.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -57,6 +62,15 @@ final class PreferModelAttributesRule implements Rule
 
     /** @var string The Laravel floor the gated attributes require. */
     private const string ATTRIBUTE_FLOOR = '13.2.0';
+
+    /** @var string The gated-attribute floor as written in a constraint. */
+    private const string ATTRIBUTE_FLOOR_LABEL = '13.2';
+
+    /** @var string Identifier for a legacy form the project can replace today. */
+    private const string ENFORCE_IDENTIFIER = 'sineMaculaLaravel.modelAttribute';
+
+    /** @var string Identifier for a legacy form only the declared floor still justifies. */
+    private const string LAGGING_FLOOR_IDENTIFIER = 'sineMaculaLaravel.modelAttributeLaggingFloor';
 
     /** @var int Maximum fields before the property form is preferred. */
     private const int HIDDEN_LIMIT = 5;
@@ -146,15 +160,22 @@ final class PreferModelAttributesRule implements Rule
             $name      = $method->name->toString();
             $attribute = self::METHOD_ATTRIBUTES[$name] ?? null;
 
-            if ($attribute === null || $this->isEnabled($attribute, $scope) === false) {
+            if ($attribute === null) {
                 continue;
             }
 
-            $errors[] = RuleErrorBuilder::message(sprintf(
-                'Use the #[%s] attribute instead of overriding the %s() method.',
+            $error = $this->attributeError(
                 $attribute,
-                $name,
-            ))->identifier('sineMaculaLaravel.modelAttribute')->line($method->getStartLine())->build();
+                sprintf('overriding the %s() method', $name),
+                $method->getStartLine(),
+                $scope,
+            );
+
+            if ($error === null) {
+                continue;
+            }
+
+            $errors[] = $error;
         }
 
         return $errors;
@@ -173,7 +194,7 @@ final class PreferModelAttributesRule implements Rule
     {
         $attribute = self::PROPERTY_ATTRIBUTES[$name] ?? null;
 
-        if ($attribute === null || $this->isEnabled($attribute, $scope) === false) {
+        if ($attribute === null) {
             return null;
         }
 
@@ -181,31 +202,102 @@ final class PreferModelAttributesRule implements Rule
             return null;
         }
 
-        return RuleErrorBuilder::message(sprintf(
-            'Use the #[%s] attribute instead of the $%s property.',
-            $attribute,
-            $name,
-        ))->identifier('sineMaculaLaravel.modelAttribute')->line($line)->build();
+        return $this->attributeError($attribute, sprintf('the $%s property', $name), $line, $scope);
     }
 
     /**
-     * Whether an attribute is enabled here, honouring the 13.2 version gate.
+     * Build the error for an enabled attribute's legacy form: the plain
+     * replacement where the floor already supports it, otherwise the lagging
+     * floor notice where the project resolves to a version that does.
      *
      * @param  string  $attribute
+     * @param  string  $legacy
+     * @param  int  $line
      * @param  \PHPStan\Analyser\Scope  $scope
-     * @return bool
+     * @return \PHPStan\Rules\RuleError|null
      */
-    private function isEnabled(string $attribute, Scope $scope): bool
+    private function attributeError(string $attribute, string $legacy, int $line, Scope $scope): ?RuleError
     {
         if (in_array($attribute, $this->attributes, true) === false) {
-            return false;
+            return null;
         }
 
-        if (in_array($attribute, self::VERSION_GATED_ATTRIBUTES, true) === false) {
-            return true;
+        if ($this->isGated($attribute) === false || $this->supportsGatedAttributes($scope)) {
+            return $this->error(
+                sprintf('Use the #[%s] attribute instead of %s.', $attribute, $legacy),
+                self::ENFORCE_IDENTIFIER,
+                $line,
+            );
         }
 
-        return $this->supportsGatedAttributes($scope);
+        return $this->laggingFloorError($attribute, $legacy, $line, $scope);
+    }
+
+    /**
+     * Build the notice for a legacy form the project's resolved Laravel could
+     * already replace, were its declared floor not holding it back.
+     *
+     * @param  string  $attribute
+     * @param  string  $legacy
+     * @param  int  $line
+     * @param  \PHPStan\Analyser\Scope  $scope
+     * @return \PHPStan\Rules\RuleError|null
+     */
+    private function laggingFloorError(string $attribute, string $legacy, int $line, Scope $scope): ?RuleError
+    {
+        $installed = $this->laggingFloorVersion($scope);
+
+        if ($installed === null) {
+            return null;
+        }
+
+        return $this->error(
+            sprintf(
+                '#[%s] is available in the Laravel %s this project resolves to, but its declared floor still '
+                . 'allows older versions; raise the floor to %s to replace %s.',
+                $attribute,
+                $installed,
+                self::ATTRIBUTE_FLOOR_LABEL,
+                $legacy,
+            ),
+            self::LAGGING_FLOOR_IDENTIFIER,
+            $line,
+        );
+    }
+
+    /**
+     * The resolved Laravel version when it supports the gated attributes but
+     * the project's declared floor does not, or null when the two agree.
+     *
+     * @param  \PHPStan\Analyser\Scope  $scope
+     * @return string|null
+     */
+    private function laggingFloorVersion(Scope $scope): ?string
+    {
+        $floor = $this->declaredFloor($scope);
+
+        if ($floor === null || $this->normaliseVersion($floor) === null) {
+            return null;
+        }
+
+        $installed = $this->detectInstalledLaravelVersion($scope->getFile());
+
+        if ($installed === null || $this->isLaravelVersionAtLeast($installed, self::ATTRIBUTE_FLOOR) === false) {
+            return null;
+        }
+
+        return ltrim($installed, 'vV');
+    }
+
+    /**
+     * Whether the attribute is one of those the 13.2 gate applies to.
+     *
+     * @param  string  $attribute
+     * @return bool
+     */
+    private function isGated(string $attribute): bool
+    {
+        return in_array($attribute, self::VERSION_GATED_ATTRIBUTES, true);
     }
 
     /**
@@ -216,10 +308,34 @@ final class PreferModelAttributesRule implements Rule
      */
     private function supportsGatedAttributes(Scope $scope): bool
     {
-        $version = $this->minLaravelVersion !== ''
+        $floor = $this->declaredFloor($scope);
+
+        return $floor !== null && $this->isLaravelVersionAtLeast($floor, self::ATTRIBUTE_FLOOR);
+    }
+
+    /**
+     * The project's declared Laravel floor, explicit or detected.
+     *
+     * @param  \PHPStan\Analyser\Scope  $scope
+     * @return string|null
+     */
+    private function declaredFloor(Scope $scope): ?string
+    {
+        return $this->minLaravelVersion !== ''
             ? $this->minLaravelVersion
             : $this->detectLaravelVersion($scope->getFile());
+    }
 
-        return $version !== null && $this->isLaravelVersionAtLeast($version, self::ATTRIBUTE_FLOOR);
+    /**
+     * Build a rule error at a line under the given identifier.
+     *
+     * @param  string  $message
+     * @param  string  $identifier
+     * @param  int  $line
+     * @return \PHPStan\Rules\RuleError
+     */
+    private function error(string $message, string $identifier, int $line): RuleError
+    {
+        return RuleErrorBuilder::message($message)->identifier($identifier)->line($line)->build();
     }
 }

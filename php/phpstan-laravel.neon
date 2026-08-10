@@ -24,6 +24,14 @@ parameters:
         # Explicit minimum Laravel version for the 13.2-only attributes
         # (#[Table]/#[Fillable]/#[Hidden]). Leave empty to detect it from the
         # nearest composer.json; set e.g. "13.2" to enforce them regardless.
+        #
+        # Where the declared floor sits below 13.2 but composer.lock resolves
+        # above it, the legacy form is reported under the separate
+        # sineMaculaLaravel.modelAttributeLaggingFloor identifier rather than
+        # passed over: the attribute cannot be adopted until the floor moves,
+        # but the gap stays visible instead of becoming a bulk migration later.
+        # A package that supports older versions on purpose can ignore that
+        # identifier and keep the enforcement one.
         minLaravelVersion: ''
 
     # Extend the base standard's unchecked-exception set with Laravel exceptions

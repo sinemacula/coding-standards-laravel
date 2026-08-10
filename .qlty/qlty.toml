@@ -95,7 +95,7 @@ name = "editorconfig-checker"
 # sniffs resolve in qlty's sandbox.
 [[plugin]]
 name = "php-codesniffer"
-version = "3.13.5"
+version = "3.13.6"
 mode = "comment"
 package_file = "composer.json"
 package_filters = ["slevomat", "dealerdirect", "sinemacula"]

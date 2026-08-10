@@ -25,13 +25,13 @@
     </rule>
 
     <!--
-        Exempt Eloquent models from the readonly-public-property requirement. A
-        model overrides the framework's public magic properties ($timestamps,
-        $incrementing, $preventsLazyLoading, …), which are declared non-readonly
-        on the base class - PHP forbids making an inherited property readonly, so
-        the requirement cannot be satisfied. The base sniff matches the immediate
-        parent name as written, so the model bases are listed by short name
-        (a model extends Model, Authenticatable, or Pivot).
+        Exempt the framework bases that declare public magic properties from the
+        readonly-public-property requirement. A subclass overrides them ($timestamps
+        and $incrementing on a model, $collects on a resource collection,
+        $withinTransaction on a migration, …), and they are declared non-readonly on
+        the base class - PHP forbids making an inherited property readonly, so the
+        requirement cannot be satisfied. The base sniff matches the immediate parent
+        name as written, so the bases are listed by short name.
     -->
     <rule ref="SineMacula.Classes.RequireReadonlyPublicProperty">
         <properties>
@@ -39,6 +39,9 @@
                 <element value="Model"/>
                 <element value="Authenticatable"/>
                 <element value="Pivot"/>
+                <element value="Migration"/>
+                <element value="JsonResource"/>
+                <element value="ResourceCollection"/>
             </property>
         </properties>
     </rule>

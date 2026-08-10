@@ -1,0 +1,12 @@
+{
+    "packages": [
+        {
+            "name": "laravel/framework",
+            "version": "v13.23.0"
+        },
+        {
+            "name": "illuminate/database",
+            "version": "v13.24.1"
+        }
+    ]
+}

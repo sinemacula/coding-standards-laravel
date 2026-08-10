@@ -34,8 +34,17 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     /** @var string The expected error message. */
     private const string HIDDEN_ERROR = 'Use the #[Hidden] attribute instead of the $hidden property.';
 
+    /** @var string The expected error message. */
+    private const string COLLECTED_BY_ERROR = 'Use the #[CollectedBy] attribute instead of overriding the newCollection() method.';
+
+    /** @var string The fixture carrying every legacy form. */
+    private const string FIXTURE = __DIR__ . '/data/prefer-model-attributes.inc';
+
     /** @var string A model whose composer.json floor is below 13.2. */
     private const string UNSUPPORTED_MODEL = __DIR__ . '/data/version/unsupported/model.inc';
+
+    /** @var string A model whose floor is below 13.2 but which resolves above it. */
+    private const string DRIFT_MODEL = __DIR__ . '/data/version/drift/model.inc';
 
     /** @var array<int, string>|null Attributes the rule under test mandates, or null for the constructor default. */
     private ?array $attributes = null;
@@ -47,7 +56,8 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
      * On a supporting version the constructor's default expressive set flags
      * $table/$fillable/$hidden - including a $fillable declared alongside an
      * exempt property and a $hidden at exactly the field limit; a $hidden over
-     * the limit, the disabled attributes and non-models are not.
+     * the limit, the disabled attributes, a property with no attribute
+     * equivalent and non-models are not.
      *
      * @return void
      */
@@ -55,7 +65,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     {
         $this->minLaravelVersion = '13.2';
 
-        $this->analyse([__DIR__ . '/data/prefer-model-attributes.inc'], [
+        $this->analyse([self::FIXTURE], [
             [self::TABLE_ERROR, 9],
             [self::HIDDEN_ERROR, 11],
             [self::FILLABLE_ERROR, 15],
@@ -75,13 +85,32 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     {
         $this->attributes = ['Touches', 'UseFactory', 'CollectedBy', 'UseEloquentBuilder'];
 
-        $this->analyse([__DIR__ . '/data/prefer-model-attributes.inc'], [
+        $this->analyse([self::FIXTURE], [
             ['Use the #[Touches] attribute instead of the $touches property.', 13],
             ['Use the #[UseFactory] attribute instead of overriding the newFactory() method.', 17],
-            ['Use the #[CollectedBy] attribute instead of overriding the newCollection() method.', 28],
+            [self::COLLECTED_BY_ERROR, 28],
             ['Use the #[UseEloquentBuilder] attribute instead of overriding the newEloquentBuilder() method.', 32],
             ['Use the #[Touches] attribute instead of the $touches property.', 53],
-            ['Use the #[CollectedBy] attribute instead of overriding the newCollection() method.', 59],
+            [self::COLLECTED_BY_ERROR, 59],
+            ['Use the #[UseFactory] attribute instead of overriding the newFactory() method.', 81],
+            [self::COLLECTED_BY_ERROR, 85],
+        ]);
+    }
+
+    /**
+     * A method override whose attribute is not enabled does not stop the ones
+     * after it from being reported.
+     *
+     * @return void
+     */
+    public function testKeepsScanningPastAnUnconfiguredMethodOverride(): void
+    {
+        $this->attributes = ['CollectedBy'];
+
+        $this->analyse([self::FIXTURE], [
+            [self::COLLECTED_BY_ERROR, 28],
+            [self::COLLECTED_BY_ERROR, 59],
+            [self::COLLECTED_BY_ERROR, 85],
         ]);
     }
 
@@ -163,7 +192,8 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
 
     /**
      * An unparseable explicit minLaravelVersion yields no gated enforcement
-     * rather than an error.
+     * rather than an error, and no lagging-floor notice either - a floor that
+     * cannot be read is not evidence that it lags.
      *
      * @return void
      */
@@ -171,7 +201,79 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     {
         $this->minLaravelVersion = 'not-a-version';
 
-        $this->analyse([self::UNSUPPORTED_MODEL], []);
+        $this->analyse([self::DRIFT_MODEL], []);
+    }
+
+    /**
+     * A floor below 13.2 on a project whose composer.lock already resolves
+     * above it reports the lagging floor rather than staying silent, so the
+     * migration is not deferred wholesale to the day the floor is raised.
+     *
+     * @return void
+     */
+    public function testReportsALaggingFloorWhenTheLockAlreadySupportsTheAttribute(): void
+    {
+        $this->analyse([self::DRIFT_MODEL], [
+            [
+                '#[Table] is available in the Laravel 13.23.0 this project resolves to, but its declared floor '
+                . 'still allows older versions; raise the floor to 13.2 to replace the $table property.',
+                9,
+            ],
+        ]);
+    }
+
+    /**
+     * The locked illuminate/database version wins over laravel/framework, as
+     * the declared constraint does.
+     *
+     * @return void
+     */
+    public function testPrefersTheLockedIlluminateDatabaseVersion(): void
+    {
+        $this->analyse([__DIR__ . '/data/version/drift-illuminate/model.inc'], [
+            [
+                '#[Table] is available in the Laravel 13.24.1 this project resolves to, but its declared floor '
+                . 'still allows older versions; raise the floor to 13.2 to replace the $table property.',
+                9,
+            ],
+        ]);
+    }
+
+    /**
+     * A project that both declares and resolves below 13.2 genuinely cannot use
+     * the attribute, so it stays silent.
+     *
+     * @return void
+     */
+    public function testStaysSilentWhenTheLockAlsoPredatesTheAttribute(): void
+    {
+        $this->analyse([__DIR__ . '/data/version/drift-old/model.inc'], []);
+    }
+
+    /**
+     * A composer.lock carrying no readable Laravel entry is treated as no
+     * resolved version at all.
+     *
+     * @return void
+     */
+    public function testMalformedLockYieldsNoLaggingFloorNotice(): void
+    {
+        $this->analyse([__DIR__ . '/data/version/drift-malformed/model.inc'], []);
+    }
+
+    /**
+     * A floor that already reaches 13.2 reports the plain replacement, never
+     * the lagging-floor notice, even with a lock present.
+     *
+     * @return void
+     */
+    public function testASupportedFloorIsNeverReportedAsLagging(): void
+    {
+        $this->minLaravelVersion = '13.2';
+
+        $this->analyse([self::DRIFT_MODEL], [
+            [self::TABLE_ERROR, 9],
+        ]);
     }
 
     /**

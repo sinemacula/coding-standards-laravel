@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
 
 class User extends Model
@@ -22,6 +23,11 @@ class User extends Model
 
         return $label;
     }
+}
+
+class UserFactory extends Factory
+{
+    protected $model = User::class;
 }
 
 $topLevel = 1;

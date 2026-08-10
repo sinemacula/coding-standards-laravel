@@ -27,8 +27,8 @@ final class PropertyTypeHintSniff implements Sniff
         'signature', 'description', 'table', 'primaryKey', 'keyType', 'incrementing',
         'timestamps', 'dateFormat', 'with', 'withCount', 'perPage', 'fillable', 'guarded',
         'hidden', 'visible', 'casts', 'dates', 'appends', 'attributes', 'dispatchesEvents',
-        'touches', 'observables', 'connection', 'escapeWhenCastingToString', 'bindings',
-        'singletons', 'defer',
+        'touches', 'observables', 'connection', 'escapeWhenCastingToString', 'model',
+        'bindings', 'singletons', 'defer',
     ];
 
     /** @var array<int, int|string> Scopes whose direct variables are properties. */

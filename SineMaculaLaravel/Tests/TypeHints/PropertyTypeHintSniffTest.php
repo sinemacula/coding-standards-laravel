@@ -21,14 +21,14 @@ final class PropertyTypeHintSniffTest extends AbstractSniffTestCase
 {
     /**
      * An untyped class property is flagged; framework-magic properties (incl.
-     * $dateFormat), a typed property, parameters, locals and top-level vars are
-     * not.
+     * $dateFormat and a factory's $model), a typed property, parameters, locals
+     * and top-level vars are not.
      *
      * @return void
      */
     public function testFlagsUntypedNonMagicProperties(): void
     {
-        $this->assertErrorsOnLines('PropertyTypeHint.inc', [15]);
+        $this->assertErrorsOnLines('PropertyTypeHint.inc', [16]);
     }
 
     /**
@@ -39,7 +39,7 @@ final class PropertyTypeHintSniffTest extends AbstractSniffTestCase
     public function testRendersPropertyNameInErrorMessage(): void
     {
         $this->assertErrorMessagesOnLines('PropertyTypeHint.inc', [
-            15 => ['Property $nickname must have a native type hint.'],
+            16 => ['Property $nickname must have a native type hint.'],
         ]);
     }
 }

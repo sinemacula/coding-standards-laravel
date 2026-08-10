@@ -84,7 +84,7 @@ A deliberate exception can be bypassed with the native directive - `// phpcs:ign
 | `SineMaculaLaravel.Structure.RequireRoleDirectory` | A class whose role is recognised by identity (what it extends/implements) must live under that role's directory - a controller under `Http/Controllers`; an entry-point provider may sit at the package root. |
 | `SineMaculaLaravel.Structure.RequireRoleNaming` | A class is named for its role: controllers/providers/form-requests/resources/policies require a suffix, models forbid `Model`/`Entity`, and the rest (jobs, listeners, events, mailables, middleware, commands, casts, rules) stay bare. |
 | `SineMaculaLaravel.Structure.RoutesLocation` | A `routes.php` file, if present, must sit at the root of an `Http` directory. |
-| `SineMaculaLaravel.TypeHints.PropertyTypeHint` | A class property declares a native type - except the framework-magic properties (`$table`, `$fillable`, `$signature`, …, the configurable `magicProperties` set) that override an untyped parent and so cannot be typed. |
+| `SineMaculaLaravel.TypeHints.PropertyTypeHint` | A class property declares a native type - except the framework-magic properties (`$table`, `$fillable`, `$signature`, `$model`, …, the configurable `magicProperties` set) that override an untyped parent and so cannot be typed, or a property marked `@untypeable`. |
 | `SineMaculaLaravel.TypeHints.ParameterTypeHint` | A function or method parameter declares a native type - except where a parent fixes the signature: a method carrying `#[\Override]`, or a non-private trait method (whose effective parent is the consuming class's, invisible to a token sniff). |
 | `SineMaculaLaravel.TypeHints.ReturnTypeHint` | A function, method or closure declares a native return type - except constructors/destructors/clone handlers and methods carrying `#[\Override]`. |
 
@@ -123,6 +123,20 @@ configurable `magicProperties` list on `PropertyTypeHint`, and an overriding met
 signature out with the native `#[\Override]` attribute. A non-private trait method is also exempt
 from the parameter requirement, since its effective parent is whatever the consuming class extends
 and a token sniff cannot resolve that.
+
+`magicProperties` covers the framework base classes an application extends - models, factories,
+commands, migrations, API resources, middleware, the HTTP/console kernels, service providers and the
+exception handler. It cannot know about third-party or application base classes, so a property whose
+untyped parent declaration is out of the list's reach is marked `@untypeable` on its own docblock:
+
+```php
+/**
+ * The vendor base class declares this untyped, so PHP forbids typing it here.
+ *
+ * @untypeable
+ */
+protected $view;
+```
 
 #### Readonly properties
 

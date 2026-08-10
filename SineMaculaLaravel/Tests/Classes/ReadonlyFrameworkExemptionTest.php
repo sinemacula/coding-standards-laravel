@@ -11,13 +11,14 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests that the SineMaculaLaravel standard exempts Eloquent models from the
- * readonly-public-property requirement.
+ * Tests that the SineMaculaLaravel standard exempts the framework bases that
+ * declare public magic properties from the readonly-public-property
+ * requirement.
  *
  * Building the real standard proves the ruleset wiring: it sets the base
- * RequireReadonlyPublicProperty sniff's ignoredParentClasses to the model
- * bases, so a model's public magic properties are not flagged while an ordinary
- * class still is.
+ * RequireReadonlyPublicProperty sniff's ignoredParentClasses to those bases, so
+ * an inherited public magic property is not flagged while an ordinary class
+ * still is.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -25,17 +26,18 @@ use PHPUnit\Framework\TestCase;
  * @internal
  */
 #[CoversNothing]
-final class ReadonlyModelExemptionTest extends TestCase
+final class ReadonlyFrameworkExemptionTest extends TestCase
 {
     /**
-     * A public property on a Model, Authenticatable or Pivot subclass is not
-     * flagged as needing readonly; one on an ordinary class still is.
+     * A public property on a Model, Authenticatable, Pivot, Migration,
+     * JsonResource or ResourceCollection subclass is not flagged as needing
+     * readonly; one on an ordinary class still is.
      *
      * @return void
      */
-    public function testExemptsModelMagicPropertiesFromReadonly(): void
+    public function testExemptsFrameworkMagicPropertiesFromReadonly(): void
     {
-        self::assertSame([28], $this->readonlyViolationLines());
+        self::assertSame([31], $this->readonlyViolationLines());
     }
 
     /**
@@ -48,7 +50,7 @@ final class ReadonlyModelExemptionTest extends TestCase
     {
         $config  = new Config(['--standard=SineMaculaLaravel', '--extensions=inc,php'], false);
         $ruleset = new Ruleset($config);
-        $file    = new LocalFile(__DIR__ . DIRECTORY_SEPARATOR . 'ReadonlyModelExemption.inc', $ruleset, $config);
+        $file    = new LocalFile(__DIR__ . DIRECTORY_SEPARATOR . 'ReadonlyFrameworkExemption.inc', $ruleset, $config);
 
         $file->process();
 

@@ -188,6 +188,34 @@ parameters:
             message: '#^Dynamic call to static method App\\Builders\\#'
 ```
 
+#### Where model columns come from
+
+A model's columns are read from its migrations, and everything that rests on them - the property
+checks, the cast types, the `model property of ...` parameter types - is only as good as that scan.
+Left unset, larastan resolves the path from the booted application rather than from the project being
+analysed, and an isolated runner can boot it somewhere else; the two then disagree, no migration is
+found, and the checks quietly stop covering anything. The standard names the conventional path so it
+is pinned to the project:
+
+```neon
+parameters:
+    databaseMigrationsPath:
+        - %currentWorkingDirectory%/database/migrations
+```
+
+Replace it where migrations live elsewhere, or are kept per module - the entries accept globs, and
+`databaseMigrationsPath!:` replaces rather than appends:
+
+```neon
+parameters:
+    databaseMigrationsPath!:
+        - %currentWorkingDirectory%/database/migrations
+        - %currentWorkingDirectory%/app/*/Database/Migrations
+```
+
+If the scan finds nothing the failure is loud rather than silent: with no columns to resolve against,
+every model property is reported as undefined.
+
 ## Requirements
 
 - PHP ^8.3

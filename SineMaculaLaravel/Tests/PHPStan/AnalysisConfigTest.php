@@ -94,6 +94,22 @@ final class AnalysisConfigTest extends TestCase
     }
 
     /**
+     * The migration path is named rather than left to the application's own
+     * database path, which resolves from the booted application and so can
+     * point away from the project being analysed - taking every model's
+     * columns, and the checks that rest on them, with it.
+     *
+     * @return void
+     */
+    public function testPinsTheMigrationPathToTheProject(): void
+    {
+        $paths = self::readConfig()['parameters']['databaseMigrationsPath'] ?? null;
+
+        self::assertIsArray($paths, 'The shipped config declares no databaseMigrationsPath.');
+        self::assertContains('%currentWorkingDirectory%/database/migrations', $paths);
+    }
+
+    /**
      * Assert the shipped pattern ignores a report.
      *
      * @param  string  $report
@@ -109,23 +125,31 @@ final class AnalysisConfigTest extends TestCase
     }
 
     /**
-     * Read the dynamic-call pattern out of the shipped config.
+     * Load the analysis config this package ships.
      *
      * The config loader is internal, so a minor upgrade may move it; that is
      * acceptable here, where the alternative is a second neon parser carried
      * only to read one shipped file, and any breakage surfaces as a failure of
      * this test rather than in anything the package ships.
      *
-     * @return string
+     * @return array<string, mixed>
      */
-    private static function readBuilderPattern(): string
+    private static function readConfig(): array
     {
         $file = dirname(__DIR__, 3) . '/php/phpstan-laravel.neon';
 
         // @phpstan-ignore phpstanApi.constructor, phpstanApi.method
-        $config = (new NeonAdapter([]))->load($file);
+        return (new NeonAdapter([]))->load($file);
+    }
 
-        $ignored = $config['parameters']['ignoreErrors'] ?? [];
+    /**
+     * Read the dynamic-call pattern out of the shipped config.
+     *
+     * @return string
+     */
+    private static function readBuilderPattern(): string
+    {
+        $ignored = self::readConfig()['parameters']['ignoreErrors'] ?? [];
 
         self::assertIsArray($ignored);
 

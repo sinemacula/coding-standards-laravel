@@ -34,6 +34,23 @@ parameters:
         # identifier and keep the enforcement one.
         minLaravelVersion: ''
 
+    # Where the migrations that describe each model's columns live. Larastan
+    # falls back to the application's own database path when this is unset,
+    # which resolves from the booted application rather than from the project
+    # being analysed. An isolated runner can boot it somewhere other than the
+    # working directory, and the two then disagree: no migration is found, no
+    # model has any columns, and the model property checks quietly stop
+    # covering anything. Naming the path pins it to the project instead.
+    #
+    # A project whose migrations sit elsewhere, or that keeps them per module,
+    # replaces this with its own paths - the entries accept globs:
+    #
+    #     databaseMigrationsPath!:
+    #         - %currentWorkingDirectory%/database/migrations
+    #         - %currentWorkingDirectory%/app/*/Database/Migrations
+    databaseMigrationsPath:
+        - %currentWorkingDirectory%/database/migrations
+
     # Larastan reflects every method forwarded onto an Eloquent builder - the
     # query methods and any #[Scope] - as a static method, so the strict rules
     # read ordinary query code as a dynamic call to a static one. The report is

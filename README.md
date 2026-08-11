@@ -163,6 +163,31 @@ standard sets the base sniff's `ignoredParentClasses` to the model bases (`Model
 | `sineMaculaLaravel.factoryTimestamps` | A factory `definition()` must not set `created_at` / `updated_at`. |
 | `sineMaculaLaravel.resourceFieldNaming` | Field keys in a resource's `toArray()` result use snake_case, nested arrays included. Inspects the string-literal keys of the array returned directly from `toArray()` on a `JsonResource`; computed keys, a non-literal return, and non-resource classes are left alone. Digits are allowed (`line_1`); only casing is enforced. |
 
+#### Builder calls under the strict rules
+
+Larastan reflects every method forwarded onto an Eloquent builder - the query methods and any
+`#[Scope]` - as a static method, so `phpstan-strict-rules` reads ordinary query code as a dynamic
+call to a static one:
+
+```
+Dynamic call to static method Illuminate\Database\Eloquent\Builder<App\Models\Credential>::whereNull().
+```
+
+That lands on essentially every query in a project, so this standard ignores it, scoped to the
+framework builders rather than turning the rule off - a genuine dynamic call to a static method
+elsewhere is still reported.
+
+A model pointing at its own builder with `#[UseEloquentBuilder]` is reported against **that** class
+instead, which no shipped pattern can name. Add the matching entry to the project's own config:
+
+```neon
+parameters:
+    ignoreErrors:
+        -
+            identifier: staticMethod.dynamicCall
+            message: '#^Dynamic call to static method App\\Builders\\#'
+```
+
 ## Requirements
 
 - PHP ^8.3

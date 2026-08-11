@@ -34,6 +34,27 @@ parameters:
         # identifier and keep the enforcement one.
         minLaravelVersion: ''
 
+    # Larastan reflects every method forwarded onto an Eloquent builder - the
+    # query methods and any #[Scope] - as a static method, so the strict rules
+    # read ordinary query code as a dynamic call to a static one. The report is
+    # an artefact of that reflection rather than anything about the code, and it
+    # lands on essentially every query in a project, so it cannot be answered at
+    # the call site. Scoped to the builder classes rather than turned off, so a
+    # genuine dynamic call to a static method elsewhere is still reported.
+    #
+    # A model pointing at its own builder with #[UseEloquentBuilder] is reported
+    # against that class instead, which no shipped pattern can name. Such a
+    # project adds its own entry alongside this one:
+    #
+    #     ignoreErrors:
+    #         -
+    #             identifier: staticMethod.dynamicCall
+    #             message: '#^Dynamic call to static method App\\Builders\\#'
+    ignoreErrors:
+        -
+            identifier: staticMethod.dynamicCall
+            message: '#^Dynamic call to static method Illuminate\\Database\\(Eloquent|Query)\\Builder#'
+
     # Extend the base standard's unchecked-exception set with Laravel exceptions
     # that are effectively unchecked in an application: a ValidationException is
     # turned into a 422 response by the framework's handler, and a

@@ -54,7 +54,11 @@ Two standards ship; reference exactly one (each pulls in `SineMacula`, so it rep
 
 The Laravel rules are auto-included via this package's `extra.phpstan.includes` (resolved by
 `phpstan/extension-installer`), alongside the base config. Your project's `phpstan.neon` only needs its
-own `level` / `paths`.
+own `paths`.
+
+Do not set `level`. Analysis runs through qlty, whose phpstan driver passes `--level=9` on the command
+line, and a command-line level overrides the config file outright - so a level set here does nothing
+except mislead whoever reads it next.
 
 ### PHP CS Fixer
 

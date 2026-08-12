@@ -19,7 +19,12 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
  * not fire in test files, in container-wiring classes (service providers and
  * registrars, whose job is to wire the container), or on a dynamic resolution
  * whose argument is a runtime variable rather than a literal class - a factory
- * that cannot be injected. Helper names and wiring markers are configurable.
+ * that cannot be injected.
+ *
+ * It also does not fire in a class the framework constructs itself, which has
+ * no injection point to use instead: a model factory is reached through
+ * `Model::factory()`, so neither its constructor nor `definition()` can be
+ * given a collaborator. Helper names and both exempt sets are configurable.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -41,6 +46,9 @@ final class DisallowServiceLocationSniff implements Sniff
 
     /** @var array<int, string> Base classes (short name) marking container-wiring code. */
     public array $wiringBaseClasses = ['ServiceProvider', 'Registrar'];
+
+    /** @var array<int, string> Base classes (short name) the framework constructs, leaving no injection point. */
+    public array $uninjectableBaseClasses = ['Factory'];
 
     /**
      * Register the tokens this sniff listens for.
@@ -115,6 +123,7 @@ final class DisallowServiceLocationSniff implements Sniff
     {
         return $this->isDynamicResolution($phpcsFile, $stackPtr)
             || $this->isWiringClass($phpcsFile, $stackPtr)
+            || $this->isUninjectableClass($phpcsFile, $stackPtr)
             || $this->isTestFile($phpcsFile);
     }
 
@@ -196,6 +205,22 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
+     * Whether the enclosing class is one the framework constructs, so there is
+     * no constructor to inject through.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  int  $stackPtr
+     * @return bool
+     */
+    private function isUninjectableClass(File $phpcsFile, int $stackPtr): bool
+    {
+        $classPtr = $phpcsFile->getCondition($stackPtr, T_CLASS);
+
+        return $classPtr !== false
+            && $this->extendsBase($phpcsFile->findExtendedClassName($classPtr), $this->uninjectableBaseClasses);
+    }
+
+    /**
      * Whether the class declaration is a wiring class by suffix or base class.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
@@ -205,7 +230,7 @@ final class DisallowServiceLocationSniff implements Sniff
     private function isWiringDeclaration(File $phpcsFile, int $classPtr): bool
     {
         return $this->hasWiringSuffix($phpcsFile->getDeclarationName($classPtr))
-            || $this->extendsWiringBase($phpcsFile->findExtendedClassName($classPtr));
+            || $this->extendsBase($phpcsFile->findExtendedClassName($classPtr), $this->wiringBaseClasses);
     }
 
     /**
@@ -226,12 +251,13 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Whether the extended class short name is a configured wiring base.
+     * Whether the extended class short name is one of the given base classes.
      *
      * @param  false|string  $parent
+     * @param  array<int, string>  $bases
      * @return bool
      */
-    private function extendsWiringBase(false|string $parent): bool
+    private function extendsBase(false|string $parent, array $bases): bool
     {
         if ($parent === false) {
             return false;
@@ -240,6 +266,6 @@ final class DisallowServiceLocationSniff implements Sniff
         $position = strrpos($parent, '\\');
         $short    = $position === false ? $parent : substr($parent, $position + 1);
 
-        return in_array($short, $this->wiringBaseClasses, true);
+        return in_array($short, $bases, true);
     }
 }

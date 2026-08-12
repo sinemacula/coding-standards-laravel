@@ -5,6 +5,9 @@
 # depends on. The framework-agnostic SineMacula PHPStan config is auto-included
 # from the installed sinemacula/coding-standards package via extension-installer.
 parameters:
+    # This repo runs PHPStan itself rather than through qlty, so it is one of
+    # the few configs that has to state the level. 9 is what qlty's driver
+    # enforces everywhere else.
     level: 9
 
     # PHP_CodeSniffer ships a bespoke autoloader (its classes are not on the

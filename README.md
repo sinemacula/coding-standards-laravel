@@ -75,7 +75,7 @@ A deliberate exception can be bypassed with the native directive - `// phpcs:ign
 
 | Sniff | Enforces |
 |-------|----------|
-| `SineMaculaLaravel.Architecture.DisallowServiceLocation` | No service location (`app()`, `resolve()`, `App::make()`) inside a class body - inject collaborators instead. Targets production code: test files, container-wiring classes (service providers and registrars), and dynamic resolution of a runtime variable (`app($class)`, a factory that cannot be injected) are exempt. |
+| `SineMaculaLaravel.Architecture.DisallowServiceLocation` | No service location (`app()`, `resolve()`, `App::make()`) inside a class body - inject collaborators instead. Targets production code: test files, container-wiring classes (service providers and registrars), classes the framework constructs itself and so leaves no injection point (a model factory, reached through `Model::factory()` - the configurable `uninjectableBaseClasses` set), and dynamic resolution of a runtime variable (`app($class)`, a factory that cannot be injected) are exempt. |
 | `SineMaculaLaravel.Configuration.DisallowEnvOutsideConfig` | `env()` only inside `config/` files (test code exempt); use `config()` everywhere else. |
 | `SineMaculaLaravel.Controllers.DisallowDatabaseAccess` | No `DB::` facade or direct Eloquent model queries in a controller - read through a repository. |
 | `SineMaculaLaravel.Controllers.DisallowInlineValidation` | No inline validation (`$request->validate()`, `Validator::make()`) in a controller - use a form request. |

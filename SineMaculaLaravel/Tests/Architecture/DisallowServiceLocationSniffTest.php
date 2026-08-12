@@ -91,6 +91,19 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
+     * A model factory is constructed by the framework through Model::factory(),
+     * so it has no injection point - neither its constructor nor definition(),
+     * configure() or a state method can be given a collaborator - and may
+     * resolve from the container.
+     *
+     * @return void
+     */
+    public function testExemptsClassesTheFrameworkConstructs(): void
+    {
+        $this->assertErrorsOnLines('Factory.inc', []);
+    }
+
+    /**
      * Test code may resolve services from the container to assert on them.
      *
      * @return void

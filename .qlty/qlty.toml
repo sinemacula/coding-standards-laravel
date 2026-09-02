@@ -100,12 +100,13 @@ mode = "comment"
 package_file = "composer.json"
 package_filters = ["slevomat", "dealerdirect", "sinemacula"]
 
-# Pinned to the last php-cs-fixer release whose symfony/console stays on the 7.x
-# line; 3.90+ pulls symfony/console 8 (needs PHP 8.4.1), which qlty's PHP 8.3
-# runner cannot parse. Bump once the runner ships PHP 8.4.
+# Pinned to a release the shared standard's own constraint accepts - it requires
+# ^3.95.19, and a pin below that leaves the sandbox install unresolvable, which
+# takes the whole run down rather than reporting findings. Kept exact so the
+# version that runs here is the one CI resolves.
 [[plugin]]
 name = "php-cs-fixer"
-version = "3.89.0"
+version = "3.95.24"
 package_file = "composer.json"
 package_filters = ["sinemacula"]
 

@@ -38,6 +38,19 @@ parameters:
         # identifier and keep the enforcement one.
         minLaravelVersion: ''
 
+        # Methods DisallowModelBehaviourRule permits on a model besides its
+        # relations and accessors: the framework hooks a model legitimately
+        # implements. The framework adds to these over time, so a project on an
+        # older release may need a different set. Use `modelHooks!:` to replace,
+        # not append.
+        modelHooks:
+            - casts
+            - booted
+            - boot
+            - newFactory
+            - getRouteKeyName
+            - uniqueIds
+
     # Where the migrations that describe each model's columns live. Larastan
     # falls back to the application's own database path when this is unset,
     # which resolves from the booted application rather than from the project
@@ -91,6 +104,7 @@ parametersSchema:
     sineMaculaLaravel: structure([
         modelAttributes: listOf(string())
         minLaravelVersion: string()
+        modelHooks: listOf(string())
     ])
 
 rules:
@@ -106,9 +120,15 @@ rules:
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireSnakeCaseResourceFieldsRule
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireSnakeCaseSchemaRule
 
-# PreferModelAttributesRule is registered as a service (not under `rules:`) so
-# its mandated attribute set can be injected from the parameter above.
+# These rules are registered as services rather than under `rules:` so the sets
+# they read can be injected from the parameters above.
 services:
+    -
+        class: SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowModelBehaviourRule
+        arguments:
+            hooks: %sineMaculaLaravel.modelHooks%
+        tags:
+            - phpstan.rules.rule
     -
         class: SineMacula\CodingStandardsLaravel\PHPStan\Rules\PreferModelAttributesRule
         arguments:

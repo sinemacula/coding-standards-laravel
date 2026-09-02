@@ -182,6 +182,7 @@ standard sets the base sniff's `ignoredParentClasses` to the model bases (`Model
 | `sineMaculaLaravel.massAssignment`             | Every concrete production model declares mass assignment via `$fillable`/`$guarded` or the attribute form.    |
 | `sineMaculaLaravel.fillableCasts`              | Every `$fillable` entry on a model declares a matching cast, documenting each settable field's type.          |
 | `sineMaculaLaravel.relationshipReturnType`     | A relationship method declares a return-type hint.                                                            |
+| `sineMaculaLaravel.modelBehaviour`             | A model carries its schema and its relations; behaviour belongs to a repository or a service.                 |
 | `sineMaculaLaravel.modelAttribute`             | Prefer a model attribute over its legacy property or method form, for the attributes a project enables.       |
 | `sineMaculaLaravel.modelAttributeLaggingFloor` | The legacy form of an attribute the project already resolves a Laravel version for, while its floor does not. |
 | `sineMaculaLaravel.foreignIdFor`               | A foreign key column in a migration is declared from its model - `foreignIdFor(Organization::class)`.         |
@@ -190,6 +191,18 @@ standard sets the base sniff's `ignoredParentClasses` to the model bases (`Model
 | `sineMaculaLaravel.formRequestRules`           | A form request (under `Http\Requests`) defines a `rules()` method; classes declared in tests are exempt.      |
 | `sineMaculaLaravel.factoryTimestamps`          | A factory `definition()` must not set `created_at` / `updated_at`.                                            |
 | `sineMaculaLaravel.resourceFieldNaming`        | Field keys in a resource's `toArray()` result use snake_case, nested arrays included.                         |
+
+#### What a model may carry
+
+`modelBehaviour` limits a model's own surface to what describes a record. Permitted are its relations,
+recognised the same way `relationshipReturnType` recognises them; accessors and mutators, recognised by
+an `Attribute` return type rather than by name; and the framework hooks named in
+`sineMaculaLaravel.modelHooks`, which is configurable because the framework adds to them over time.
+
+Only public methods are reported: a non-public helper called from a relation is detail, whereas a public
+one is what other layers reach for. A query scope is the exception, reported whatever its visibility,
+because the attribute form is conventionally not public. It belongs on a repository, which can compose it
+as an ordinary fluent method instead of a magic call on the builder.
 
 #### Model attributes and the version gate
 

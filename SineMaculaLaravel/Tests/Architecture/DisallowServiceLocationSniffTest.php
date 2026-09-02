@@ -128,7 +128,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
      */
     public function testExemptsAFactoryBehindAConfiguredIntermediateBase(): void
     {
-        $this->uninjectableBaseClasses = ['Illuminate\\Database\\Eloquent\\Factories\\Factory', 'BaseFactory'];
+        $this->uninjectableBaseClasses = ['Illuminate\Database\Eloquent\Factories\Factory', 'BaseFactory'];
 
         $this->assertErrorsOnLines('FactoryIntermediateBase.inc', []);
     }
@@ -152,7 +152,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
      */
     public function testAcceptsAConfiguredBaseWrittenFullyQualified(): void
     {
-        $this->uninjectableBaseClasses = ['\\Illuminate\\Database\\Eloquent\\Factories\\Factory'];
+        $this->uninjectableBaseClasses = ['\Illuminate\Database\Eloquent\Factories\Factory'];
 
         $this->assertErrorsOnLines('Factory.inc', []);
     }
@@ -166,9 +166,19 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
      */
     public function testMatchesQualifiedBasesOnSegmentBoundaries(): void
     {
-        $this->uninjectableBaseClasses = ['Factories\\Factory'];
+        $this->uninjectableBaseClasses = ['Factories\Factory'];
 
         $this->assertErrorsOnLines('PartialSegmentFactory.inc', [11]);
+    }
+
+    /**
+     * Test code may resolve services from the container to assert on them.
+     *
+     * @return void
+     */
+    public function testExemptsTestFiles(): void
+    {
+        $this->assertErrorsOnLines('ServiceLocationInTest.inc', []);
     }
 
     /**
@@ -182,15 +192,5 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
         return $this->uninjectableBaseClasses === null
             ? []
             : ['uninjectableBaseClasses' => $this->uninjectableBaseClasses];
-    }
-
-    /**
-     * Test code may resolve services from the container to assert on them.
-     *
-     * @return void
-     */
-    public function testExemptsTestFiles(): void
-    {
-        $this->assertErrorsOnLines('ServiceLocationInTest.inc', []);
     }
 }

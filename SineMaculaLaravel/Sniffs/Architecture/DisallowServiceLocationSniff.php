@@ -50,7 +50,7 @@ final class DisallowServiceLocationSniff implements Sniff
     public array $wiringBaseClasses = ['ServiceProvider', 'Registrar'];
 
     /** @var array<int, string> Base classes the framework constructs, leaving no injection point. */
-    public array $uninjectableBaseClasses = ['Illuminate\\Database\\Eloquent\\Factories\\Factory'];
+    public array $uninjectableBaseClasses = ['Illuminate\Database\Eloquent\Factories\Factory'];
 
     /**
      * Register the tokens this sniff listens for.

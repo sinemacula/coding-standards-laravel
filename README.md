@@ -73,24 +73,47 @@ A deliberate exception can be bypassed with the native directive - `// phpcs:ign
 
 ### PHPCS sniffs
 
-| Sniff | Enforces |
-|-------|----------|
-| `SineMaculaLaravel.Architecture.DisallowServiceLocation` | No service location (`app()`, `resolve()`, `App::make()`) inside a class body - inject collaborators instead. Targets production code: test files, container-wiring classes (service providers and registrars), classes the framework constructs itself and so leaves no injection point (a model factory, reached through `Model::factory()` - the configurable `uninjectableBaseClasses` set, whose entries are matched against the parent resolved through the file's imports when they contain a `\`, so an unrelated `Illuminate\View\Factory` is not exempted; a bare entry matches the short name, which is how a project adds an intermediate base of its own), and dynamic resolution of a runtime variable (`app($class)`, a factory that cannot be injected) are exempt. |
-| `SineMaculaLaravel.Configuration.DisallowEnvOutsideConfig` | `env()` only inside `config/` files (test code exempt); use `config()` everywhere else. |
-| `SineMaculaLaravel.Controllers.DisallowDatabaseAccess` | No `DB::` facade or direct Eloquent model queries in a controller - read through a repository. |
-| `SineMaculaLaravel.Controllers.DisallowInlineValidation` | No inline validation (`$request->validate()`, `Validator::make()`) in a controller - use a form request. |
-| `SineMaculaLaravel.Controllers.DisallowNonRestActions` | A controller's candidate actions (public, non-static instance methods) must be REST verbs or `__invoke`; statics, the constructor and framework overrides are auto-exempt. Mark a method `@non-rest-action` (a deliberate non-CRUD action) or `@utility` (not an action) to allow it. |
-| `SineMaculaLaravel.Debug.DisallowDebugStatements` | No debug calls (`dd`, `dump`, `ray`, `var_dump`, `print_r`) in committed code. A truthy second argument turns `print_r` into a plain string function that prints nothing - the form log and exception messages are built from - so it is left alone; `print_r($value, false)` and the bare form are still flagged. |
-| `SineMaculaLaravel.Eloquent.DisallowLegacyAttributeAccessor` | No legacy `getXAttribute()` / `setXAttribute()` accessors on an Eloquent model - use `Attribute::make()`. Gated on both model identity (base class) and accessor arity, so look-alike methods on other classes are clean. |
-| `SineMaculaLaravel.Routing.CollapseResourceRoutes` | Individual routes for one controller that together form a whole resource (`GET`/`POST` on the base, `GET`/`PUT`/`PATCH`/`DELETE` on `base/{param}`, each dispatched to the canonical action) are flagged to collapse into a single `Route::apiResource(...)->only([...])`. Conservative: any extra or nested route, a renamed action, an inconsistent parameter, or a per-route modifier beyond the URI-constraint family leaves the group untouched, and routes are only grouped within their enclosing `group()` closure. |
-| `SineMaculaLaravel.Services.DisallowHttpAbort` | No `abort()` / `abort_if` / `abort_unless` / `HttpException` in a service - throw a domain exception. |
-| `SineMaculaLaravel.Structure.RequireBladeLocation` | A `*.blade.php` template must live under a `resources/views` (or module `Resources/views`) directory. |
-| `SineMaculaLaravel.Structure.RequireRoleDirectory` | A class whose role is recognised by identity (what it extends/implements) must live under that role's directory - a controller under `Http/Controllers`; an entry-point provider may sit at the package root. |
-| `SineMaculaLaravel.Structure.RequireRoleNaming` | A class is named for its role: controllers/providers/form-requests/resources/policies require a suffix, models forbid `Model`/`Entity`, and the rest (jobs, listeners, events, mailables, middleware, commands, casts, rules) stay bare. |
-| `SineMaculaLaravel.Structure.RoutesLocation` | A `routes.php` file, if present, must sit at the root of an `Http` directory. |
-| `SineMaculaLaravel.TypeHints.PropertyTypeHint` | A class property declares a native type - except the framework-magic properties (`$table`, `$fillable`, `$signature`, `$model`, …, the configurable `magicProperties` set) that override an untyped parent and so cannot be typed, or a property marked `@untypeable`. |
-| `SineMaculaLaravel.TypeHints.ParameterTypeHint` | A function or method parameter declares a native type - except where a parent fixes the signature: a method carrying `#[\Override]`, or a non-private trait method (whose effective parent is the consuming class's, invisible to a token sniff). |
-| `SineMaculaLaravel.TypeHints.ReturnTypeHint` | A function, method or closure declares a native return type - except constructors/destructors/clone handlers and methods carrying `#[\Override]`. |
+| Sniff                                                        | Enforces                                                                                                                                          |
+|--------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| `SineMaculaLaravel.Architecture.DisallowServiceLocation`     | No service location (`app()`, `resolve()`, `App::make()`) in a class body - inject collaborators instead.                                         |
+| `SineMaculaLaravel.Configuration.DisallowEnvOutsideConfig`   | `env()` only inside `config/` files (test code exempt); use `config()` everywhere else.                                                           |
+| `SineMaculaLaravel.Controllers.DisallowDatabaseAccess`       | No `DB::` facade or direct Eloquent model queries in a controller - read through a repository.                                                    |
+| `SineMaculaLaravel.Controllers.DisallowInlineValidation`     | No inline validation (`$request->validate()`, `Validator::make()`) in a controller - use a form request.                                          |
+| `SineMaculaLaravel.Controllers.DisallowNonRestActions`       | A controller's actions are REST verbs or `__invoke`; `@non-rest-action` or `@utility` allows an exception.                                        |
+| `SineMaculaLaravel.Debug.DisallowDebugStatements`            | No debug calls (`dd`, `dump`, `ray`, `var_dump`, `print_r`); the string-returning `print_r($value, true)` is allowed.                             |
+| `SineMaculaLaravel.Eloquent.DisallowLegacyAttributeAccessor` | No legacy `getXAttribute()` / `setXAttribute()` accessors on an Eloquent model - use `Attribute::make()`.                                         |
+| `SineMaculaLaravel.Routing.CollapseResourceRoutes`           | Routes for one controller that together form a whole resource collapse into `Route::apiResource(...)->only([...])`.                               |
+| `SineMaculaLaravel.Services.DisallowHttpAbort`               | No `abort()` / `abort_if` / `abort_unless` / `HttpException` in a service - throw a domain exception.                                             |
+| `SineMaculaLaravel.Structure.RequireBladeLocation`           | A `*.blade.php` template must live under a `resources/views` (or module `Resources/views`) directory.                                             |
+| `SineMaculaLaravel.Structure.RequireRoleDirectory`           | A class whose role is recognised by identity lives under that role's directory - a controller under `Http/Controllers`.                           |
+| `SineMaculaLaravel.Structure.RequireRoleNaming`              | A class is named for its role - a required suffix for controllers, providers, form requests, resources and policies.                              |
+| `SineMaculaLaravel.Structure.RoutesLocation`                 | A `routes.php` file, if present, must sit at the root of an `Http` directory.                                                                     |
+| `SineMaculaLaravel.TypeHints.PropertyTypeHint`               | A class property declares a native type - except the `magicProperties` set, or a property marked `@untypeable`.                                   |
+| `SineMaculaLaravel.TypeHints.ParameterTypeHint`              | A parameter declares a native type - except where a parent fixes the signature (`#[\Override]`, a trait method).                                  |
+| `SineMaculaLaravel.TypeHints.ReturnTypeHint`                 | A function, method or closure declares a native return type - except constructors/destructors/clone handlers and methods carrying `#[\Override]`. |
+
+#### Service location
+
+The rule targets production code. Exempt are test files; container-wiring classes, recognised by a
+`Providers` namespace, a `Provider`/`Registrar` suffix or a `ServiceProvider`/`Registrar` base; classes the
+framework constructs itself and so leaves no injection point (the `uninjectableBaseClasses` set, defaulting
+to Eloquent's `Factory`); and resolution of a runtime variable, `app($class)`, which injection cannot
+replace.
+
+An entry in `uninjectableBaseClasses` containing a `\` is matched against the parent resolved through the
+file's imports, so an unrelated `Illuminate\View\Factory` is not exempted. A bare entry matches the short
+name, which is how a project adds an intermediate base of its own.
+
+#### Debug statements
+
+Only the return form is left alone: `print_r($value, false)` and the bare `print_r($value)` are still
+flagged, and `var_dump` has no return form at all.
+
+#### Resource routes
+
+`CollapseResourceRoutes` is deliberately conservative. Any extra or nested route, a renamed action, an
+inconsistent parameter, or a per-route modifier beyond the URI-constraint family leaves the group
+untouched, and routes are only grouped within their enclosing `group()` closure.
 
 #### Role-based structure
 
@@ -152,21 +175,42 @@ standard sets the base sniff's `ignoredParentClasses` to the model bases (`Model
 
 ### PHPStan rules
 
-| Identifier | Enforces |
-|------------|----------|
-| `sineMaculaLaravel.castsProperty` | No `$casts` property on an Eloquent model (a class extending `Model`/`Authenticatable`/`Pivot`) - use the `casts()` method. A non-model class with its own `$casts` is left alone. |
-| `sineMaculaLaravel.datesProperty` | No `$dates` property on a model (deprecated) - cast dates via `casts()`. |
-| `sineMaculaLaravel.massAssignment` | Every concrete production model declares mass assignment explicitly via `$fillable`/`$guarded` or the `#[Fillable]`/`#[Guarded]` attribute; models declared in tests are exempt. |
-| `sineMaculaLaravel.fillableCasts` | Every `$fillable` attribute (or `#[Fillable]` entry) on a model declares a matching cast in `casts()` (or a `$casts` property), documenting each settable field's type. Runs only on a concrete model directly extending `Model`/`Authenticatable`/`Pivot`; a `$fillable` or `casts()` that is not a plain enumerable literal (built from a variable, or merging `parent::casts()`) is skipped, and models declared in tests are exempt. |
-| `sineMaculaLaravel.relationshipReturnType` | A relationship method declares a return-type hint. |
-| `sineMaculaLaravel.modelAttribute` | Prefer a model attribute over its legacy property/method form, for the attributes a project enables (default `#[Table]`/`#[Fillable]`/`#[Hidden]`, configurable via `sineMaculaLaravel.modelAttributes`). The 13.2-only attributes are enforced only when the project's Laravel floor reaches 13.2 - taken from `sineMaculaLaravel.minLaravelVersion` or detected from the nearest `composer.json`; below that, or when undetectable, the property form is left alone. |
-| `sineMaculaLaravel.modelAttributeLaggingFloor` | The legacy form of a 13.2-only attribute in a project whose `composer.lock` already resolves to 13.2 or above while its declared floor does not. Reported instead of the silence that would otherwise defer the whole migration to the day the floor is raised. A library that deliberately supports older versions can ignore this identifier and keep the enforcement one. |
-| `sineMaculaLaravel.foreignIdFor` | A foreign key column in a migration is declared from its model - `foreignIdFor(Organization::class)` rather than `foreignUuid('organization_id')`, so the column name and key type come from one place. Flags the longhand `foreignId`/`foreignUuid`/`foreignUlid` calls whose literal column name ends in `_id`; a dynamic name, and any other column, are left alone. Bypass a column pointing at a table this service does not own with `@phpstan-ignore sineMaculaLaravel.foreignIdFor`. |
-| `sineMaculaLaravel.migrationMethods` | A migration defines both `up()` and `down()`. |
-| `sineMaculaLaravel.schemaNaming` | Table and column names in a migration use snake_case. Inspects the literal name arguments of the `Schema` table calls and the Blueprint column/index methods (value arguments and dynamic names are left alone). Digits are allowed (`line_1`, `oauth2`); only casing is enforced. |
-| `sineMaculaLaravel.formRequestRules` | A form request (under `Http\Requests`) defines a `rules()` method. Classes declared in tests, where the namespace merely mirrors the production tree, are exempt. |
-| `sineMaculaLaravel.factoryTimestamps` | A factory `definition()` must not set `created_at` / `updated_at`. |
-| `sineMaculaLaravel.resourceFieldNaming` | Field keys in a resource's `toArray()` result use snake_case, nested arrays included. Inspects the string-literal keys of the array returned directly from `toArray()` on a `JsonResource`; computed keys, a non-literal return, and non-resource classes are left alone. Digits are allowed (`line_1`); only casing is enforced. |
+| Identifier                                     | Enforces                                                                                                      |
+|------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| `sineMaculaLaravel.castsProperty`              | No `$casts` property on an Eloquent model - use the `casts()` method.                                         |
+| `sineMaculaLaravel.datesProperty`              | No `$dates` property on a model (deprecated) - cast dates via `casts()`.                                      |
+| `sineMaculaLaravel.massAssignment`             | Every concrete production model declares mass assignment via `$fillable`/`$guarded` or the attribute form.    |
+| `sineMaculaLaravel.fillableCasts`              | Every `$fillable` entry on a model declares a matching cast, documenting each settable field's type.          |
+| `sineMaculaLaravel.relationshipReturnType`     | A relationship method declares a return-type hint.                                                            |
+| `sineMaculaLaravel.modelAttribute`             | Prefer a model attribute over its legacy property or method form, for the attributes a project enables.       |
+| `sineMaculaLaravel.modelAttributeLaggingFloor` | The legacy form of an attribute the project already resolves a Laravel version for, while its floor does not. |
+| `sineMaculaLaravel.foreignIdFor`               | A foreign key column in a migration is declared from its model - `foreignIdFor(Organization::class)`.         |
+| `sineMaculaLaravel.migrationMethods`           | A migration defines both `up()` and `down()`.                                                                 |
+| `sineMaculaLaravel.schemaNaming`               | Table and column names in a migration use snake_case; digits are allowed, only casing is enforced.            |
+| `sineMaculaLaravel.formRequestRules`           | A form request (under `Http\Requests`) defines a `rules()` method; classes declared in tests are exempt.      |
+| `sineMaculaLaravel.factoryTimestamps`          | A factory `definition()` must not set `created_at` / `updated_at`.                                            |
+| `sineMaculaLaravel.resourceFieldNaming`        | Field keys in a resource's `toArray()` result use snake_case, nested arrays included.                         |
+
+#### Model attributes and the version gate
+
+`modelAttribute` mandates the attributes a project enables - by default `#[Table]`, `#[Fillable]` and
+`#[Hidden]`, configurable through `sineMaculaLaravel.modelAttributes`. Those landed in Laravel 13.2, so they
+are enforced only once the project's floor reaches it, taken from `sineMaculaLaravel.minLaravelVersion` or
+detected from the nearest `composer.json`.
+
+Where the floor sits below 13.2 but `composer.lock` already resolves above it, the legacy form is reported
+under `modelAttributeLaggingFloor` instead. The attribute cannot be adopted until the floor moves, but the
+gap stays visible rather than arriving as a bulk migration the day it does. A package that supports older
+versions deliberately can ignore that identifier and keep the enforcement one.
+
+#### What the model and migration rules inspect
+
+`fillableCasts` runs only on a concrete model directly extending `Model`/`Authenticatable`/`Pivot`, and
+skips a `$fillable` or `casts()` that is not a plain enumerable literal. `schemaNaming` and
+`resourceFieldNaming` inspect string literals only, so computed keys and dynamic names are left alone.
+`foreignIdFor` flags the longhand `foreignId`/`foreignUuid`/`foreignUlid` calls whose literal column name
+ends in `_id`; bypass a column pointing at a table this service does not own with `@phpstan-ignore
+sineMaculaLaravel.foreignIdFor`. Classes declared in tests are exempt throughout.
 
 #### Builder calls under the strict rules
 
@@ -174,7 +218,7 @@ Larastan reflects every method forwarded onto an Eloquent builder - the query me
 `#[Scope]` - as a static method, so `phpstan-strict-rules` reads ordinary query code as a dynamic
 call to a static one:
 
-```
+```text
 Dynamic call to static method Illuminate\Database\Eloquent\Builder<App\Models\Credential>::whereNull().
 ```
 

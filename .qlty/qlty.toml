@@ -89,6 +89,12 @@ name = "trufflehog"
 [[plugin]]
 name = "editorconfig-checker"
 
+# Markdown is checked against the shared standard's own markdownlint config,
+# exported by the sinemacula source - the tables here are aligned because it
+# says so (MD060), which nothing in this repo was enforcing before.
+[[plugin]]
+name = "markdownlint"
+
 # Dogfood the SineMacula PHP standards on this repo's own code. phpcs and php-cs-fixer
 # read the in-tree configs under .qlty/configs (phpcs.xml, .php-cs-fixer.dist.php). The
 # shared standard plus slevomat + the installer come from composer.json so the ruleset's

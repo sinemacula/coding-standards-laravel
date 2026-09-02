@@ -108,13 +108,18 @@ package_filters = ["slevomat", "dealerdirect", "sinemacula"]
 
 # Pinned to a release the shared standard's own constraint accepts - it requires
 # ^3.95.19, and a pin below that leaves the sandbox install unresolvable, which
-# takes the whole run down rather than reporting findings. Kept exact so the
-# version that runs here is the one CI resolves.
+# takes the whole run down rather than reporting findings.
+#
+# symfony/console is filtered in alongside it so the sandbox takes the ^7.4 this
+# repo already declares. Left to resolve on its own it reaches console 8, which
+# needs PHP 8.4.1 and is written in 8.4 syntax, so the 8.3 runner cannot parse
+# it - a build error rather than a findings failure, and one that only appears
+# on a cold install, so a warm local sandbox goes on passing while CI fails.
 [[plugin]]
 name = "php-cs-fixer"
 version = "3.95.24"
 package_file = "composer.json"
-package_filters = ["sinemacula"]
+package_filters = ["sinemacula", "symfony/console"]
 
 # phpstan is NOT wired here: qlty Cloud never runs `composer install`, so it cannot
 # autoload the in-repo PHPStan rules or scan PHP_CodeSniffer's non-PSR-4 source that

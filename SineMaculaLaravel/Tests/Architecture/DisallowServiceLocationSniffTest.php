@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversTrait;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsFunctionCalls;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsTestClasses;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesImports;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
 use SineMaculaLaravel\Sniffs\Architecture\DisallowServiceLocationSniff;
 use SineMaculaLaravel\Tests\AbstractSniffTestCase;
@@ -23,9 +24,13 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 #[CoversClass(DisallowServiceLocationSniff::class)]
 #[CoversTrait(DetectsFunctionCalls::class)]
 #[CoversTrait(DetectsTestClasses::class)]
+#[CoversTrait(ResolvesImports::class)]
 #[CoversTrait(ResolvesNamespace::class)]
 final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
 {
+    /** @var array<int, string>|null Uninjectable bases for the sniff under test, or null for the default. */
+    private ?array $uninjectableBaseClasses = null;
+
     /**
      * Container helpers and the App::make/App::makeWith facade with a literal
      * class are flagged inside a class; injected dependencies, helpers outside
@@ -101,6 +106,82 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     public function testExemptsClassesTheFrameworkConstructs(): void
     {
         $this->assertErrorsOnLines('Factory.inc', []);
+    }
+
+    /**
+     * A class extending an unrelated framework class whose name merely ends in
+     * the same word - Illuminate\View\Factory - is an ordinary injectable
+     * service, so its service location is still reported.
+     *
+     * @return void
+     */
+    public function testDoesNotExemptAnUnrelatedBaseOfTheSameShortName(): void
+    {
+        $this->assertErrorsOnLines('ViewFactory.inc', [13, 20]);
+    }
+
+    /**
+     * A factory behind an intermediate base of the project's own is exempt once
+     * that base is configured, which is how a bare entry is matched.
+     *
+     * @return void
+     */
+    public function testExemptsAFactoryBehindAConfiguredIntermediateBase(): void
+    {
+        $this->uninjectableBaseClasses = ['Illuminate\\Database\\Eloquent\\Factories\\Factory', 'BaseFactory'];
+
+        $this->assertErrorsOnLines('FactoryIntermediateBase.inc', []);
+    }
+
+    /**
+     * Without that configuration the intermediate base is unknown, so the
+     * factory beneath it is reported.
+     *
+     * @return void
+     */
+    public function testReportsAFactoryBehindAnUnconfiguredIntermediateBase(): void
+    {
+        $this->assertErrorsOnLines('FactoryIntermediateBase.inc', [12]);
+    }
+
+    /**
+     * A configured base may be written with a leading separator, as it would be
+     * in an import.
+     *
+     * @return void
+     */
+    public function testAcceptsAConfiguredBaseWrittenFullyQualified(): void
+    {
+        $this->uninjectableBaseClasses = ['\\Illuminate\\Database\\Eloquent\\Factories\\Factory'];
+
+        $this->assertErrorsOnLines('Factory.inc', []);
+    }
+
+    /**
+     * A qualified entry matches whole segments, so a parent whose namespace
+     * merely ends in the same letters - App\Support\MyFactories\Factory against
+     * Factories\Factory - is not exempted.
+     *
+     * @return void
+     */
+    public function testMatchesQualifiedBasesOnSegmentBoundaries(): void
+    {
+        $this->uninjectableBaseClasses = ['Factories\\Factory'];
+
+        $this->assertErrorsOnLines('PartialSegmentFactory.inc', [11]);
+    }
+
+    /**
+     * Property overrides to apply to the sniff under test.
+     *
+     * @return array<string, mixed>
+     */
+    #[\Override]
+    protected function sniffProperties(): array
+    {
+        return $this->uninjectableBaseClasses === null
+            ? []
+            : ['uninjectableBaseClasses' => $this->uninjectableBaseClasses];
     }
 
     /**

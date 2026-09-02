@@ -8,6 +8,7 @@ use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsFunctionCalls;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsTestClasses;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesImports;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
 
 /**
@@ -33,6 +34,7 @@ final class DisallowServiceLocationSniff implements Sniff
 {
     use DetectsFunctionCalls;
     use DetectsTestClasses;
+    use ResolvesImports;
     use ResolvesNamespace;
 
     /** @var array<int, string> Container helper functions forbidden inside a class body. */
@@ -47,8 +49,8 @@ final class DisallowServiceLocationSniff implements Sniff
     /** @var array<int, string> Base classes (short name) marking container-wiring code. */
     public array $wiringBaseClasses = ['ServiceProvider', 'Registrar'];
 
-    /** @var array<int, string> Base classes (short name) the framework constructs, leaving no injection point. */
-    public array $uninjectableBaseClasses = ['Factory'];
+    /** @var array<int, string> Base classes the framework constructs, leaving no injection point. */
+    public array $uninjectableBaseClasses = ['Illuminate\\Database\\Eloquent\\Factories\\Factory'];
 
     /**
      * Register the tokens this sniff listens for.
@@ -215,9 +217,49 @@ final class DisallowServiceLocationSniff implements Sniff
     private function isUninjectableClass(File $phpcsFile, int $stackPtr): bool
     {
         $classPtr = $phpcsFile->getCondition($stackPtr, T_CLASS);
+        $parent   = $classPtr === false ? false : $phpcsFile->findExtendedClassName($classPtr);
 
-        return $classPtr !== false
-            && $this->extendsBase($phpcsFile->findExtendedClassName($classPtr), $this->uninjectableBaseClasses);
+        if ($parent === false) {
+            return false;
+        }
+
+        return $this->matchesUninjectableBase($phpcsFile, (int) $classPtr, $parent);
+    }
+
+    /**
+     * Whether the parent, as written, is one of the configured uninjectable
+     * bases.
+     *
+     * An entry containing a separator is matched against the parent resolved
+     * through the file's imports, so a base is identified by the class it
+     * actually names rather than by a word other classes happen to end with. A
+     * bare entry is matched against the short name, which is how a project
+     * names an intermediate base of its own.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  int  $classPtr
+     * @param  string  $parent
+     * @return bool
+     */
+    private function matchesUninjectableBase(File $phpcsFile, int $classPtr, string $parent): bool
+    {
+        $qualified = $this->qualify(
+            $this->importMap($phpcsFile, $classPtr),
+            $this->namespaceName($phpcsFile),
+            $parent,
+        );
+
+        foreach ($this->uninjectableBaseClasses as $base) {
+            $matched = str_contains($base, '\\')
+                ? str_ends_with('\\' . $qualified, '\\' . ltrim($base, '\\'))
+                : $this->shortNameOf($parent) === $base;
+
+            if ($matched) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -230,7 +272,7 @@ final class DisallowServiceLocationSniff implements Sniff
     private function isWiringDeclaration(File $phpcsFile, int $classPtr): bool
     {
         return $this->hasWiringSuffix($phpcsFile->getDeclarationName($classPtr))
-            || $this->extendsBase($phpcsFile->findExtendedClassName($classPtr), $this->wiringBaseClasses);
+            || $this->extendsWiringBase($phpcsFile->findExtendedClassName($classPtr));
     }
 
     /**
@@ -251,21 +293,29 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Whether the extended class short name is one of the given base classes.
+     * Whether the extended class short name is a configured wiring base.
+     *
+     * Wiring bases are matched by short name alone: the set includes names such
+     * as Registrar that have no one qualified form to compare against.
      *
      * @param  false|string  $parent
-     * @param  array<int, string>  $bases
      * @return bool
      */
-    private function extendsBase(false|string $parent, array $bases): bool
+    private function extendsWiringBase(false|string $parent): bool
     {
-        if ($parent === false) {
-            return false;
-        }
+        return $parent !== false && in_array($this->shortNameOf($parent), $this->wiringBaseClasses, true);
+    }
 
-        $position = strrpos($parent, '\\');
-        $short    = $position === false ? $parent : substr($parent, $position + 1);
+    /**
+     * Reduce a name as written to its trailing segment.
+     *
+     * @param  string  $name
+     * @return string
+     */
+    private function shortNameOf(string $name): string
+    {
+        $position = strrpos($name, '\\');
 
-        return in_array($short, $bases, true);
+        return $position === false ? $name : substr($name, $position + 1);
     }
 }

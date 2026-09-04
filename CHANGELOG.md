@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.6.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.5.0...v1.6.0) (2026-09-04)
+
+
+### Features
+
+* limit a model to its schema and its relations ([#93](https://github.com/sinemacula/coding-standards-laravel/issues/93)) ([7e0b2a3](https://github.com/sinemacula/coding-standards-laravel/commit/7e0b2a3e85c33504ec7432aac285e9de12939a63))
+* require foreign key columns to be declared from their model ([#88](https://github.com/sinemacula/coding-standards-laravel/issues/88)) ([d456f83](https://github.com/sinemacula/coding-standards-laravel/commit/d456f83106942d88d86967c5d95ef0c78126aeeb))
+
+
+### Bug Fixes
+
+* exempt classes the framework constructs from the service location rule ([#89](https://github.com/sinemacula/coding-standards-laravel/issues/89)) ([f0d130f](https://github.com/sinemacula/coding-standards-laravel/commit/f0d130f4a576035ebfb3f3583e8ebedce428dde8))
+* identify uninjectable bases by the class they name ([#91](https://github.com/sinemacula/coding-standards-laravel/issues/91)) ([85c50d3](https://github.com/sinemacula/coding-standards-laravel/commit/85c50d3346a53eb2f8d40b8eb80c07072dfba7b1))
+* ignore the builder calls larastan reflects as static methods ([#84](https://github.com/sinemacula/coding-standards-laravel/issues/84)) ([c5418b3](https://github.com/sinemacula/coding-standards-laravel/commit/c5418b39171935373eb4fbf1ba2c83f63b2f9a4e))
+* make the property rules inheritance-aware across the framework, not just models ([#81](https://github.com/sinemacula/coding-standards-laravel/issues/81)) ([cd4b065](https://github.com/sinemacula/coding-standards-laravel/commit/cd4b065d5feb40e2aef1a27afc3ca628ee5e9910))
+* pin the model migration scan to the project being analysed ([#85](https://github.com/sinemacula/coding-standards-laravel/issues/85)) ([4fa7361](https://github.com/sinemacula/coding-standards-laravel/commit/4fa736140b4cefba894a0335cdb0ad2b52cf14a5))
+* report a lagging Laravel floor instead of hiding the model attributes ([#83](https://github.com/sinemacula/coding-standards-laravel/issues/83)) ([45e32f2](https://github.com/sinemacula/coding-standards-laravel/commit/45e32f217fd5ffef530bb56be3d030d60d564f2f))
+* stop documenting a PHPStan level that never applies ([#86](https://github.com/sinemacula/coding-standards-laravel/issues/86)) ([f8c62c8](https://github.com/sinemacula/coding-standards-laravel/commit/f8c62c806de184fb1f8a4ab88f1ecd8d87e85ba6))
+* stop flagging the print_r form that returns instead of printing ([#87](https://github.com/sinemacula/coding-standards-laravel/issues/87)) ([b47392c](https://github.com/sinemacula/coding-standards-laravel/commit/b47392cfd8153a6b9b62a0b9a9b891b49cae0f43))
+
 ## [1.5.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.4.0...v1.5.0) (2026-07-25)
 
 

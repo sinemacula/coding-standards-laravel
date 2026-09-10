@@ -6,6 +6,15 @@
     colors="true"
     cacheDirectory=".phpunit.cache"
 >
+    <!--
+        The rule fixtures extend the real framework classes, so PHPStan resolves
+        Eloquent's full ancestry while they are analysed. That needs more than
+        the stock limit.
+    -->
+    <php>
+        <ini name="memory_limit" value="1G"/>
+    </php>
+
     <testsuites>
         <testsuite name="SineMaculaLaravel">
             <directory>SineMaculaLaravel/Tests</directory>

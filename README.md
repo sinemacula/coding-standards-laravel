@@ -175,29 +175,60 @@ standard sets the base sniff's `ignoredParentClasses` to the model bases (`Model
 
 ### PHPStan rules
 
-| Identifier                                     | Enforces                                                                                                      |
-|------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
-| `sineMaculaLaravel.castsProperty`              | No `$casts` property on an Eloquent model - use the `casts()` method.                                         |
-| `sineMaculaLaravel.datesProperty`              | No `$dates` property on a model (deprecated) - cast dates via `casts()`.                                      |
-| `sineMaculaLaravel.massAssignment`             | Every concrete production model declares mass assignment via `$fillable`/`$guarded` or the attribute form.    |
-| `sineMaculaLaravel.fillableCasts`              | Every `$fillable` entry on a model declares a matching cast, documenting each settable field's type.          |
-| `sineMaculaLaravel.relationshipReturnType`     | A relationship method declares a return-type hint.                                                            |
-| `sineMaculaLaravel.modelBehaviour`             | A model carries its schema and its relations; behaviour belongs to a repository or a service.                 |
-| `sineMaculaLaravel.modelAttribute`             | Prefer a model attribute over its legacy property or method form, for the attributes a project enables.       |
-| `sineMaculaLaravel.modelAttributeLaggingFloor` | The legacy form of an attribute the project already resolves a Laravel version for, while its floor does not. |
-| `sineMaculaLaravel.foreignIdFor`               | A foreign key column in a migration is declared from its model - `foreignIdFor(Organization::class)`.         |
-| `sineMaculaLaravel.migrationMethods`           | A migration defines both `up()` and `down()`.                                                                 |
-| `sineMaculaLaravel.schemaNaming`               | Table and column names in a migration use snake_case; digits are allowed, only casing is enforced.            |
-| `sineMaculaLaravel.formRequestRules`           | A form request (under `Http\Requests`) defines a `rules()` method; classes declared in tests are exempt.      |
-| `sineMaculaLaravel.factoryTimestamps`          | A factory `definition()` must not set `created_at` / `updated_at`.                                            |
-| `sineMaculaLaravel.resourceFieldNaming`        | Field keys in a resource's `toArray()` result use snake_case, nested arrays included.                         |
+| Identifier                                     | Enforces                                                                                                                 |
+|------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| `sineMaculaLaravel.castsProperty`              | No `$casts` property on an Eloquent model - use the `casts()` method.                                                    |
+| `sineMaculaLaravel.datesProperty`              | No `$dates` property on a model (deprecated) - cast dates via `casts()`.                                                 |
+| `sineMaculaLaravel.massAssignment`             | Every concrete production model declares mass assignment via `$fillable`/`$guarded` or the attribute form.               |
+| `sineMaculaLaravel.fillableCasts`              | Every `$fillable` entry on a model declares a matching cast, documenting each settable field's type.                     |
+| `sineMaculaLaravel.relationshipReturnType`     | A relationship method declares a return-type hint.                                                                       |
+| `sineMaculaLaravel.modelBehaviour`             | A model, at any depth of ancestry, carries its schema and its relations; behaviour belongs to a repository or a service. |
+| `sineMaculaLaravel.modelAttribute`             | Prefer a model attribute over its legacy property or method form, for the attributes a project enables.                  |
+| `sineMaculaLaravel.modelAttributeLaggingFloor` | The legacy form of an attribute the project already resolves a Laravel version for, while its floor does not.            |
+| `sineMaculaLaravel.foreignIdFor`               | A foreign key column in a migration is declared from its model - `foreignIdFor(Organization::class)`.                    |
+| `sineMaculaLaravel.migrationMethods`           | A migration defines both `up()` and `down()`.                                                                            |
+| `sineMaculaLaravel.schemaNaming`               | Table and column names in a migration use snake_case; digits are allowed, only casing is enforced.                       |
+| `sineMaculaLaravel.formRequestRules`           | A form request (under `Http\Requests`) defines a `rules()` method; classes declared in tests are exempt.                 |
+| `sineMaculaLaravel.factoryTimestamps`          | A factory `definition()` must not set `created_at` / `updated_at`.                                                       |
+| `sineMaculaLaravel.resourceFieldNaming`        | Field keys in a resource's `toArray()` result use snake_case, nested arrays included.                                    |
 
 #### What a model may carry
 
 `modelBehaviour` limits a model's own surface to what describes a record. Permitted are its relations,
-recognised the same way `relationshipReturnType` recognises them; accessors and mutators, recognised by
-an `Attribute` return type rather than by name; and the framework hooks named in
-`sineMaculaLaravel.modelHooks`, which is configurable because the framework adds to them over time.
+recognised the same way `relationshipReturnType` recognises them; accessors and mutators, recognised by an
+`Attribute` return type rather than by name; the framework hooks named in `sineMaculaLaravel.modelHooks`,
+which is configurable because the framework adds to them over time; and any public method declared by an
+interface the model's own author opted into.
+
+Every method the class declares is read, so moving one into a trait does not take it out of scope, and an
+anonymous class extending a model base is read like any other. A method a trait imports is reported against
+the line the class declares itself on, because the trait may live in another file.
+
+A model is recognised through its whole ancestry, so a project that puts its own base class between its
+models and `Model`, `Authenticatable` or `Pivot` is covered like any other. It is the only model rule that
+does: `castsProperty`, `massAssignment`, `fillableCasts` and `modelAttribute` each match the immediate
+parent name as written, and `datesProperty` does not look at the parent at all - it reports a `$dates`
+property wherever one appears.
+
+The parent name as written is read alongside the resolved ancestry rather than only when nothing resolves,
+so a model whose parent is written as `Model`, `Authenticatable` or `Pivot` stays covered where a dependency
+is only partly installed and the ancestry above that parent is invisible. What name-based recovery cannot
+reach is a base class of the project's own, named something else, that resolves while the framework base
+above it does not: nothing in the model or its resolved ancestry names a model base, and it is left alone.
+
+The interface exemption covers only the contracts the model's own author opted into, whether the class, a
+base class of the project's own or a package declares them. The contracts the framework base already
+carries are excluded: `Model` itself implements `Arrayable`, `ArrayAccess`, `JsonSerializable` and six
+more, so honouring those would exempt `toArray()`, `jsonSerialize()` and the array-access methods on every
+model there is - and `toArray()` is the canonical way behaviour gets smuggled onto one.
+
+An abstract method inherited from a base class is not exempt either. That obligation is written in the
+project itself, and the rule already reports it where the base declares it, so exempting the implementations
+would turn one suppression on a base class into unpoliced behaviour on every model beneath it. The mandate
+and each implementation of it are reported separately; where the mandate is deliberate, silence each report
+with `@phpstan-ignore sineMaculaLaravel.modelBehaviour` in the method's own docblock. A report against a
+trait-imported method is anchored to the class declaration rather than the trait, so it is silenced there
+rather than in the trait.
 
 Only public methods are reported: a non-public helper called from a relation is detail, whereas a public
 one is what other layers reach for. A query scope is the exception, reported whatever its visibility,

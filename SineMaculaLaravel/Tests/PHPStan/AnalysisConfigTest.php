@@ -7,6 +7,7 @@ namespace SineMaculaLaravel\Tests\PHPStan;
 use PHPStan\DependencyInjection\NeonAdapter;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
+use SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowModelBehaviourRule;
 
 /**
  * Tests the analysis config this package ships to consuming projects.
@@ -107,6 +108,24 @@ final class AnalysisConfigTest extends TestCase
 
         self::assertIsArray($paths, 'The shipped config declares no databaseMigrationsPath.');
         self::assertContains('%currentWorkingDirectory%/database/migrations', $paths);
+    }
+
+    /**
+     * The hook set the shipped config names and the rule's own default are the
+     * same list. Nothing else holds the two together: a project that leaves the
+     * parameter alone runs the config's list, while the rule tests construct
+     * the rule without one, so the pair can drift apart unnoticed.
+     *
+     * @return void
+     */
+    public function testShipsTheHookSetTheRuleDefaultsTo(): void
+    {
+        $shipped = self::readConfig()['parameters']['sineMaculaLaravel']['modelHooks'] ?? null;
+        $default = (new \ReflectionParameter([DisallowModelBehaviourRule::class, '__construct'], 'hooks'))
+            ->getDefaultValue();
+
+        self::assertIsArray($shipped, 'The shipped config declares no modelHooks.');
+        self::assertSame($default, $shipped);
     }
 
     /**

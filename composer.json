@@ -28,7 +28,13 @@
     "autoload-dev": {
         "psr-4": {
             "SineMaculaLaravel\\Tests\\": "SineMaculaLaravel/Tests/"
-        }
+        },
+        "classmap": [
+            "SineMaculaLaravel/Tests/PHPStan/data/model-behaviour.inc",
+            "SineMaculaLaravel/Tests/PHPStan/data/model-behaviour-inheritance.inc",
+            "SineMaculaLaravel/Tests/PHPStan/data/model-behaviour-declared.inc",
+            "SineMaculaLaravel/Tests/PHPStan/data/model-behaviour-partial.inc"
+        ]
     },
     "extra": {
         "phpstan": {
@@ -46,7 +52,8 @@
         "phpstan/phpstan": "^2.1",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan-phpunit": "^2.0",
-        "symfony/console": "^7.4"
+        "symfony/console": "^7.4",
+        "laravel/framework": "^12.0"
     },
     "config": {
         "allow-plugins": {

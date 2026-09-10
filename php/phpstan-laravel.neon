@@ -45,11 +45,19 @@ parameters:
         # not append.
         modelHooks:
             - casts
-            - booted
             - boot
+            - booting
+            - booted
             - newFactory
-            - getRouteKeyName
+            - newCollection
+            - newEloquentBuilder
             - uniqueIds
+            - newUniqueId
+            - getRouteKeyName
+            - resolveRouteBindingQuery
+            - getMorphClass
+            - prunable
+            - toSearchableArray
 
     # Where the migrations that describe each model's columns live. Larastan
     # falls back to the application's own database path when this is unset,

@@ -89,9 +89,6 @@ name = "trufflehog"
 [[plugin]]
 name = "editorconfig-checker"
 
-# Markdown is checked against the shared standard's own markdownlint config,
-# exported by the sinemacula source - the tables here are aligned because it
-# says so (MD060), which nothing in this repo was enforcing before.
 [[plugin]]
 name = "markdownlint"
 
@@ -106,15 +103,9 @@ mode = "comment"
 package_file = "composer.json"
 package_filters = ["slevomat", "dealerdirect", "sinemacula"]
 
-# Pinned to a release the shared standard's own constraint accepts - it requires
-# ^3.95.19, and a pin below that leaves the sandbox install unresolvable, which
-# takes the whole run down rather than reporting findings.
-#
-# symfony/console is filtered in alongside it so the sandbox takes the ^7.4 this
-# repo already declares. Left to resolve on its own it reaches console 8, which
-# needs PHP 8.4.1 and is written in 8.4 syntax, so the 8.3 runner cannot parse
-# it - a build error rather than a findings failure, and one that only appears
-# on a cold install, so a warm local sandbox goes on passing while CI fails.
+# Pinned to a release the shared standard accepts (^3.95.19). symfony/console is
+# filtered in so the sandbox takes this repo's ^7.4; console 8 needs PHP 8.4.1
+# and the 8.3 runner cannot parse it.
 [[plugin]]
 name = "php-cs-fixer"
 version = "3.95.24"

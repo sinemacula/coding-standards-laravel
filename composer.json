@@ -17,8 +17,9 @@
         "friendsofphp/php-cs-fixer": "^3.0"
     },
     "suggest": {
-        "phpstan/phpstan-phpunit": "PHPUnit-aware PHPStan rules. Auto-registers via phpstan/extension-installer.",
-        "phpstan/extension-installer": "Auto-registers the Laravel PHPStan rules (required for the shared php/phpstan-laravel.neon to load)."
+        "larastan/larastan": "Eloquent-aware analysis. The shipped config tunes it, and the builder ignore and migration path only do anything with it installed.",
+        "phpstan/extension-installer": "Auto-registers the Laravel PHPStan rules (required for the shared php/phpstan-laravel.neon to load).",
+        "phpstan/phpstan-phpunit": "PHPUnit-aware PHPStan rules. Auto-registers via phpstan/extension-installer."
     },
     "autoload": {
         "psr-4": {

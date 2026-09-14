@@ -109,6 +109,14 @@ parameters:
             - Illuminate\Validation\ValidationException
 
 parametersSchema:
+    # Declared here because the config above sets it. The parameter is read by
+    # the Laravel extension, and PHPStan rejects a parameter no schema declares -
+    # so without this the shipped config refuses to start in a project that
+    # analyses without that extension, as a configuration error rather than a
+    # finding. Declaring it costs nothing where the extension is present, which
+    # declares it identically.
+    databaseMigrationsPath: listOf(string())
+
     sineMaculaLaravel: structure([
         modelAttributes: listOf(string())
         minLaravelVersion: string()

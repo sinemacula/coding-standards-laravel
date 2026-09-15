@@ -283,6 +283,11 @@ parameters:
 
 #### Where model columns come from
 
+This section, and the builder ignore above it, describe behaviour that comes from larastan. The package
+suggests it rather than requiring it, so that a project analysing without it is not made to install a
+framework it does not use; the rules this package ships work either way, and the two settings written for
+larastan are inert without it rather than fatal.
+
 A model's columns are read from its migrations, and everything that rests on them - the property
 checks, the cast types, the `model property of ...` parameter types - is only as good as that scan.
 Left unset, larastan resolves the path from the booted application rather than from the project being

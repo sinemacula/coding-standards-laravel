@@ -129,6 +129,28 @@ final class AnalysisConfigTest extends TestCase
     }
 
     /**
+     * Every parameter the config sets outside PHPStan's own is declared by the
+     * config itself. PHPStan rejects a parameter no schema declares, so one set
+     * here on behalf of another extension stops the whole run - a configuration
+     * error rather than a finding - in any project that analyses without that
+     * extension installed.
+     *
+     * @return void
+     */
+    public function testDeclaresTheParametersItSetsForOtherExtensions(): void
+    {
+        $config = self::readConfig();
+
+        self::assertArrayHasKey(
+            'databaseMigrationsPath',
+            $config['parametersSchema'] ?? [],
+            'The config sets databaseMigrationsPath without declaring it, which refuses to start without the '
+            . 'extension that owns it.',
+        );
+        self::assertArrayHasKey('databaseMigrationsPath', $config['parameters'] ?? []);
+    }
+
+    /**
      * Assert the shipped pattern ignores a report.
      *
      * @param  string  $report

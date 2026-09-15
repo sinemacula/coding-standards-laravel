@@ -25,24 +25,11 @@ parameters:
             - Fillable
             - Hidden
 
-        # Explicit minimum Laravel version for the 13.2-only attributes
-        # (#[Table]/#[Fillable]/#[Hidden]). Leave empty to detect it from the
-        # nearest composer.json; set e.g. "13.2" to enforce them regardless.
-        #
-        # Where the declared floor sits below 13.2 but composer.lock resolves
-        # above it, the legacy form is reported under the separate
-        # sineMaculaLaravel.modelAttributeLaggingFloor identifier rather than
-        # passed over: the attribute cannot be adopted until the floor moves,
-        # but the gap stays visible instead of becoming a bulk migration later.
-        # A package that supports older versions on purpose can ignore that
-        # identifier and keep the enforcement one.
+        # Leave empty to detect the floor from the nearest composer.json.
         minLaravelVersion: ''
 
-        # Methods DisallowModelBehaviourRule permits on a model besides its
-        # relations and accessors: the framework hooks a model legitimately
-        # implements. The framework adds to these over time, so a project on an
-        # older release may need a different set. Use `modelHooks!:` to replace,
-        # not append.
+        # Hooks a model may declare besides its relations and accessors.
+        # Use `modelHooks!:` to replace, not append.
         modelHooks:
             - casts
             - boot
@@ -59,39 +46,13 @@ parameters:
             - prunable
             - toSearchableArray
 
-    # Where the migrations that describe each model's columns live. Larastan
-    # falls back to the application's own database path when this is unset,
-    # which resolves from the booted application rather than from the project
-    # being analysed. An isolated runner can boot it somewhere other than the
-    # working directory, and the two then disagree: no migration is found, no
-    # model has any columns, and the model property checks quietly stop
-    # covering anything. Naming the path pins it to the project instead.
-    #
-    # A project whose migrations sit elsewhere, or that keeps them per module,
-    # replaces this with its own paths - the entries accept globs:
-    #
-    #     databaseMigrationsPath!:
-    #         - %currentWorkingDirectory%/database/migrations
-    #         - %currentWorkingDirectory%/app/*/Database/Migrations
+    # Pins the column scan to the project; unset, it resolves from the booted
+    # application, which an isolated runner can boot elsewhere.
     databaseMigrationsPath:
         - %currentWorkingDirectory%/database/migrations
 
-    # Larastan reflects every method forwarded onto an Eloquent builder - the
-    # query methods and any #[Scope] - as a static method, so the strict rules
-    # read ordinary query code as a dynamic call to a static one. The report is
-    # an artefact of that reflection rather than anything about the code, and it
-    # lands on essentially every query in a project, so it cannot be answered at
-    # the call site. Scoped to the builder classes rather than turned off, so a
-    # genuine dynamic call to a static method elsewhere is still reported.
-    #
-    # A model pointing at its own builder with #[UseEloquentBuilder] is reported
-    # against that class instead, which no shipped pattern can name. Such a
-    # project adds its own entry alongside this one:
-    #
-    #     ignoreErrors:
-    #         -
-    #             identifier: staticMethod.dynamicCall
-    #             message: '#^Dynamic call to static method App\\Builders\\#'
+    # Methods forwarded onto a builder are reflected as static, so ordinary
+    # query code reads as a dynamic call to a static method.
     ignoreErrors:
         -
             identifier: staticMethod.dynamicCall
@@ -109,6 +70,9 @@ parameters:
             - Illuminate\Validation\ValidationException
 
 parametersSchema:
+    # Set above but owned by the Laravel extension; an undeclared one is rejected.
+    databaseMigrationsPath: listOf(string())
+
     sineMaculaLaravel: structure([
         modelAttributes: listOf(string())
         minLaravelVersion: string()

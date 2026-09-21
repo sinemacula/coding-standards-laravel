@@ -6,6 +6,7 @@ namespace SineMaculaLaravel\Tests\Controllers;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversTrait;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDeclarationNames;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDocblockTags;
 use SineMaculaLaravel\Sniffs\Controllers\DisallowNonRestActionsSniff;
 use SineMaculaLaravel\Tests\AbstractSniffTestCase;
@@ -19,6 +20,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
  * @internal
  */
 #[CoversClass(DisallowNonRestActionsSniff::class)]
+#[CoversTrait(ReadsDeclarationNames::class)]
 #[CoversTrait(ReadsDocblockTags::class)]
 final class DisallowNonRestActionsSniffTest extends AbstractSniffTestCase
 {

@@ -6,6 +6,7 @@ namespace SineMaculaLaravel\Sniffs\Eloquent;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDeclarationNames;
 
 /**
  * Disallow legacy Eloquent accessors and mutators.
@@ -22,6 +23,8 @@ use PHP_CodeSniffer\Sniffs\Sniff;
  */
 final class DisallowLegacyAttributeAccessorSniff implements Sniff
 {
+    use ReadsDeclarationNames;
+
     /** @var array<int, string> Eloquent model base classes (matched by short name). */
     public array $modelBaseClasses = ['Model', 'Authenticatable', 'Pivot'];
 
@@ -46,9 +49,9 @@ final class DisallowLegacyAttributeAccessorSniff implements Sniff
     #[\Override]
     public function process(File $phpcsFile, $stackPtr): void
     {
-        $name = $phpcsFile->getDeclarationName($stackPtr);
+        $name = $this->declarationName($phpcsFile, $stackPtr);
 
-        if ($name === null || preg_match('/^(get|set)[A-Z]\w*Attribute$/', $name, $matches) !== 1) {
+        if (preg_match('/^(get|set)[A-Z]\w*Attribute$/', $name, $matches) !== 1) {
             return;
         }
 

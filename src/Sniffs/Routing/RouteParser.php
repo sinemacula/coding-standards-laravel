@@ -128,7 +128,7 @@ final readonly class RouteParser
             $action = null;
         }
 
-        return new RouteCall($this->enclosingScope($phpcsFile, $facade), $controller, $base, $action, $param, $facade, $tokens[$facade]['line']);
+        return new RouteCall($this->enclosingScope($phpcsFile, $facade), $controller, $base, $action, $param, $facade);
     }
 
     /**
@@ -214,12 +214,20 @@ final readonly class RouteParser
     private function isClassConstant(File $phpcsFile, int $ptr): bool
     {
         $tokens = $phpcsFile->getTokens();
-        $colon  = $this->after($phpcsFile, $ptr);
-        $class  = $colon === null ? null : $this->after($phpcsFile, $colon);
 
-        return $tokens[$ptr]['code']                         === T_STRING
-            && $colon !== null && $tokens[$colon]['code']    === T_DOUBLE_COLON
-            && $class !== null && $tokens[$class]['content'] === 'class';
+        if ($tokens[$ptr]['code'] !== T_STRING) {
+            return false;
+        }
+
+        $colon = $this->after($phpcsFile, $ptr);
+
+        if ($colon === null || $tokens[$colon]['code'] !== T_DOUBLE_COLON) {
+            return false;
+        }
+
+        $class = $this->after($phpcsFile, $colon);
+
+        return $class !== null && $tokens[$class]['content'] === 'class';
     }
 
     /**

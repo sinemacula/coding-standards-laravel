@@ -17,6 +17,8 @@ use PHP_CodeSniffer\Files\File;
  */
 trait IdentifiesControllers
 {
+    use ReadsDeclarationNames;
+
     /**
      * Determine whether the token sits inside a class named `*Controller`.
      *
@@ -33,9 +35,7 @@ trait IdentifiesControllers
                 continue;
             }
 
-            $name = $phpcsFile->getDeclarationName($ptr);
-
-            if ($name !== null && str_ends_with($name, 'Controller')) {
+            if (str_ends_with($this->declarationName($phpcsFile, $ptr), 'Controller')) {
                 return true;
             }
         }

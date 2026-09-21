@@ -6,6 +6,7 @@ namespace SineMaculaLaravel\Sniffs\Structure;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDeclarationNames;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
 
 /**
@@ -24,6 +25,7 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
  */
 final class RequireRoleNamingSniff implements Sniff
 {
+    use ReadsDeclarationNames;
     use ResolvesRole;
 
     /** @var array<string, string> Role => comma-separated suffixes the name must end with one of. */
@@ -67,7 +69,7 @@ final class RequireRoleNamingSniff implements Sniff
             return;
         }
 
-        $name = $phpcsFile->getDeclarationName($stackPtr) ?? '';
+        $name = $this->declarationName($phpcsFile, $stackPtr);
 
         $this->checkRequired($phpcsFile, $stackPtr, $role, $name);
         $this->checkForbidden($phpcsFile, $stackPtr, $role, $name);

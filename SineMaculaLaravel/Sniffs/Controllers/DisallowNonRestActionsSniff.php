@@ -6,6 +6,7 @@ namespace SineMaculaLaravel\Sniffs\Controllers;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDeclarationNames;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDocblockTags;
 
 /**
@@ -29,6 +30,7 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDocblockTags;
  */
 final class DisallowNonRestActionsSniff implements Sniff
 {
+    use ReadsDeclarationNames;
     use ReadsDocblockTags;
 
     /** @var array<int, string> Canonical controller action method names. */
@@ -62,10 +64,10 @@ final class DisallowNonRestActionsSniff implements Sniff
     #[\Override]
     public function process(File $phpcsFile, $stackPtr): void
     {
-        $name     = $phpcsFile->getDeclarationName($stackPtr);
+        $name     = $this->declarationName($phpcsFile, $stackPtr);
         $classPtr = $phpcsFile->getCondition($stackPtr, T_CLASS, false);
 
-        if ($name === null || $classPtr === false || $this->isExempt($phpcsFile, $classPtr, $stackPtr, $name)) {
+        if ($name === '' || $classPtr === false || $this->isExempt($phpcsFile, $classPtr, $stackPtr, $name)) {
             return;
         }
 
@@ -105,7 +107,7 @@ final class DisallowNonRestActionsSniff implements Sniff
      */
     private function isExemptClass(File $phpcsFile, int $classPtr): bool
     {
-        return str_ends_with((string) $phpcsFile->getDeclarationName($classPtr), 'Controller') === false
+        return str_ends_with($this->declarationName($phpcsFile, $classPtr), 'Controller') === false
             || $phpcsFile->getClassProperties($classPtr)['is_abstract'] !== false
             || $this->hasDocblockTag($phpcsFile, $classPtr, '@utility');
     }

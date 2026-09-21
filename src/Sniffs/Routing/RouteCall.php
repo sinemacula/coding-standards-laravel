@@ -25,7 +25,6 @@ final readonly class RouteCall
      * @param  string|null  $action
      * @param  string|null  $param
      * @param  int  $pointer
-     * @param  int  $line
      * @return void
      */
     public function __construct(
@@ -47,8 +46,5 @@ final readonly class RouteCall
 
         /** @var int Token pointer of the Route facade, for error placement. */
         public int $pointer,
-
-        /** @var int Line the registration starts on. */
-        public int $line,
     ) {}
 }

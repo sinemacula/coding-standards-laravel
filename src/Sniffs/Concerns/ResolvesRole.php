@@ -27,9 +27,7 @@ use PHP_CodeSniffer\Files\File;
  */
 trait ResolvesRole
 {
-    use DetectsTestClasses;
-    use ResolvesImports;
-    use ResolvesNamespace;
+    use DetectsTestClasses, ResolvesImports, ResolvesNamespace;
 
     /** @var array<string, string> Role => comma-separated identity names (short, or `\`-qualified to match through imports). */
     public array $roleIdentities = [

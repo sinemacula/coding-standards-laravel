@@ -32,10 +32,7 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
  */
 final class DisallowServiceLocationSniff implements Sniff
 {
-    use DetectsFunctionCalls;
-    use DetectsTestClasses;
-    use ResolvesImports;
-    use ResolvesNamespace;
+    use DetectsFunctionCalls, DetectsTestClasses, ResolvesImports, ResolvesNamespace;
 
     /** @var array<int, string> Container helper functions forbidden inside a class body. */
     public array $helpers = ['app', 'resolve'];

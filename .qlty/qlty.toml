@@ -96,21 +96,43 @@ name = "markdownlint"
 # read the in-tree configs under .qlty/configs (phpcs.xml, .php-cs-fixer.dist.php). The
 # shared standard plus slevomat + the installer come from composer.json so the ruleset's
 # sniffs resolve in qlty's sandbox.
+#
+# Held at or above 4.0.2: earlier 4.x and 3.13.5 are covered by a command-injection
+# advisory that Composer refuses to install, which fails the plugin outright instead
+# of reporting findings.
 [[plugin]]
 name = "php-codesniffer"
-version = "3.13.6"
+version = "4.0.4"
 mode = "comment"
 package_file = "composer.json"
 package_filters = ["slevomat", "dealerdirect", "sinemacula"]
 
-# Pinned to a release the shared standard accepts (^3.95.19). symfony/console is
-# filtered in so the sandbox takes this repo's ^7.4; console 8 needs PHP 8.4.1
-# and the 8.3 runner cannot parse it.
+# phpcs 4.x exits 3 on findings (bitmask: 1 errors + 2 fixable), which qlty's built-in
+# driver, written for 3.x exit semantics, treats as a crash - silently discarding every
+# finding. 0/1/2/3 all mean "ran and found issues"; a real fatal exits higher (255) and
+# still errors.
+[plugins.definitions.php-codesniffer.drivers.lint]
+success_codes = [0, 1, 2, 3]
+
+# The in-tree fixer config builds on the base PhpCsFixerConfig, so the standards package
+# is installed into the sandbox directly. It cannot come from package_file: setting that
+# key makes qlty ignore extra_packages, and the Symfony pins below are load-bearing -
+# since 3.90.0 the fixer accepts a Symfony that needs PHP 8.4.1, and the sandbox install
+# does not honour platform requirements, so the 8.3 runner cannot parse it.
 [[plugin]]
 name = "php-cs-fixer"
-version = "3.95.24"
-package_file = "composer.json"
-package_filters = ["sinemacula", "symfony/console"]
+version = "3.95.25"
+extra_packages = [
+    "sinemacula/coding-standards@1.23.2",
+    "symfony/console@^7.4",
+    "symfony/event-dispatcher@^7.4",
+    "symfony/filesystem@^7.4",
+    "symfony/finder@^7.4",
+    "symfony/options-resolver@^7.4",
+    "symfony/process@^7.4",
+    "symfony/stopwatch@^7.4",
+    "symfony/string@^7.4",
+]
 
 # phpstan is NOT wired here: qlty Cloud never runs `composer install`, so it cannot
 # autoload the in-repo PHPStan rules or scan PHP_CodeSniffer's non-PSR-4 source that

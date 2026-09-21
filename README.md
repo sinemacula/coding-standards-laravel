@@ -20,16 +20,22 @@ scoped to Laravel projects (no runtime framework detection).
 composer require --dev sinemacula/coding-standards-laravel
 ```
 
-This brings `sinemacula/coding-standards` with it. You also need `squizlabs/php_codesniffer`,
-`dealerdirect/phpcodesniffer-composer-installer`, and `slevomat/coding-standard` in your dev deps (as you
-already do for the base standard).
+This brings `sinemacula/coding-standards` with it, so don't require the base package as well. You also
+need `squizlabs/php_codesniffer` (`^3.13.6 || ^4.0.2` - 3.13.5 and 4.0.1 are covered by an advisory that
+Composer refuses to install), `dealerdirect/phpcodesniffer-composer-installer`, and
+`slevomat/coding-standard` in your dev deps (as you already do for the base standard).
 
 ## Usage
 
-Wire it into the PHP tools through the same Qlty plugin setup you already use for the base standard
-(`package_file = "composer.json"` with `package_filters = ["sinemacula", ...]` in `.qlty/qlty.toml` - the
-`"sinemacula"` filter already matches this package, so Qlty installs it into the linter tool environments
-automatically).
+Wire it into the PHP tools through the same Qlty plugin setup you already use for the base standard. For
+`php-codesniffer` that is `package_file = "composer.json"` with `package_filters = ["sinemacula", ...]` in
+`.qlty/qlty.toml` - the `"sinemacula"` filter already matches this package, so Qlty installs it into the
+linter tool environment automatically.
+
+`php-cs-fixer` is the exception: give it `extra_packages` instead, listing the standards package and
+Symfony pinned to `^7.4`. Qlty ignores `extra_packages` whenever `package_file` is set on the same
+plugin, and since 3.90.0 the fixer accepts a Symfony that needs PHP 8.4.1 - the sandbox install does not
+honour platform requirements, so an unpinned Symfony leaves a PHP 8.3 runner unable to parse it.
 
 ### PHPCS
 

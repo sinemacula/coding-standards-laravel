@@ -23,8 +23,7 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
  */
 final class DisallowHttpAbortSniff implements Sniff
 {
-    use DetectsFunctionCalls;
-    use ResolvesNamespace;
+    use DetectsFunctionCalls, ResolvesNamespace;
 
     /** @var array<int, string> The HTTP-abort helper functions. */
     public array $functions = ['abort', 'abort_if', 'abort_unless'];

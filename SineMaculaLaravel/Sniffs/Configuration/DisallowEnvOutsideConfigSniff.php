@@ -24,8 +24,7 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsTestClasses;
  */
 final class DisallowEnvOutsideConfigSniff implements Sniff
 {
-    use DetectsFunctionCalls;
-    use DetectsTestClasses;
+    use DetectsFunctionCalls, DetectsTestClasses;
 
     /**
      * Register the tokens this sniff listens for.

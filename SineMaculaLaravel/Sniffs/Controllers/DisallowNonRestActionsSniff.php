@@ -30,8 +30,7 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDocblockTags;
  */
 final class DisallowNonRestActionsSniff implements Sniff
 {
-    use ReadsDeclarationNames;
-    use ReadsDocblockTags;
+    use ReadsDeclarationNames, ReadsDocblockTags;
 
     /** @var array<int, string> Canonical controller action method names. */
     public array $actions = [

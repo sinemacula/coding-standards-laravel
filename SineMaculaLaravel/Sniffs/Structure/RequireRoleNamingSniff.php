@@ -25,8 +25,7 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
  */
 final class RequireRoleNamingSniff implements Sniff
 {
-    use ReadsDeclarationNames;
-    use ResolvesRole;
+    use ReadsDeclarationNames, ResolvesRole;
 
     /** @var array<string, string> Role => comma-separated suffixes the name must end with one of. */
     public array $requireSuffix = [

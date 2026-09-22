@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/sinemacula/coding-standards-laravel/compare/v1.6.0...v1.6.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* read declaration names consistently across both code sniffer lines ([#103](https://github.com/sinemacula/coding-standards-laravel/issues/103)) ([c9d7ce9](https://github.com/sinemacula/coding-standards-laravel/commit/c9d7ce91991cdaba69b231a35c3dde45e880e80a))
+
 ## [1.6.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.5.0...v1.6.0) (2026-09-15)
 
 

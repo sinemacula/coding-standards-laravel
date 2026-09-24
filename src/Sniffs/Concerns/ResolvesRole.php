@@ -32,7 +32,7 @@ trait ResolvesRole
     /** @var array<string, string> Role => comma-separated identity names (short, or `\`-qualified to match through imports). */
     public array $roleIdentities = [
         'Controller'      => 'Controller',
-        'Model'           => 'Model,Authenticatable,Pivot',
+        'Model'           => 'Eloquent\Model,Authenticatable,Pivot',
         'ServiceProvider' => 'ServiceProvider',
         'FormRequest'     => 'FormRequest',
         'Resource'        => 'JsonResource',
@@ -91,31 +91,22 @@ trait ResolvesRole
     /**
      * Resolve a role from what the class extends, implements, uses or carries.
      *
+     * What a class declares - its parent, interfaces and traits - is settled
+     * before what it is attributed with, because an attribute names a class the
+     * subject relates to at least as often as it names what the subject is. A
+     * repository attributed with the model it serves is a repository.
+     *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $classPtr
      * @return string|null
      */
     protected function roleByIdentity(File $phpcsFile, int $classPtr): ?string
     {
-        $names     = $this->identityNames($phpcsFile, $classPtr);
-        $short     = array_map($this->shortName(...), $names);
         $imports   = $this->importMap($phpcsFile, $classPtr);
         $namespace = $this->namespaceName($phpcsFile);
-        $qualified = array_map(fn (string $name): string => $this->qualify($imports, $namespace, $name), $names);
 
-        foreach ($this->roleIdentities as $role => $identities) {
-            foreach ($this->split($identities) as $identity) {
-                $matched = str_contains($identity, '\\')
-                    ? $this->matchesQualified($identity, $qualified)
-                    : in_array($identity, $short, true);
-
-                if ($matched) {
-                    return $role;
-                }
-            }
-        }
-
-        return null;
+        return $this->roleForNames($imports, $namespace, $this->declaredNames($phpcsFile, $classPtr))
+            ?? $this->roleForNames($imports, $namespace, $this->attributeNames($phpcsFile, $classPtr));
     }
 
     /**
@@ -134,6 +125,34 @@ trait ResolvesRole
         foreach ($this->roleLocations as $role => $paths) {
             if ($this->matchesLocation($phpcsFile, $paths)) {
                 return $role;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve the first role an identity list matches one of the names for.
+     *
+     * @param  array<string, string>  $imports
+     * @param  string  $namespace
+     * @param  array<int, string>  $names
+     * @return string|null
+     */
+    private function roleForNames(array $imports, string $namespace, array $names): ?string
+    {
+        $short     = array_map($this->shortName(...), $names);
+        $qualified = array_map(fn (string $name): string => $this->qualify($imports, $namespace, $name), $names);
+
+        foreach ($this->roleIdentities as $role => $identities) {
+            foreach ($this->split($identities) as $identity) {
+                $matched = str_contains($identity, '\\')
+                    ? $this->matchesQualified($identity, $qualified)
+                    : in_array($identity, $short, true);
+
+                if ($matched) {
+                    return $role;
+                }
             }
         }
 
@@ -177,13 +196,13 @@ trait ResolvesRole
     }
 
     /**
-     * Collect the identity names a class declares, as written.
+     * Collect the names a class declares as its own identity, as written.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $classPtr
      * @return array<int, string>
      */
-    private function identityNames(File $phpcsFile, int $classPtr): array
+    private function declaredNames(File $phpcsFile, int $classPtr): array
     {
         $names      = [];
         $extends    = $phpcsFile->findExtendedClassName($classPtr);
@@ -197,7 +216,7 @@ trait ResolvesRole
             $names[] = $interface;
         }
 
-        return array_merge($names, $this->usedTraitNames($phpcsFile, $classPtr), $this->attributeNames($phpcsFile, $classPtr));
+        return array_merge($names, $this->usedTraitNames($phpcsFile, $classPtr));
     }
 
     /**

@@ -101,20 +101,6 @@ final class RequireRoleDirectorySniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A sync job is identified through every import shape - plain, aliased,
-     * grouped, namespace-headed and fully-qualified - while the aliased event
-     * trait, a relative unimported name, a same-suffix segment (MiniBus), and
-     * function/constant imports of the colliding name all stay out of the Job
-     * identity.
-     *
-     * @return void
-     */
-    public function testResolvesJobIdentityThroughImports(): void
-    {
-        $this->assertErrorsOnLines('RoleDirectorySyncJob.inc', [15, 20, 25, 30, 35]);
-    }
-
-    /**
      * A trait `use` inside an earlier class body never leaks into the import
      * map of a later class, and an import between classes still resolves.
      *

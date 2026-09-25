@@ -78,6 +78,23 @@ abstract class AbstractSniffTestCase extends TestCase
     }
 
     /**
+     * Resolve the absolute path of the sniff under test from this test class.
+     *
+     * A test named for a concern rather than a sniff overrides this to name the
+     * sniff it drives, since the concern has no sniff file of its own.
+     *
+     * @return string
+     */
+    protected function sniffFile(): string
+    {
+        return str_replace(
+            [DIRECTORY_SEPARATOR . 'Tests' . DIRECTORY_SEPARATOR, 'SniffTest.php'],
+            [DIRECTORY_SEPARATOR . 'Sniffs' . DIRECTORY_SEPARATOR, 'Sniff.php'],
+            (new \ReflectionClass(static::class))->getFileName(),
+        );
+    }
+
+    /**
      * Run the sniff under test over a fixture in the test's own directory.
      *
      * @param  string  $fixture
@@ -106,20 +123,6 @@ abstract class AbstractSniffTestCase extends TestCase
         $file->process();
 
         return $file;
-    }
-
-    /**
-     * Resolve the absolute path of the sniff under test from this test class.
-     *
-     * @return string
-     */
-    private function sniffFile(): string
-    {
-        return str_replace(
-            [DIRECTORY_SEPARATOR . 'Tests' . DIRECTORY_SEPARATOR, 'SniffTest.php'],
-            [DIRECTORY_SEPARATOR . 'Sniffs' . DIRECTORY_SEPARATOR, 'Sniff.php'],
-            (new \ReflectionClass(static::class))->getFileName(),
-        );
     }
 
     /**

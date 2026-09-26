@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.2](https://github.com/sinemacula/coding-standards-laravel/compare/v1.6.1...v1.6.2) (2026-09-26)
+
+
+### Bug Fixes
+
+* resolve a class role from what it declares before what it carries ([#108](https://github.com/sinemacula/coding-standards-laravel/issues/108)) ([9bae0be](https://github.com/sinemacula/coding-standards-laravel/commit/9bae0be7e1e4e515167ba9f4066bd4d94ef097da))
+
 ## [1.6.1](https://github.com/sinemacula/coding-standards-laravel/compare/v1.6.0...v1.6.1) (2026-09-22)
 
 

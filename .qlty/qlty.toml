@@ -67,7 +67,7 @@ default = true
 [[source]]
 name = "sinemacula"
 repository = "https://github.com/sinemacula/coding-standards"
-tag = "v1.25.0"
+tag = "v1.26.0"
 
 [[plugin]]
 name = "ripgrep"
@@ -87,7 +87,7 @@ package_filters = ["slevomat", "dealerdirect", "sinemacula"]
 # key makes qlty ignore extra_packages.
 [[plugin]]
 name = "php-cs-fixer"
-extra_packages = ["sinemacula/coding-standards@1.25.0"]
+extra_packages = ["sinemacula/coding-standards@1.26.0"]
 
 # phpstan is NOT wired here: qlty Cloud never runs `composer install`, so it cannot
 # autoload the in-repo PHPStan rules or scan PHP_CodeSniffer's non-PSR-4 source that

@@ -3,11 +3,13 @@
 <div align="center">
 
 [![Latest Stable Version](https://img.shields.io/packagist/v/sinemacula/coding-standards-laravel.svg)](https://packagist.org/packages/sinemacula/coding-standards-laravel)
+[![PHP Version](https://img.shields.io/packagist/dependency-v/sinemacula/coding-standards-laravel/php.svg)](https://packagist.org/packages/sinemacula/coding-standards-laravel)
 [![Build Status](https://github.com/sinemacula/coding-standards-laravel/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/sinemacula/coding-standards-laravel/actions/workflows/tests.yml)
 [![Quality Gates](https://github.com/sinemacula/coding-standards-laravel/actions/workflows/quality-gates.yml/badge.svg?branch=master)](https://github.com/sinemacula/coding-standards-laravel/actions/workflows/quality-gates.yml)
 [![Maintainability](https://qlty.sh/gh/sinemacula/projects/coding-standards-laravel/maintainability.svg)](https://qlty.sh/gh/sinemacula/projects/coding-standards-laravel)
 [![Code Coverage](https://qlty.sh/gh/sinemacula/projects/coding-standards-laravel/coverage.svg)](https://qlty.sh/gh/sinemacula/projects/coding-standards-laravel)
 [![Total Downloads](https://img.shields.io/packagist/dt/sinemacula/coding-standards-laravel.svg)](https://packagist.org/packages/sinemacula/coding-standards-laravel)
+[![License](https://img.shields.io/github/license/sinemacula/coding-standards-laravel.svg)](LICENSE)
 
 </div>
 

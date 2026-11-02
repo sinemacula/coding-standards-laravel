@@ -34,7 +34,8 @@
             "SineMaculaLaravel/Tests/PHPStan/data/model-behaviour.inc",
             "SineMaculaLaravel/Tests/PHPStan/data/model-behaviour-inheritance.inc",
             "SineMaculaLaravel/Tests/PHPStan/data/model-behaviour-declared.inc",
-            "SineMaculaLaravel/Tests/PHPStan/data/model-behaviour-partial.inc"
+            "SineMaculaLaravel/Tests/PHPStan/data/model-behaviour-partial.inc",
+            "SineMaculaLaravel/Tests/PHPStan/data/model-behaviour-hooks.inc"
         ]
     },
     "extra": {

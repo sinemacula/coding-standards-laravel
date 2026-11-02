@@ -19,9 +19,9 @@ trait CarriesBehaviour
         //
     }
 
-    public function casts(): array
+    public function getRouteKeyName(): string
     {
-        return [];
+        return 'uuid';
     }
 }
 

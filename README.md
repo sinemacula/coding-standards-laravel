@@ -53,6 +53,9 @@ Two standards ship; reference exactly one (each pulls in `SineMacula`, so it rep
   rules (`Structure.*`, `Controllers.*`) excluded, since a package is organised by domain rather than
   Laravel's app directory layout. Composition only - it redefines nothing.
 
+Both drop the `Internal.NoCodeFound` warning for `*.blade.php` files, which hold no PHP to check. Under
+`SineMaculaLaravel` the templates are still read, so `RequireBladeLocation` still reports a misplaced one.
+
 ```xml
 <?xml version="1.0"?>
 <ruleset name="Project">

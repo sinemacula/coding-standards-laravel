@@ -56,8 +56,9 @@ Two standards ship; reference exactly one (each pulls in `SineMacula`, so it rep
 Both drop the `Internal.NoCodeFound` warning for `*.blade.php` files, which hold no PHP to check. Under
 `SineMaculaLaravel` the templates are still read, so `RequireBladeLocation` still reports a misplaced one.
 
-Both also leave line length unchecked in translation files - `lang/{locale}/`, `Resources/lang/{locale}/` and
-`lang/vendor/` - because a translation string cannot be wrapped without changing what it says.
+Both also leave line length unchecked in translation files - a file directly inside `lang/{locale}/` or
+`Resources/lang/{locale}/` (`en`, `pt_BR`, `es_419`, `zh_Hant_TW`, ...), or under `lang/vendor/` - because a
+translation string cannot be wrapped without changing what it says.
 
 ```xml
 <?xml version="1.0"?>

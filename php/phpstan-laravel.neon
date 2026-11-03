@@ -109,3 +109,9 @@ services:
             minLaravelVersion: %sineMaculaLaravel.minLaravelVersion%
         tags:
             - phpstan.rules.rule
+    -
+        class: SineMacula\CodingStandardsLaravel\PHPStan\Rules\PreferQueueAttributesRule
+        arguments:
+            minLaravelVersion: %sineMaculaLaravel.minLaravelVersion%
+        tags:
+            - phpstan.rules.rule

@@ -1,0 +1,6 @@
+{
+    "require": {
+        "illuminate/queue": "^13.24",
+        "illuminate/support": "^13.24"
+    }
+}

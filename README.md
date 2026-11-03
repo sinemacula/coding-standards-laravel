@@ -209,12 +209,14 @@ standard sets the base sniff's `ignoredParentClasses` to the model bases (`Model
 `modelBehaviour` limits a model's own surface to what describes a record. Permitted are its relations,
 recognised the same way `relationshipReturnType` recognises them; accessors and mutators, recognised by an
 `Attribute` return type rather than by name; the framework hooks named in `sineMaculaLaravel.modelHooks`,
-which is configurable because the framework adds to them over time; and any public method declared by an
-interface the model's own author opted into.
+described below; and any public method declared by an interface the model's own author opted into.
 
 Every method the class declares is read, so moving one into a trait does not take it out of scope, and an
 anonymous class extending a model base is read like any other. A method a trait imports is reported against
-the line the class declares itself on, because the trait may live in another file.
+the line the class declares itself on, because the trait may live in another file. A trait is only read
+where its file is among the analysed paths, though, so one installed as a dependency is reported only in the
+package that ships it, where that package's own classes import it. An application importing it gets no
+report and needs no config.
 
 A model is recognised through its whole ancestry, so a project that puts its own base class between its
 models and `Model`, `Authenticatable` or `Pivot` is covered like any other. It is the only model rule that
@@ -246,6 +248,59 @@ Only public methods are reported: a non-public helper called from a relation is 
 one is what other layers reach for. A query scope is the exception, reported whatever its visibility,
 because the attribute form is conventionally not public. It belongs on a repository, which can compose it
 as an ordinary fluent method instead of a magic call on the builder.
+
+#### Framework hooks
+
+A method is a default hook only if it passes all three tests:
+
+1. **Eloquent declares it, publicly** - on `Model`, on a concern `Model` composes, or on an Eloquent trait a
+   model opts into. Only public methods are reported, so a protected entry would do nothing.
+2. **Only an override can say it** - no property, attribute or constant on the model says the same thing on
+   every Laravel version this package supports.
+3. **It describes rather than performs** - it returns a name, class, list, generated value or unexecuted
+   query. It does not run a query, return a fetched record, change state or call anything external.
+
+The defaults are `uniqueIds`, `newUniqueId`, `getRouteKeyName`, `resolveRouteBindingQuery`, `getMorphClass`
+and `prunable`. `getRouteKeyName` stays only while Laravel 12 is supported, since `#[RouteKey]` arrives in
+13. Passing the tests makes a method eligible, but it is only added once a real project needs it.
+
+The route binding resolvers - `resolveRouteBinding()`, `resolveSoftDeletableRouteBinding()`,
+`resolveChildRouteBinding()` and `resolveSoftDeletableChildRouteBinding()` - fail the third test, because
+each runs the lookup and returns the record. `resolveRouteBindingQuery()` and `getRouteKeyName()` already
+cover any change to the query's shape, so overriding a resolver only adds something when it does more than
+shape the query. That is behaviour, and a project that wants it appends the resolvers in its own PHPStan
+config (`.qlty/configs/phpstan.neon` where qlty runs the analysis):
+
+```neon
+parameters:
+    sineMaculaLaravel:
+        # Route binding that does more than shape the query: <the project's reason>.
+        modelHooks:
+            - resolveRouteBinding
+            - resolveSoftDeletableRouteBinding
+            - resolveChildRouteBinding
+            - resolveSoftDeletableChildRouteBinding
+```
+
+- **Append, don't replace.** Use `modelHooks:`, not `modelHooks!:`, and don't copy the defaults; they still
+  apply.
+- **List all four resolvers, not only the ones overridden.** The framework picks one by the route's
+  soft-delete and scoping settings, so overriding only `resolveRouteBinding()` means a `withTrashed()` or
+  scoped route skips the custom logic without any warning.
+- **State the reason in a comment.** The list applies to every model in the project, so it records a
+  project-wide decision.
+
+A hook from a package outside `laravel/framework`, such as Scout's `toSearchableArray()`, is appended the
+same way.
+
+| Situation                                               | Use                                                                                                                            |
+|---------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| Any model in the project may do this                    | `modelHooks` in the project's config                                                                                           |
+| One model, or a few, as a deliberate exception          | `@phpstan-ignore sineMaculaLaravel.modelBehaviour` in the method's docblock, or on the class line for a method a trait imports |
+| The method comes from a trait installed as a dependency | Nothing - the trait is not read                                                                                                |
+
+Don't declare an interface just to reach the interface exemption. It does silence the rule, but the
+exemption exists for contracts that come from outside the model, not as another way to permit a hook.
 
 #### Model attributes and the version gate
 

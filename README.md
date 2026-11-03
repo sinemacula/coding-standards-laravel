@@ -263,9 +263,30 @@ A method is a default hook only if it passes all three tests:
 3. **It describes rather than performs** - it returns a name, class, list, generated value or unexecuted
    query. It does not run a query, return a fetched record, change state or call anything external.
 
-The defaults are `uniqueIds`, `newUniqueId`, `getRouteKeyName`, `resolveRouteBindingQuery`, `getMorphClass`
-and `prunable`. `getRouteKeyName` stays only while Laravel 12 is supported, since `#[RouteKey]` arrives in
-13. Passing the tests makes a method eligible, but it is only added once a real project needs it.
+The defaults are `uniqueIds`, `newUniqueId`, `getRouteKeyName`, `resolveRouteBindingQuery`, `getMorphClass`,
+`prunable`, `getTable` and `getConnectionName`. `getRouteKeyName` stays only while Laravel 12 is supported,
+since `#[RouteKey]` arrives in 13. Passing the tests makes a method eligible, but it is only added once a
+real project needs it.
+
+`getTable` and `getConnectionName` are where a table or connection taken from config goes. `$table`,
+`$connection` and their attributes only take constant values, so the override is the only way to say it,
+and it replaces setting either one from a constructor, which is reported like any other behaviour.
+Fall back to config rather than replacing the property, so `setTable()`, `setConnection()` and
+`Model::on()` keep working:
+
+```php
+public function getTable(): string
+{
+    return $this->table ?? config('audit.table');
+}
+
+public function getConnectionName(): ?string
+{
+    return $this->connection ?? config('audit.connection');
+}
+```
+
+A fixed name still belongs in `#[Table]` or `$table`.
 
 The route binding resolvers - `resolveRouteBinding()`, `resolveSoftDeletableRouteBinding()`,
 `resolveChildRouteBinding()` and `resolveSoftDeletableChildRouteBinding()` - fail the third test, because

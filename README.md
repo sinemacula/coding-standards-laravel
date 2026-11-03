@@ -185,10 +185,11 @@ declared non-readonly on the base class, and PHP forbids making an inherited pro
 standard sets the base sniff's `ignoredParentClasses` to the model bases (`Model`, `Authenticatable`,
 `Pivot`), matched by the immediate parent name as written.
 
-A class that implements `ShouldQueue`, `ShouldQueueAfterCommit` or `ShouldBroadcast` is exempt for the properties the framework reads
-off it - `$tries`, `$timeout`, `$backoff`, `$queue`, `$connection` and the others the ruleset lists - because each needs a
-default and a readonly property cannot have one. Its other public properties are still required to be
-readonly. The interface is matched as written in the class's own `implements` clause.
+A class that implements `ShouldQueue`, `ShouldQueueAfterCommit` or `ShouldBroadcast` is exempt for the
+properties the framework reads off it - `$tries`, `$timeout`, `$backoff`, `$queue`, `$connection` and the
+others the ruleset lists - because each needs a default and a readonly property cannot have one. Its other
+public properties are still required to be readonly. The interface is matched as written in the class's own
+`implements` clause.
 
 #### Policy abilities
 

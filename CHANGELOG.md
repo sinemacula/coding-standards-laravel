@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.3](https://github.com/sinemacula/coding-standards-laravel/compare/v1.6.2...v1.6.3) (2026-11-03)
+
+
+### Bug Fixes
+
+* limit the default model hooks to the ones that describe a record ([#122](https://github.com/sinemacula/coding-standards-laravel/issues/122)) ([ce8a79d](https://github.com/sinemacula/coding-standards-laravel/commit/ce8a79d85b7bb2784a6855c4db161c550a770a20))
+
 ## [1.6.2](https://github.com/sinemacula/coding-standards-laravel/compare/v1.6.1...v1.6.2) (2026-09-26)
 
 

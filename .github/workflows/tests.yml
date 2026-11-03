@@ -50,7 +50,7 @@ jobs:
 
         steps:
             -   name: Checkout
-                uses: actions/checkout@v5
+                uses: actions/checkout@v7
                 with:
                     persist-credentials: false
 
@@ -59,7 +59,7 @@ jobs:
             # include()-based autoloader, which pcov does not instrument (it reports
             # 0%). Xdebug is the only driver that sees them, so it is set directly.
             -   name: Setup PHP
-                uses: shivammathur/setup-php@v2
+                uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
                 with:
                     php-version: ${{ matrix.php }}
                     coverage: xdebug
@@ -73,7 +73,7 @@ jobs:
 
             -   name: Publish code coverage
                 if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.php == '8.3' }}
-                uses: qltysh/qlty-action/coverage@v2
+                uses: qltysh/qlty-action/coverage@ebcd284bf32e36a030afe15f1e136c7be08b9506 # v2
                 with:
                     oidc: true
                     files: clover.xml
@@ -96,12 +96,12 @@ jobs:
 
         steps:
             -   name: Checkout
-                uses: actions/checkout@v5
+                uses: actions/checkout@v7
                 with:
                     persist-credentials: false
 
             -   name: Setup PHP
-                uses: shivammathur/setup-php@v2
+                uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
                 with:
                     php-version: 8.3
                     tools: composer

@@ -40,6 +40,9 @@
         the base class - PHP forbids making an inherited property readonly, so the
         requirement cannot be satisfied. The base sniff matches the immediate parent
         name as written, so the bases are listed by short name.
+
+        A queued class or broadcast event is exempt only for the properties the
+        framework reads off it, which need a default and so cannot be readonly.
     -->
     <rule ref="SineMacula.Classes.RequireReadonlyPublicProperty">
         <properties>
@@ -50,6 +53,23 @@
                 <element value="Migration"/>
                 <element value="JsonResource"/>
                 <element value="ResourceCollection"/>
+            </property>
+            <property name="ignoredInterfaceProperties" type="array">
+                <element key="ShouldQueue" value="tries,timeout,backoff,maxExceptions,failOnTimeout,deleteWhenMissingModels,uniqueFor,uniqueId,debounceFor,shouldBeEncrypted,afterCommit,connection,queue,delay"/>
+                <element key="ShouldQueueAfterCommit" value="tries,timeout,backoff,maxExceptions,failOnTimeout,deleteWhenMissingModels,uniqueFor,uniqueId,debounceFor,shouldBeEncrypted,afterCommit,connection,queue,delay"/>
+                <element key="ShouldBroadcast" value="tries,timeout,backoff,maxExceptions,deleteWhenMissingModels,afterCommit,uniqueFor,uniqueId,connection,queue,broadcastQueue"/>
+            </property>
+        </properties>
+    </rule>
+
+    <!--
+        A policy's ability methods are named for the abilities the Gate checks
+        (viewAny, update, before, ...), so they cannot take a predicate prefix.
+    -->
+    <rule ref="SineMacula.NamingConventions.BooleanMethodName">
+        <properties>
+            <property name="ignoredClassSuffixes" type="array">
+                <element value="Policy"/>
             </property>
         </properties>
     </rule>

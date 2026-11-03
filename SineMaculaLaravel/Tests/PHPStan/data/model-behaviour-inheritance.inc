@@ -30,41 +30,6 @@ class Subscription extends BaseModel
 
 class Ledger extends BaseModel
 {
-    public function casts(): array
-    {
-        return [];
-    }
-
-    public static function boot(): void
-    {
-        //
-    }
-
-    public static function booting(): void
-    {
-        //
-    }
-
-    public static function booted(): void
-    {
-        //
-    }
-
-    public static function newFactory()
-    {
-        return null;
-    }
-
-    public function newCollection(array $models = [])
-    {
-        return $models;
-    }
-
-    public function newEloquentBuilder($query)
-    {
-        return $query;
-    }
-
     public function uniqueIds(): array
     {
         return ['uuid'];
@@ -93,11 +58,6 @@ class Ledger extends BaseModel
     public function prunable()
     {
         return null;
-    }
-
-    public function toSearchableArray(): array
-    {
-        return [];
     }
 }
 

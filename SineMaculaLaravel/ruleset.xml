@@ -33,6 +33,16 @@
     </rule>
 
     <!--
+        A translation string cannot be wrapped without changing what it says. The
+        locale directory is part of the pattern so a project that merely sits
+        under a directory named lang keeps the check.
+    -->
+    <rule ref="Generic.Files.LineLength">
+        <exclude-pattern>*/lang/[a-z]{2}([_-][A-Za-z]{2,4})?/*</exclude-pattern>
+        <exclude-pattern>*/lang/vendor/*</exclude-pattern>
+    </rule>
+
+    <!--
         Exempt the framework bases that declare public magic properties from the
         readonly-public-property requirement. A subclass overrides them ($timestamps
         and $incrementing on a model, $collects on a resource collection,

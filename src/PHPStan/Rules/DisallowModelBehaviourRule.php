@@ -106,6 +106,7 @@ final readonly class DisallowModelBehaviourRule implements Rule
     public function __construct(
         array $hooks = [
             'uniqueIds', 'newUniqueId', 'getRouteKeyName', 'resolveRouteBindingQuery', 'getMorphClass', 'prunable',
+            'getTable', 'getConnectionName',
         ],
     ) {
         $this->hooks = $hooks;

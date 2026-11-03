@@ -39,6 +39,8 @@ parameters:
             - resolveRouteBindingQuery
             - getMorphClass
             - prunable
+            - getTable
+            - getConnectionName
 
     # Pins the column scan to the project; unset, it resolves from the booted
     # application, which an isolated runner can boot elsewhere.

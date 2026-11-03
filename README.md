@@ -116,7 +116,8 @@ A deliberate exception can be bypassed with the native directive - `// phpcs:ign
 The rule targets production code. Exempt are test files; container-wiring classes, recognised by a
 `Providers` namespace, a `Provider`/`Registrar` suffix or a `ServiceProvider`/`Registrar` base; classes the
 framework constructs itself and so leaves no injection point (the `uninjectableBaseClasses` set, defaulting
-to Eloquent's `Factory`); and resolution of a runtime variable, `app($class)`, which injection cannot
+to Eloquent's `Factory`, `JsonResource` and `ResourceCollection`, and the API toolkit's `ApiResource` and
+`ReportResource`, whose `schema()` is static); and resolution of a runtime variable, `app($class)`, which injection cannot
 replace.
 
 An entry in `uninjectableBaseClasses` containing a `\` is matched against the parent resolved through the

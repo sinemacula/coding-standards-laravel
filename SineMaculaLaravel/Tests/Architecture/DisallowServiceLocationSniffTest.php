@@ -109,6 +109,29 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
+     * An API resource is built with `new` or `::collection()` around the record
+     * it presents, and a toolkit resource's `schema()` is static, so neither
+     * has an injection point and either may resolve from the container.
+     *
+     * @return void
+     */
+    public function testExemptsApiResources(): void
+    {
+        $this->assertErrorsOnLines('Resource.inc', []);
+    }
+
+    /**
+     * A project class that merely shares the toolkit resource's short name is
+     * an ordinary injectable class.
+     *
+     * @return void
+     */
+    public function testDoesNotExemptAnUnrelatedApiResource(): void
+    {
+        $this->assertErrorsOnLines('UnrelatedApiResource.inc', [15]);
+    }
+
+    /**
      * A class extending an unrelated framework class whose name merely ends in
      * the same word - Illuminate\View\Factory - is an ordinary injectable
      * service, so its service location is still reported.

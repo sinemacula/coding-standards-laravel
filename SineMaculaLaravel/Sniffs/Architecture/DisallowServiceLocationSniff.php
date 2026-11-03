@@ -25,7 +25,9 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
  * It also does not fire in a class the framework constructs itself, which has
  * no injection point to use instead: a model factory is reached through
  * `Model::factory()`, so neither its constructor nor `definition()` can be
- * given a collaborator. Helper names and both exempt sets are configurable.
+ * given a collaborator, and an API resource is built with `new` or
+ * `::collection()` around the record it presents, and a toolkit resource's
+ * `schema()` is static. Helper names and both exempt sets are configurable.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -47,7 +49,13 @@ final class DisallowServiceLocationSniff implements Sniff
     public array $wiringBaseClasses = ['ServiceProvider', 'Registrar'];
 
     /** @var array<int, string> Base classes the framework constructs, leaving no injection point. */
-    public array $uninjectableBaseClasses = ['Illuminate\Database\Eloquent\Factories\Factory'];
+    public array $uninjectableBaseClasses = [
+        'Illuminate\Database\Eloquent\Factories\Factory',
+        'Illuminate\Http\Resources\Json\JsonResource',
+        'Illuminate\Http\Resources\Json\ResourceCollection',
+        'SineMacula\ApiToolkit\Http\Resources\ApiResource',
+        'SineMacula\ApiToolkit\Http\Resources\ReportResource',
+    ];
 
     /**
      * Register the tokens this sniff listens for.

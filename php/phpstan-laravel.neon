@@ -45,6 +45,10 @@ parameters:
     databaseMigrationsPath:
         - %currentWorkingDirectory%/database/migrations
 
+    # Reads cast types from the body of casts(); unset, they come from its
+    # declared array<string, string> return type and every cast is lost.
+    parseModelCastsMethod: true
+
     # Methods forwarded onto a builder are reflected as static, so ordinary
     # query code reads as a dynamic call to a static method.
     ignoreErrors:
@@ -66,6 +70,7 @@ parameters:
 parametersSchema:
     # Set above but owned by the Laravel extension; an undeclared one is rejected.
     databaseMigrationsPath: listOf(string())
+    parseModelCastsMethod: bool()
 
     sineMaculaLaravel: structure([
         modelAttributes: listOf(string())

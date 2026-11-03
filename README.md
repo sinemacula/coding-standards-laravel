@@ -352,7 +352,7 @@ parameters:
 
 This section, and the builder ignore above it, describe behaviour that comes from larastan. The package
 suggests it rather than requiring it, so that a project analysing without it is not made to install a
-framework it does not use; the rules this package ships work either way, and the two settings written for
+framework it does not use; the rules this package ships work either way, and the settings written for
 larastan are inert without it rather than fatal.
 
 A model's columns are read from its migrations, and everything that rests on them - the property
@@ -380,6 +380,15 @@ parameters:
 
 If the scan finds nothing the failure is loud rather than silent: with no columns to resolve against,
 every model property is reported as undefined.
+
+#### Where cast types come from
+
+A cast changes a property's type, so `casts()` has to be read for the column types to be right. By
+default larastan reads only its declared return type, and the `@return array<string, string>` a
+documented `casts()` carries says nothing about any one column: every `datetime`, `json`, enum and custom
+cast types as the raw column, and the strict rules then report ordinary Carbon, array and enum use as
+errors. The standard enables `parseModelCastsMethod`, so larastan reads the array `casts()` returns
+instead.
 
 ## Requirements
 

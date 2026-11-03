@@ -141,13 +141,15 @@ final class AnalysisConfigTest extends TestCase
     {
         $config = self::readConfig();
 
-        self::assertArrayHasKey(
-            'databaseMigrationsPath',
-            $config['parametersSchema'] ?? [],
-            'The config sets databaseMigrationsPath without declaring it, which refuses to start without the '
-            . 'extension that owns it.',
-        );
-        self::assertArrayHasKey('databaseMigrationsPath', $config['parameters'] ?? []);
+        foreach (['databaseMigrationsPath', 'parseModelCastsMethod'] as $parameter) {
+            self::assertArrayHasKey(
+                $parameter,
+                $config['parametersSchema'] ?? [],
+                "The config sets {$parameter} without declaring it, which refuses to start without the "
+                . 'extension that owns it.',
+            );
+            self::assertArrayHasKey($parameter, $config['parameters'] ?? []);
+        }
     }
 
     /**

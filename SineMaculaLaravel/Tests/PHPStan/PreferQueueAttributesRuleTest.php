@@ -104,8 +104,8 @@ final class PreferQueueAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * A property with hooks computes the setting rather than declaring it, so an
-     * attribute could not say the same thing, while a plain one beside it is
+     * A property with hooks computes the setting rather than declaring it, so
+     * an attribute could not say the same thing, while a plain one beside it is
      * still reported.
      *
      * @return void

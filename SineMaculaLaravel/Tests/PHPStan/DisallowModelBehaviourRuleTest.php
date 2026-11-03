@@ -46,8 +46,9 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
 
     /**
      * A public method carrying logic and a query scope in either form are
-     * reported; relations, the framework hooks at either visibility, accessors
-     * declared by their return type, non-public helpers and non-models are not.
+     * reported, and so is a framework method left out of the hooks once it is
+     * widened to public; relations, the hooks, accessors declared by their
+     * return type, non-public helpers and non-models are not.
      *
      * @return void
      */
@@ -57,6 +58,7 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
             [sprintf(self::SCOPE, 'live'), 59],
             [sprintf(self::BEHAVIOUR, 'revoke'), 65],
             [sprintf(self::BEHAVIOUR, 'scopeExpired'), 70],
+            [sprintf(self::BEHAVIOUR, 'casts'), 78],
         ]);
     }
 
@@ -98,13 +100,13 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
     {
         $this->analyse([__DIR__ . '/data/model-behaviour-inheritance.inc'], [
             [sprintf(self::BEHAVIOUR, 'renew'), 25],
-            [sprintf(self::BEHAVIOUR, 'purge'), 106],
-            [sprintf(self::BEHAVIOUR, 'purge'), 111],
-            [sprintf(self::BEHAVIOUR, 'expire'), 142],
-            [sprintf(self::BEHAVIOUR, 'toArray'), 150],
-            [sprintf(self::BEHAVIOUR, 'jsonSerialize'), 155],
-            [sprintf(self::BEHAVIOUR, 'offsetGet'), 160],
-            [sprintf(self::BEHAVIOUR, 'getAuthIdentifier'), 181],
+            [sprintf(self::BEHAVIOUR, 'purge'), 66],
+            [sprintf(self::BEHAVIOUR, 'purge'), 71],
+            [sprintf(self::BEHAVIOUR, 'expire'), 102],
+            [sprintf(self::BEHAVIOUR, 'toArray'), 110],
+            [sprintf(self::BEHAVIOUR, 'jsonSerialize'), 115],
+            [sprintf(self::BEHAVIOUR, 'offsetGet'), 120],
+            [sprintf(self::BEHAVIOUR, 'getAuthIdentifier'), 141],
         ]);
     }
 
@@ -121,27 +123,80 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
 
         $this->analyse([__DIR__ . '/data/model-behaviour-inheritance.inc'], [
             [sprintf(self::BEHAVIOUR, 'renew'), 25],
-            [sprintf(self::BEHAVIOUR, 'casts'), 33],
-            [sprintf(self::BEHAVIOUR, 'boot'), 38],
-            [sprintf(self::BEHAVIOUR, 'booting'), 43],
-            [sprintf(self::BEHAVIOUR, 'booted'), 48],
-            [sprintf(self::BEHAVIOUR, 'newFactory'), 53],
-            [sprintf(self::BEHAVIOUR, 'newCollection'), 58],
-            [sprintf(self::BEHAVIOUR, 'newEloquentBuilder'), 63],
-            [sprintf(self::BEHAVIOUR, 'uniqueIds'), 68],
-            [sprintf(self::BEHAVIOUR, 'newUniqueId'), 73],
-            [sprintf(self::BEHAVIOUR, 'getRouteKeyName'), 78],
-            [sprintf(self::BEHAVIOUR, 'resolveRouteBindingQuery'), 83],
-            [sprintf(self::BEHAVIOUR, 'getMorphClass'), 88],
-            [sprintf(self::BEHAVIOUR, 'prunable'), 93],
-            [sprintf(self::BEHAVIOUR, 'toSearchableArray'), 98],
-            [sprintf(self::BEHAVIOUR, 'purge'), 106],
-            [sprintf(self::BEHAVIOUR, 'purge'), 111],
-            [sprintf(self::BEHAVIOUR, 'expire'), 142],
-            [sprintf(self::BEHAVIOUR, 'toArray'), 150],
-            [sprintf(self::BEHAVIOUR, 'jsonSerialize'), 155],
-            [sprintf(self::BEHAVIOUR, 'offsetGet'), 160],
-            [sprintf(self::BEHAVIOUR, 'getAuthIdentifier'), 181],
+            [sprintf(self::BEHAVIOUR, 'uniqueIds'), 33],
+            [sprintf(self::BEHAVIOUR, 'newUniqueId'), 38],
+            [sprintf(self::BEHAVIOUR, 'getRouteKeyName'), 43],
+            [sprintf(self::BEHAVIOUR, 'resolveRouteBindingQuery'), 48],
+            [sprintf(self::BEHAVIOUR, 'getMorphClass'), 53],
+            [sprintf(self::BEHAVIOUR, 'prunable'), 58],
+            [sprintf(self::BEHAVIOUR, 'purge'), 66],
+            [sprintf(self::BEHAVIOUR, 'purge'), 71],
+            [sprintf(self::BEHAVIOUR, 'expire'), 102],
+            [sprintf(self::BEHAVIOUR, 'toArray'), 110],
+            [sprintf(self::BEHAVIOUR, 'jsonSerialize'), 115],
+            [sprintf(self::BEHAVIOUR, 'offsetGet'), 120],
+            [sprintf(self::BEHAVIOUR, 'getAuthIdentifier'), 141],
+        ]);
+    }
+
+    /**
+     * A framework method fails as a default hook when it is not public on
+     * Eloquent, has a declarative form, comes from outside the framework or
+     * performs work, so each is reported once a model declares it publicly. The
+     * route binding resolvers are in the last group, since each runs the lookup
+     * and returns the record.
+     *
+     * @return void
+     */
+    public function testReportsTheMethodsTheDefaultHookSetLeavesOut(): void
+    {
+        $this->analyse([__DIR__ . '/data/model-behaviour-hooks.inc'], [
+            [sprintf(self::BEHAVIOUR, 'casts'), 9],
+            [sprintf(self::BEHAVIOUR, 'boot'), 14],
+            [sprintf(self::BEHAVIOUR, 'booting'), 19],
+            [sprintf(self::BEHAVIOUR, 'booted'), 24],
+            [sprintf(self::BEHAVIOUR, 'newFactory'), 29],
+            [sprintf(self::BEHAVIOUR, 'newCollection'), 34],
+            [sprintf(self::BEHAVIOUR, 'newEloquentBuilder'), 39],
+            [sprintf(self::BEHAVIOUR, 'toSearchableArray'), 44],
+            [sprintf(self::BEHAVIOUR, 'resolveRouteBinding'), 52],
+            [sprintf(self::BEHAVIOUR, 'resolveSoftDeletableRouteBinding'), 57],
+            [sprintf(self::BEHAVIOUR, 'resolveChildRouteBinding'), 62],
+            [sprintf(self::BEHAVIOUR, 'resolveSoftDeletableChildRouteBinding'), 67],
+        ]);
+    }
+
+    /**
+     * A project whose models resolve their own route bindings appends the
+     * resolvers to the default set, which leaves the defaults in force and
+     * permits the resolvers alone.
+     *
+     * @return void
+     */
+    public function testPermitsTheRouteBindingResolversOnceAppended(): void
+    {
+        $default = (new \ReflectionParameter([DisallowModelBehaviourRule::class, '__construct'], 'hooks'))
+            ->getDefaultValue();
+
+        self::assertIsArray($default);
+
+        $this->hooks = [
+            ...$default,
+            'resolveRouteBinding',
+            'resolveSoftDeletableRouteBinding',
+            'resolveChildRouteBinding',
+            'resolveSoftDeletableChildRouteBinding',
+        ];
+
+        $this->analyse([__DIR__ . '/data/model-behaviour-hooks.inc'], [
+            [sprintf(self::BEHAVIOUR, 'casts'), 9],
+            [sprintf(self::BEHAVIOUR, 'boot'), 14],
+            [sprintf(self::BEHAVIOUR, 'booting'), 19],
+            [sprintf(self::BEHAVIOUR, 'booted'), 24],
+            [sprintf(self::BEHAVIOUR, 'newFactory'), 29],
+            [sprintf(self::BEHAVIOUR, 'newCollection'), 34],
+            [sprintf(self::BEHAVIOUR, 'newEloquentBuilder'), 39],
+            [sprintf(self::BEHAVIOUR, 'toSearchableArray'), 44],
         ]);
     }
 

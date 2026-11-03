@@ -28,8 +28,10 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsRelationships;
  * imports, so moving a method into a trait does not take it out of scope. An
  * imported method is reported against the line the class declares itself on,
  * since that is where the decision to import it lives and the trait may sit in
- * another file. Anonymous classes are read the same way, so extending a model
- * base inline is not a way around the rule either.
+ * another file. A trait is only read where its file is among the analysed
+ * paths, so one installed as a dependency is reported only in the package that
+ * ships it. Anonymous classes are read the same way, so extending a model base
+ * inline is not a way around the rule either.
  *
  * A model is recognised through its whole ancestry rather than the name of its
  * immediate parent, so a project that puts its own base class between its
@@ -60,9 +62,15 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsRelationships;
  * suppression on a base class into unlimited behaviour on every model beneath
  * it.
  *
- * The permitted hooks are the configurable `modelHooks` parameter, since the
- * framework adds to them over time and a project's set depends on the version
- * it pins.
+ * The permitted hooks are the configurable `modelHooks` parameter. A method is
+ * a default hook only if Eloquent declares it publicly, only an override can
+ * say what it says on every supported Laravel version, and it describes rather
+ * than performs: it returns a name, a class, a list, a generated value or a
+ * query that has not run, and never runs a query, returns a fetched record,
+ * changes state or calls anything external. The route binding resolvers fail
+ * the last test, since each runs the lookup and returns the record, so a
+ * project whose models resolve their own bindings appends them in its own
+ * config.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -97,9 +105,7 @@ final readonly class DisallowModelBehaviourRule implements Rule
      */
     public function __construct(
         array $hooks = [
-            'casts', 'boot', 'booting', 'booted', 'newFactory', 'newCollection', 'newEloquentBuilder',
-            'uniqueIds', 'newUniqueId', 'getRouteKeyName', 'resolveRouteBindingQuery', 'getMorphClass',
-            'prunable', 'toSearchableArray',
+            'uniqueIds', 'newUniqueId', 'getRouteKeyName', 'resolveRouteBindingQuery', 'getMorphClass', 'prunable',
         ],
     ) {
         $this->hooks = $hooks;

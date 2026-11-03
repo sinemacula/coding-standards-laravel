@@ -28,23 +28,17 @@ parameters:
         # Leave empty to detect the floor from the nearest composer.json.
         minLaravelVersion: ''
 
-        # Hooks a model may declare besides its relations and accessors.
-        # Use `modelHooks!:` to replace, not append.
+        # Hooks a model may declare besides its relations and accessors: each is
+        # public on Eloquent, sayable only by an override, and describes rather
+        # than performs. A project appends its own under `modelHooks:`, with the
+        # reason in a comment; `modelHooks!:` replaces the set instead.
         modelHooks:
-            - casts
-            - boot
-            - booting
-            - booted
-            - newFactory
-            - newCollection
-            - newEloquentBuilder
             - uniqueIds
             - newUniqueId
             - getRouteKeyName
             - resolveRouteBindingQuery
             - getMorphClass
             - prunable
-            - toSearchableArray
 
     # Pins the column scan to the project; unset, it resolves from the booted
     # application, which an isolated runner can boot elsewhere.

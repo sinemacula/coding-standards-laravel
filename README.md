@@ -53,6 +53,9 @@ Two standards ship; reference exactly one (each pulls in `SineMacula`, so it rep
   rules (`Structure.*`, `Controllers.*`) excluded, since a package is organised by domain rather than
   Laravel's app directory layout. Composition only - it redefines nothing.
 
+Both drop the `Internal.NoCodeFound` warning for `*.blade.php` files, which hold no PHP to check. Under
+`SineMaculaLaravel` the templates are still read, so `RequireBladeLocation` still reports a misplaced one.
+
 ```xml
 <?xml version="1.0"?>
 <ruleset name="Project">
@@ -185,6 +188,17 @@ declared non-readonly on the base class, and PHP forbids making an inherited pro
 standard sets the base sniff's `ignoredParentClasses` to the model bases (`Model`, `Authenticatable`,
 `Pivot`), matched by the immediate parent name as written.
 
+A class that implements `ShouldQueue`, `ShouldQueueAfterCommit` or `ShouldBroadcast` is exempt for the
+properties the framework reads off it - `$tries`, `$timeout`, `$backoff`, `$queue`, `$connection` and the
+others the ruleset lists - because each needs a default and a readonly property cannot have one. Its other
+public properties are still required to be readonly. The interface is matched as written in the class's own
+`implements` clause.
+
+#### Policy abilities
+
+A policy's methods are named for the abilities the Gate checks (`viewAny`, `update`, `before`, ...), so
+they cannot take a predicate prefix. `BooleanMethodName` leaves classes whose name ends in `Policy` alone.
+
 ### PHPStan rules
 
 | Identifier                                     | Enforces                                                                                                                 |
@@ -262,9 +276,30 @@ A method is a default hook only if it passes all three tests:
 3. **It describes rather than performs** - it returns a name, class, list, generated value or unexecuted
    query. It does not run a query, return a fetched record, change state or call anything external.
 
-The defaults are `uniqueIds`, `newUniqueId`, `getRouteKeyName`, `resolveRouteBindingQuery`, `getMorphClass`
-and `prunable`. `getRouteKeyName` stays only while Laravel 12 is supported, since `#[RouteKey]` arrives in
-13. Passing the tests makes a method eligible, but it is only added once a real project needs it.
+The defaults are `uniqueIds`, `newUniqueId`, `getRouteKeyName`, `resolveRouteBindingQuery`, `getMorphClass`,
+`prunable`, `getTable` and `getConnectionName`. `getRouteKeyName` stays only while Laravel 12 is supported,
+since `#[RouteKey]` arrives in 13. Passing the tests makes a method eligible, but it is only added once a
+real project needs it.
+
+`getTable` and `getConnectionName` are where a table or connection taken from config goes. `$table`,
+`$connection` and their attributes only take constant values, so the override is the only way to say it,
+and it replaces setting either one from a constructor, which is reported like any other behaviour.
+Fall back to config rather than replacing the property, so `setTable()`, `setConnection()` and
+`Model::on()` keep working:
+
+```php
+public function getTable(): string
+{
+    return $this->table ?? config('audit.table');
+}
+
+public function getConnectionName(): ?string
+{
+    return $this->connection ?? config('audit.connection');
+}
+```
+
+A fixed name still belongs in `#[Table]` or `$table`.
 
 The route binding resolvers - `resolveRouteBinding()`, `resolveSoftDeletableRouteBinding()`,
 `resolveChildRouteBinding()` and `resolveSoftDeletableChildRouteBinding()` - fail the third test, because

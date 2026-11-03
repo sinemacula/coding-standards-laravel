@@ -100,13 +100,13 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
     {
         $this->analyse([__DIR__ . '/data/model-behaviour-inheritance.inc'], [
             [sprintf(self::BEHAVIOUR, 'renew'), 25],
-            [sprintf(self::BEHAVIOUR, 'purge'), 66],
-            [sprintf(self::BEHAVIOUR, 'purge'), 71],
-            [sprintf(self::BEHAVIOUR, 'expire'), 102],
-            [sprintf(self::BEHAVIOUR, 'toArray'), 110],
-            [sprintf(self::BEHAVIOUR, 'jsonSerialize'), 115],
-            [sprintf(self::BEHAVIOUR, 'offsetGet'), 120],
-            [sprintf(self::BEHAVIOUR, 'getAuthIdentifier'), 141],
+            [sprintf(self::BEHAVIOUR, 'purge'), 76],
+            [sprintf(self::BEHAVIOUR, 'purge'), 81],
+            [sprintf(self::BEHAVIOUR, 'expire'), 112],
+            [sprintf(self::BEHAVIOUR, 'toArray'), 120],
+            [sprintf(self::BEHAVIOUR, 'jsonSerialize'), 125],
+            [sprintf(self::BEHAVIOUR, 'offsetGet'), 130],
+            [sprintf(self::BEHAVIOUR, 'getAuthIdentifier'), 151],
         ]);
     }
 
@@ -129,13 +129,15 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
             [sprintf(self::BEHAVIOUR, 'resolveRouteBindingQuery'), 48],
             [sprintf(self::BEHAVIOUR, 'getMorphClass'), 53],
             [sprintf(self::BEHAVIOUR, 'prunable'), 58],
-            [sprintf(self::BEHAVIOUR, 'purge'), 66],
-            [sprintf(self::BEHAVIOUR, 'purge'), 71],
-            [sprintf(self::BEHAVIOUR, 'expire'), 102],
-            [sprintf(self::BEHAVIOUR, 'toArray'), 110],
-            [sprintf(self::BEHAVIOUR, 'jsonSerialize'), 115],
-            [sprintf(self::BEHAVIOUR, 'offsetGet'), 120],
-            [sprintf(self::BEHAVIOUR, 'getAuthIdentifier'), 141],
+            [sprintf(self::BEHAVIOUR, 'getTable'), 63],
+            [sprintf(self::BEHAVIOUR, 'getConnectionName'), 68],
+            [sprintf(self::BEHAVIOUR, 'purge'), 76],
+            [sprintf(self::BEHAVIOUR, 'purge'), 81],
+            [sprintf(self::BEHAVIOUR, 'expire'), 112],
+            [sprintf(self::BEHAVIOUR, 'toArray'), 120],
+            [sprintf(self::BEHAVIOUR, 'jsonSerialize'), 125],
+            [sprintf(self::BEHAVIOUR, 'offsetGet'), 130],
+            [sprintf(self::BEHAVIOUR, 'getAuthIdentifier'), 151],
         ]);
     }
 

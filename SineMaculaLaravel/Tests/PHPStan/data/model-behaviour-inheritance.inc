@@ -59,6 +59,16 @@ class Ledger extends BaseModel
     {
         return null;
     }
+
+    public function getTable(): string
+    {
+        return 'ledgers';
+    }
+
+    public function getConnectionName(): ?string
+    {
+        return 'ledger';
+    }
 }
 
 abstract class MandatingBase extends Model

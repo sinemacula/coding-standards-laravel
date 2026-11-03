@@ -197,6 +197,8 @@ standard sets the base sniff's `ignoredParentClasses` to the model bases (`Model
 | `sineMaculaLaravel.modelBehaviour`             | A model, at any depth of ancestry, carries its schema and its relations; behaviour belongs to a repository or a service. |
 | `sineMaculaLaravel.modelAttribute`             | Prefer a model attribute over its legacy property or method form, for the attributes a project enables.                  |
 | `sineMaculaLaravel.modelAttributeLaggingFloor` | The legacy form of an attribute the project already resolves a Laravel version for, while its floor does not.            |
+| `sineMaculaLaravel.queueAttribute`             | A queued class sets `$tries`, `$timeout`, `$queue` and the other queue settings with their attribute, not a property.    |
+| `sineMaculaLaravel.queueAttributeLaggingFloor` | A queue setting property the project's resolved Laravel could replace, while its floor does not.                         |
 | `sineMaculaLaravel.foreignIdFor`               | A foreign key column in a migration is declared from its model - `foreignIdFor(Organization::class)`.                    |
 | `sineMaculaLaravel.migrationMethods`           | A migration defines both `up()` and `down()`.                                                                            |
 | `sineMaculaLaravel.schemaNaming`               | Table and column names in a migration use snake_case; digits are allowed, only casing is enforced.                       |
@@ -313,6 +315,37 @@ Where the floor sits below 13.2 but `composer.lock` already resolves above it, t
 under `modelAttributeLaggingFloor` instead. The attribute cannot be adopted until the floor moves, but the
 gap stays visible rather than arriving as a bulk migration the day it does. A package that supports older
 versions deliberately can ignore that identifier and keep the enforcement one.
+
+#### Queue attributes
+
+`queueAttribute` reports a public property declared only to give a queue setting a value - `public $tries =
+3;` on a job - in favour of its attribute, `#[Tries(3)]`. It reads every class the framework queues: jobs and
+listeners (`ShouldQueue`), mailables, notifications and broadcast events (`ShouldBroadcast`), each as its
+most specific kind.
+
+Each setting is enforced from the floor at which the attribute behaves like the property on every path the
+framework takes for that kind. Nothing is enforced below 13.4, the first release in which a value set at
+runtime, such as by `onQueue()`, wins over the attribute as it does over a declared default. Some settings
+wait longer: a job's `#[Delay]` until 13.24, when every queue driver honours it, and a mailable's
+`#[FailOnTimeout]` until 13.36. The floor comes from `sineMaculaLaravel.minLaravelVersion` or the nearest
+`composer.json`, read from the queue-side components (`illuminate/queue`, `illuminate/bus`,
+`illuminate/mail`, ...) as well as `illuminate/database` and `laravel/framework`, taking the lowest any of
+them declares, since each component reads only its own kinds' attributes. A floor behind what
+`composer.lock` resolves reports under `queueAttributeLaggingFloor`, as the model attributes do.
+
+A property is left alone where the attribute would not say the same thing:
+
+- a default the attribute cannot carry - a notification's per-channel `$delay` array, a `$failOnTimeout` of
+  `false` (`#[FailOnTimeout]` and `#[DeleteWhenMissingModels]` take no argument), or no default at all;
+- a setting the class answers with a method the framework calls instead - `tries()`, `backoff()`,
+  `uniqueFor()`, `viaQueue()`, `viaConnection()`, `withDelay()` and a notification's `viaQueues()` and
+  `viaConnections()`;
+- `$queue`, `$connection` and `$delay` on a class using `Queueable`, whose `onQueue()`, `onConnection()`
+  and `delay()` - and a chain's - change them at runtime, including back to `null`, which an attribute
+  cannot follow;
+- a broadcast event's `$queue` and `$connection`, which the broadcaster reads before the attribute, so an
+  inherited default would win over it;
+- a non-public or static property, which the framework never reads.
 
 #### What the model and migration rules inspect
 

@@ -245,7 +245,7 @@ final class PreferModelAttributesRule implements Rule
      */
     private function laggingFloorError(string $attribute, string $legacy, int $line, Scope $scope): ?RuleError
     {
-        $installed = $this->laggingFloorVersion($scope);
+        $installed = $this->laggingLaravelVersion($this->declaredFloor($scope), self::ATTRIBUTE_FLOOR, $scope->getFile());
 
         if ($installed === null) {
             return null;
@@ -263,30 +263,6 @@ final class PreferModelAttributesRule implements Rule
             self::LAGGING_FLOOR_IDENTIFIER,
             $line,
         );
-    }
-
-    /**
-     * The resolved Laravel version when it supports the gated attributes but
-     * the project's declared floor does not, or null when the two agree.
-     *
-     * @param  \PHPStan\Analyser\Scope  $scope
-     * @return string|null
-     */
-    private function laggingFloorVersion(Scope $scope): ?string
-    {
-        $floor = $this->declaredFloor($scope);
-
-        if ($floor === null || $this->normaliseVersion($floor) === null) {
-            return null;
-        }
-
-        $installed = $this->detectInstalledLaravelVersion($scope->getFile());
-
-        if ($installed === null || $this->isLaravelVersionAtLeast($installed, self::ATTRIBUTE_FLOOR) === false) {
-            return null;
-        }
-
-        return ltrim($installed, 'vV');
     }
 
     /**

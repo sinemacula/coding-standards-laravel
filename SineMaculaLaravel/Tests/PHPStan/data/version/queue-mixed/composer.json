@@ -1,0 +1,8 @@
+{
+    "require": {
+        "illuminate/queue": "^13.24",
+        "illuminate/mail": "^13.30",
+        "illuminate/notifications": "^13.4",
+        "illuminate/support": "^13.26"
+    }
+}

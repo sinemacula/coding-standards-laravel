@@ -104,6 +104,22 @@ final class PreferQueueAttributesRuleTest extends RuleTestCase
     }
 
     /**
+     * A property with hooks computes the setting rather than declaring it, so an
+     * attribute could not say the same thing, while a plain one beside it is
+     * still reported.
+     *
+     * @return void
+     */
+    public function testLeavesAHookedPropertyAlone(): void
+    {
+        $this->minLaravelVersion = '13.4';
+
+        $this->analyse([__DIR__ . '/data/queue-attributes-hooked/queued.inc'], [
+            [sprintf(self::ERROR, 'Timeout', 'timeout'), 15],
+        ]);
+    }
+
+    /**
      * Before 13.4 a value set on the object at runtime did not win over the
      * attribute, so no floor below it enforces anything, and with nothing
      * resolved beside it there is no lagging floor to report either.

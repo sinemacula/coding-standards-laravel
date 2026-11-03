@@ -263,15 +263,16 @@ final class PreferQueueAttributesRule implements Rule
     }
 
     /**
-     * The items of a property declaration the framework could read as a
-     * setting: only a public instance property is visible to it.
+     * The items of a property declaration that hold a setting's value: only a
+     * public instance property is visible to the framework, and one with hooks
+     * computes the value rather than declaring it.
      *
      * @param  \PhpParser\Node\Stmt\Property  $property
      * @return array<int, \PhpParser\Node\PropertyItem>
      */
     private function settingItems(Property $property): array
     {
-        return $property->isPublic() && !$property->isStatic() ? $property->props : [];
+        return $property->isPublic() && !$property->isStatic() && $property->hooks === [] ? $property->props : [];
     }
 
     /**

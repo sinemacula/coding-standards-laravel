@@ -63,3 +63,11 @@ function getSystemAttribute(): string
 {
     return '';
 }
+
+class AddressLink extends \Illuminate\Database\Eloquent\Relations\MorphPivot
+{
+    public function getLabelAttribute(): string
+    {
+        return '';
+    }
+}

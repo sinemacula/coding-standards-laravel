@@ -23,8 +23,9 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsTestFiles;
  * shape of each settable field. For each `$fillable` entry (or the
  * `#[Fillable]` attribute form) this requires a matching key in the `casts()`
  * method (or a `$casts` property). It runs only on a concrete model that
- * directly extends `Model`, `Authenticatable` or `Pivot`, so a subclass whose
- * parent declares the casts is left alone; models declared in tests are exempt.
+ * directly extends `Model`, `Authenticatable`, `Pivot` or `MorphPivot`, so a
+ * subclass whose parent declares the casts is left alone; models declared in
+ * tests are exempt.
  *
  * The fillable list and the cast set must both be statically enumerable. When
  * either is assembled dynamically - a `$fillable` built from a variable, or a
@@ -41,7 +42,7 @@ final class RequireFillableCastsRule implements Rule
     use DetectsTestFiles;
 
     /** @var array<int, string> Eloquent model base classes. */
-    private const array MODEL_BASE_CLASSES = ['Model', 'Authenticatable', 'Pivot'];
+    private const array MODEL_BASE_CLASSES = ['Model', 'Authenticatable', 'Pivot', 'MorphPivot'];
 
     /**
      * The node type this rule inspects.

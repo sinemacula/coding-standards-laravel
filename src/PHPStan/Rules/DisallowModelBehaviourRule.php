@@ -83,9 +83,10 @@ final readonly class DisallowModelBehaviourRule implements Rule
 
     /** @var array<string, string> Base classes whose descendants are models, by name and by short name. */
     private const array MODEL_BASE_CLASSES = [
-        'Illuminate\Database\Eloquent\Model'           => 'Model',
-        'Illuminate\Foundation\Auth\User'              => 'Authenticatable',
-        'Illuminate\Database\Eloquent\Relations\Pivot' => 'Pivot',
+        'Illuminate\Database\Eloquent\Model'                => 'Model',
+        'Illuminate\Foundation\Auth\User'                   => 'Authenticatable',
+        'Illuminate\Database\Eloquent\Relations\Pivot'      => 'Pivot',
+        'Illuminate\Database\Eloquent\Relations\MorphPivot' => 'MorphPivot',
     ];
 
     /** @var string Return type marking an accessor or mutator. */

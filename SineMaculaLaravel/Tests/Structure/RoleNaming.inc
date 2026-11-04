@@ -66,3 +66,7 @@ class Registry
 {
     public const Controller = 'ok';
 }
+
+class AddressLinkModel extends \Illuminate\Database\Eloquent\Relations\MorphPivot
+{
+}

@@ -20,3 +20,11 @@ class Setting extends Registry
         //
     }
 }
+
+class AddressLink extends \App\Support\MorphPivot
+{
+    public function relink(): void
+    {
+        //
+    }
+}

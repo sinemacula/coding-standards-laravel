@@ -37,7 +37,7 @@ final class ReadonlyFrameworkExemptionTest extends TestCase
      */
     public function testExemptsFrameworkMagicPropertiesFromReadonly(): void
     {
-        self::assertSame([31], $this->readonlyViolationLines());
+        self::assertSame([32], $this->readonlyViolationLines());
     }
 
     /**

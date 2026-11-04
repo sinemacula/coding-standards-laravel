@@ -60,6 +60,7 @@
                 <element value="Model"/>
                 <element value="Authenticatable"/>
                 <element value="Pivot"/>
+                <element value="MorphPivot"/>
                 <element value="Migration"/>
                 <element value="JsonResource"/>
                 <element value="ResourceCollection"/>

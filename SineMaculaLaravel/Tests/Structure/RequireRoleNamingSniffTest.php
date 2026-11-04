@@ -40,7 +40,7 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
      */
     public function testFlagsNamesAgainstResolvedRole(): void
     {
-        $this->assertErrorsOnLines('RoleNaming.inc', [13, 25, 61]);
+        $this->assertErrorsOnLines('RoleNaming.inc', [13, 25, 61, 70]);
     }
 
     /**

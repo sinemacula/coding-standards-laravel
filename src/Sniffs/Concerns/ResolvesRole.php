@@ -32,7 +32,7 @@ trait ResolvesRole
     /** @var array<string, string> Role => comma-separated identity names (short, or `\`-qualified to match through imports). */
     public array $roleIdentities = [
         'Controller'      => 'Controller',
-        'Model'           => 'Eloquent\Model,Authenticatable,Pivot',
+        'Model'           => 'Eloquent\Model,Authenticatable,Pivot,MorphPivot',
         'ServiceProvider' => 'ServiceProvider',
         'FormRequest'     => 'FormRequest',
         'Resource'        => 'JsonResource',

@@ -54,6 +54,10 @@ final class RequireFillableCastsRuleTest extends RuleTestCase
                 'Fillable attribute "role" must declare a cast in the casts() method.',
                 103,
             ],
+            [
+                'Fillable attribute "label" must declare a cast in the casts() method.',
+                167,
+            ],
         ]);
     }
 

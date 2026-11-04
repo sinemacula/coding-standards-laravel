@@ -19,11 +19,12 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsTestFiles;
  * A concrete class descending from the framework's `FormRequest` must have the
  * validation rules it enforces, whether it declares `rules()` itself or
  * inherits it from a base request of the project's own, as long as the method
- * is public, since the framework calls it from outside the class. A form request is recognised by its ancestry
- * rather than where it lives, so a validation rule or any other class kept
- * beside the requests is not mistaken for one. Where the ancestry does not
- * resolve, a parent written as `FormRequest` still marks one. Abstract base
- * requests and classes declared in tests are not affected.
+ * is public, since the framework calls it from outside the class. A form
+ * request is recognised by its ancestry rather than where it lives, so a
+ * validation rule or any other class kept beside the requests is not mistaken
+ * for one. Where the ancestry does not resolve, a parent written as
+ * `FormRequest` still marks one. Abstract base requests and classes declared in
+ * tests are not affected.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited

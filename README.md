@@ -142,17 +142,16 @@ untouched, and routes are only grouped within their enclosing `group()` closure.
 class under a role directory, minus exempt sub-namespaces such as `Concerns`/`Support`/`Contracts`). A
 class with neither is unconstrained, so genuine domain classes are never flagged.
 
-The default role table is convention-correct for Laravel: it never requires a suffix the framework
-leaves bare, and the idiomatic bare `User` model is honoured (the `Model` role's identity covers
-`Authenticatable` and `Pivot`). Every list - `roleIdentities`, `roleLocations`, `requireSuffix`,
-`forbidSuffix`, `exemptNamespaces`, `moduleRootRoles` - is a public sniff property a ruleset can
-override. Identity is matched on the immediate base by short name, so a project's own intermediate
-base (e.g. a `BaseController`) is supported by adding it to `roleIdentities`. An identity entry
-containing `\` instead matches the qualified name resolved through the file's imports, which keeps
-same-named traits distinct: the `Job` role's `Bus\Dispatchable` entry identifies a sync job without
-ever matching the Events `Dispatchable` an idiomatic event uses. Test classes - by name, test-case
-base, or a `tests/` path - play no role at all, so a test mirroring a role namespace
-(`Tests\Unit\Policies\...`) is never constrained.
+The default role table is convention-correct for Laravel: it never requires a suffix the framework leaves
+bare, and the idiomatic bare `User` model is honoured (the `Model` role's identity covers `Authenticatable`,
+`Pivot` and `MorphPivot`). Every list - `roleIdentities`, `roleLocations`, `requireSuffix`, `forbidSuffix`,
+`exemptNamespaces`, `moduleRootRoles` - is a public sniff property a ruleset can override. Identity is
+matched on the immediate base by short name, so a project's own intermediate base (e.g. a `BaseController`)
+is supported by adding it to `roleIdentities`. An identity entry containing `\` instead matches the
+qualified name resolved through the file's imports, which keeps same-named traits distinct: the `Job` role's
+`Bus\Dispatchable` entry identifies a sync job without ever matching the Events `Dispatchable` an idiomatic
+event uses. Test classes - by name, test-case base, or a `tests/` path - play no role at all, so a test
+mirroring a role namespace (`Tests\Unit\Policies\...`) is never constrained.
 
 Opt a class out entirely with an `@role-exempt` docblock tag or a `#[NotARole]` attribute (matched
 by short name; `SineMacula\CodingStandardsLaravel\Attributes\NotARole` ships so the reference also
@@ -187,11 +186,11 @@ protected $view;
 
 #### Readonly properties
 
-The base standard requires every public property to be `readonly`. An Eloquent model is exempt: it
-overrides the framework's public magic properties (`$timestamps`, `$incrementing`, …), which are
-declared non-readonly on the base class, and PHP forbids making an inherited property readonly. This
-standard sets the base sniff's `ignoredParentClasses` to the model bases (`Model`, `Authenticatable`,
-`Pivot`), matched by the immediate parent name as written.
+The base standard requires every public property to be `readonly`. An Eloquent model is exempt: it overrides
+the framework's public magic properties (`$timestamps`, `$incrementing`, …), which are declared non-readonly
+on the base class, and PHP forbids making an inherited property readonly. This standard sets the base
+sniff's `ignoredParentClasses` to the model bases (`Model`, `Authenticatable`, `Pivot`, `MorphPivot`),
+matched by the immediate parent name as written.
 
 A class that implements `ShouldQueue`, `ShouldQueueAfterCommit` or `ShouldBroadcast` is exempt for the
 properties the framework reads off it - `$tries`, `$timeout`, `$backoff`, `$queue`, `$connection` and the
@@ -240,16 +239,17 @@ package that ships it, where that package's own classes import it. An applicatio
 report and needs no config.
 
 A model is recognised through its whole ancestry, so a project that puts its own base class between its
-models and `Model`, `Authenticatable` or `Pivot` is covered like any other. It is the only model rule that
-does: `castsProperty`, `massAssignment`, `fillableCasts` and `modelAttribute` each match the immediate
-parent name as written, and `datesProperty` does not look at the parent at all - it reports a `$dates`
-property wherever one appears.
+models and `Model`, `Authenticatable`, `Pivot` or `MorphPivot` is covered like any other. It is the only
+model rule that does: `castsProperty`, `massAssignment`, `fillableCasts` and `modelAttribute` each match the
+immediate parent name as written, and `datesProperty` does not look at the parent at all - it reports a
+`$dates` property wherever one appears.
 
 The parent name as written is read alongside the resolved ancestry rather than only when nothing resolves,
-so a model whose parent is written as `Model`, `Authenticatable` or `Pivot` stays covered where a dependency
-is only partly installed and the ancestry above that parent is invisible. What name-based recovery cannot
-reach is a base class of the project's own, named something else, that resolves while the framework base
-above it does not: nothing in the model or its resolved ancestry names a model base, and it is left alone.
+so a model whose parent is written as `Model`, `Authenticatable`, `Pivot` or `MorphPivot` stays covered
+where a dependency is only partly installed and the ancestry above that parent is invisible. What name-based
+recovery cannot reach is a base class of the project's own, named something else, that resolves while the
+framework base above it does not: nothing in the model or its resolved ancestry names a model base, and it
+is left alone.
 
 The interface exemption covers only the contracts the model's own author opted into, whether the class, a
 base class of the project's own or a package declares them. The contracts the framework base already
@@ -389,12 +389,12 @@ A property is left alone where the attribute would not say the same thing:
 
 #### What the model and migration rules inspect
 
-`fillableCasts` runs only on a concrete model directly extending `Model`/`Authenticatable`/`Pivot`, and
-skips a `$fillable` or `casts()` that is not a plain enumerable literal. `schemaNaming` and
-`resourceFieldNaming` inspect string literals only, so computed keys and dynamic names are left alone.
-`foreignIdFor` flags the longhand `foreignId`/`foreignUuid`/`foreignUlid` calls whose literal column name
-ends in `_id`; bypass a column pointing at a table this service does not own with `@phpstan-ignore
-sineMaculaLaravel.foreignIdFor`. Classes declared in tests are exempt throughout.
+`fillableCasts` runs only on a concrete model directly extending
+`Model`/`Authenticatable`/`Pivot`/`MorphPivot`, and skips a `$fillable` or `casts()` that is not a plain
+enumerable literal. `schemaNaming` and `resourceFieldNaming` inspect string literals only, so computed keys
+and dynamic names are left alone. `foreignIdFor` flags the longhand `foreignId`/`foreignUuid`/`foreignUlid`
+calls whose literal column name ends in `_id`; bypass a column pointing at a table this service does not own
+with `@phpstan-ignore sineMaculaLaravel.foreignIdFor`. Classes declared in tests are exempt throughout.
 
 #### Builder calls under the strict rules
 

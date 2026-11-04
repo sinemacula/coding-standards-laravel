@@ -18,3 +18,8 @@ final class AttributeSetter
 {
     private $casts = [];
 }
+
+class AddressLink extends \Illuminate\Database\Eloquent\Relations\MorphPivot
+{
+    protected $casts = ['primary' => 'bool'];
+}

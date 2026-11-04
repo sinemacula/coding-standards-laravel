@@ -31,7 +31,7 @@ final class DisallowLegacyAttributeAccessorSniffTest extends AbstractSniffTestCa
      */
     public function testFlagsOnlyGenuineModelAccessors(): void
     {
-        $this->assertErrorsOnLines('DisallowLegacyAttributeAccessor.inc', [9, 18]);
+        $this->assertErrorsOnLines('DisallowLegacyAttributeAccessor.inc', [9, 18, 69]);
     }
 
     /**
@@ -45,6 +45,7 @@ final class DisallowLegacyAttributeAccessorSniffTest extends AbstractSniffTestCa
         $this->assertErrorMessagesOnLines('DisallowLegacyAttributeAccessor.inc', [
             9  => ['Legacy accessor/mutator "getNameAttribute()" is not allowed; define the attribute via Attribute::make().'],
             18 => ['Legacy accessor/mutator "setNameAttribute()" is not allowed; define the attribute via Attribute::make().'],
+            69 => ['Legacy accessor/mutator "getLabelAttribute()" is not allowed; define the attribute via Attribute::make().'],
         ]);
     }
 

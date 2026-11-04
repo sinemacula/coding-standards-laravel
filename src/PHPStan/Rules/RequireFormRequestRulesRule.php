@@ -67,8 +67,7 @@ final class RequireFormRequestRulesRule implements Rule
 
         if (
             !$origin instanceof Class_
-            || $origin->isAbstract()
-            || $this->isTestFile($scope)
+            || $this->isOutOfScope($origin, $scope)
             || !$this->isFormRequest($class, $origin)
             || $this->hasCallableRules($class)
         ) {
@@ -78,6 +77,19 @@ final class RequireFormRequestRulesRule implements Rule
         return [RuleErrorBuilder::message(
             'A form request must define a rules() method.',
         )->identifier('sineMaculaLaravel.formRequestRules')->build()];
+    }
+
+    /**
+     * Whether the class is left alone whatever it extends: an abstract base
+     * request, or a class declared in a test.
+     *
+     * @param  \PhpParser\Node\Stmt\Class_  $origin
+     * @param  \PHPStan\Analyser\Scope  $scope
+     * @return bool
+     */
+    private function isOutOfScope(Class_ $origin, Scope $scope): bool
+    {
+        return $origin->isAbstract() || $this->isTestFile($scope);
     }
 
     /**

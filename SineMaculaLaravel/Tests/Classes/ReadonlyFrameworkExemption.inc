@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -44,4 +45,9 @@ class ThingResource extends JsonResource
 class ThingCollection extends ResourceCollection
 {
     public $collects = ThingResource::class;
+}
+
+class AddressLink extends MorphPivot
+{
+    public $incrementing = true;
 }

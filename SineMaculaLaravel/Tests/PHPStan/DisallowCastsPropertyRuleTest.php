@@ -35,6 +35,10 @@ final class DisallowCastsPropertyRuleTest extends RuleTestCase
                 'The $casts property is not allowed; declare casts via the casts() method instead.',
                 9,
             ],
+            [
+                'The $casts property is not allowed; declare casts via the casts() method instead.',
+                24,
+            ],
         ]);
     }
 

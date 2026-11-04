@@ -161,3 +161,8 @@ class NonReturnCastsBody extends Model
         return ['second' => 'string'];
     }
 }
+
+class AddressLink extends \Illuminate\Database\Eloquent\Relations\MorphPivot
+{
+    protected $fillable = ['label'];
+}

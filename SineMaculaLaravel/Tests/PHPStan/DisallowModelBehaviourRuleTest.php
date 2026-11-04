@@ -248,6 +248,7 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
     {
         $this->analyse([__DIR__ . '/data/model-behaviour-unresolved.inc'], [
             [sprintf(self::BEHAVIOUR, 'revoke'), 10],
+            [sprintf(self::BEHAVIOUR, 'relink'), 26],
         ]);
     }
 

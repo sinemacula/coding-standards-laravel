@@ -14,9 +14,10 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDeclarationNames;
  * The legacy `getXAttribute()` / `setXAttribute()` accessor and mutator methods
  * are superseded by `Attribute::make()`. To avoid flagging unrelated methods
  * that merely share the name, two gates must both hold: the declaring class
- * extends an Eloquent model base (Model, Authenticatable, Pivot - configurable,
- * matched on the immediate base by short name), and the signature matches a
- * real accessor (a getter takes no parameters, a setter takes exactly one).
+ * extends an Eloquent model base (Model, Authenticatable, Pivot, MorphPivot -
+ * configurable, matched on the immediate base by short name), and the signature
+ * matches a real accessor (a getter takes no parameters, a setter takes exactly
+ * one).
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -26,7 +27,7 @@ final class DisallowLegacyAttributeAccessorSniff implements Sniff
     use ReadsDeclarationNames;
 
     /** @var array<int, string> Eloquent model base classes (matched by short name). */
-    public array $modelBaseClasses = ['Model', 'Authenticatable', 'Pivot'];
+    public array $modelBaseClasses = ['Model', 'Authenticatable', 'Pivot', 'MorphPivot'];
 
     /**
      * Register the tokens this sniff listens for.

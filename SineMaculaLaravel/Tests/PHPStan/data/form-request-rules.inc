@@ -47,3 +47,23 @@ class DeleteUserRequest extends FormRequest
         return [];
     }
 }
+
+abstract class HiddenRulesRequest extends FormRequest
+{
+    private function rules(): array
+    {
+        return [];
+    }
+}
+
+class InheritsHiddenRulesRequest extends HiddenRulesRequest
+{
+}
+
+class ProtectedRulesRequest extends FormRequest
+{
+    protected function rules(): array
+    {
+        return [];
+    }
+}

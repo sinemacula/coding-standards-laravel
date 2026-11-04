@@ -26,10 +26,10 @@ final class RequireFormRequestRulesRuleTest extends RuleTestCase
     private const string MESSAGE = 'A form request must define a rules() method.';
 
     /**
-     * A concrete form request without rules() is flagged, including one whose
-     * abstract base declares none either. One that declares rules() in any
-     * case, one that inherits it from a base request, and an abstract base are
-     * not.
+     * A concrete form request without a public rules() is flagged, including
+     * one whose abstract base declares none either or hides it. One that
+     * declares rules() in any case, one that inherits it from a base request,
+     * and an abstract base are not.
      *
      * @return void
      */
@@ -38,6 +38,8 @@ final class RequireFormRequestRulesRuleTest extends RuleTestCase
         $this->analyse([__DIR__ . '/data/form-request-rules.inc'], [
             [self::MESSAGE, 15],
             [self::MESSAGE, 39],
+            [self::MESSAGE, 59],
+            [self::MESSAGE, 63],
         ]);
     }
 

@@ -18,8 +18,8 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsTestFiles;
  *
  * A concrete class descending from the framework's `FormRequest` must have the
  * validation rules it enforces, whether it declares `rules()` itself or
- * inherits it from a base request of the project's own, as the framework only
- * asks that the method exist. A form request is recognised by its ancestry
+ * inherits it from a base request of the project's own, as long as the method
+ * is public, since the framework calls it from outside the class. A form request is recognised by its ancestry
  * rather than where it lives, so a validation rule or any other class kept
  * beside the requests is not mistaken for one. Where the ancestry does not
  * resolve, a parent written as `FormRequest` still marks one. Abstract base
@@ -69,7 +69,7 @@ final class RequireFormRequestRulesRule implements Rule
             || $origin->isAbstract()
             || $this->isTestFile($scope)
             || !$this->isFormRequest($class, $origin)
-            || $class->hasNativeMethod('rules')
+            || $this->hasCallableRules($class)
         ) {
             return [];
         }
@@ -77,6 +77,18 @@ final class RequireFormRequestRulesRule implements Rule
         return [RuleErrorBuilder::message(
             'A form request must define a rules() method.',
         )->identifier('sineMaculaLaravel.formRequestRules')->build()];
+    }
+
+    /**
+     * Whether the class has a public rules() method, its own or inherited, as
+     * the framework calls it from outside the class.
+     *
+     * @param  \PHPStan\Reflection\ClassReflection  $class
+     * @return bool
+     */
+    private function hasCallableRules(ClassReflection $class): bool
+    {
+        return $class->hasNativeMethod('rules') && $class->getNativeMethod('rules')->isPublic();
     }
 
     /**

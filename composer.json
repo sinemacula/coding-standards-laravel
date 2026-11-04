@@ -36,7 +36,8 @@
             "SineMaculaLaravel/Tests/PHPStan/data/model-behaviour-declared.inc",
             "SineMaculaLaravel/Tests/PHPStan/data/model-behaviour-partial.inc",
             "SineMaculaLaravel/Tests/PHPStan/data/model-behaviour-hooks.inc",
-            "SineMaculaLaravel/Tests/PHPStan/data/queue-attributes/queued.inc"
+            "SineMaculaLaravel/Tests/PHPStan/data/queue-attributes/queued.inc",
+            "SineMaculaLaravel/Tests/PHPStan/data/form-request-rules.inc"
         ]
     },
     "extra": {

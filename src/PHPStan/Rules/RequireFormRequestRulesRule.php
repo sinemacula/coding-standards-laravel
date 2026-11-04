@@ -7,6 +7,8 @@ namespace SineMacula\CodingStandardsLaravel\PHPStan\Rules;
 use PhpParser\Node;
 use PhpParser\Node\Stmt\Class_;
 use PHPStan\Analyser\Scope;
+use PHPStan\Node\InClassNode;
+use PHPStan\Reflection\ClassReflection;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsTestFiles;
@@ -14,19 +16,29 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsTestFiles;
 /**
  * Require form requests to define a rules() method.
  *
- * A concrete class under an `Http\Requests` namespace is a form request and
- * must declare the validation rules it enforces. Abstract base requests,
- * classes outside that namespace and classes declared in tests (where the
- * namespace merely mirrors the production tree) are not affected.
+ * A concrete class descending from the framework's `FormRequest` must have the
+ * validation rules it enforces, whether it declares `rules()` itself or
+ * inherits it from a base request of the project's own, as the framework only
+ * asks that the method exist. A form request is recognised by its ancestry
+ * rather than where it lives, so a validation rule or any other class kept
+ * beside the requests is not mistaken for one. Where the ancestry does not
+ * resolve, a parent written as `FormRequest` still marks one. Abstract base
+ * requests and classes declared in tests are not affected.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  *
- * @implements \PHPStan\Rules\Rule<\PhpParser\Node\Stmt\Class_>
+ * @implements \PHPStan\Rules\Rule<\PHPStan\Node\InClassNode>
  */
 final class RequireFormRequestRulesRule implements Rule
 {
     use DetectsTestFiles;
+
+    /** @var string The framework base every form request descends from. */
+    private const string FORM_REQUEST = 'Illuminate\Foundation\Http\FormRequest';
+
+    /** @var string The framework base's short name, read when the ancestry does not resolve. */
+    private const string FORM_REQUEST_SHORT_NAME = 'FormRequest';
 
     /**
      * The node type this rule inspects.
@@ -36,24 +48,28 @@ final class RequireFormRequestRulesRule implements Rule
     #[\Override]
     public function getNodeType(): string
     {
-        return Class_::class;
+        return InClassNode::class;
     }
 
     /**
-     * Flag a concrete form request that declares no rules() method.
+     * Flag a concrete form request that has no rules() method.
      *
-     * @param  \PhpParser\Node\Stmt\Class_  $node
+     * @param  \PHPStan\Node\InClassNode  $node
      * @param  \PHPStan\Analyser\Scope  $scope
      * @return array<int, \PHPStan\Rules\RuleError>
      */
     #[\Override]
     public function processNode(Node $node, Scope $scope): array
     {
+        $origin = $node->getOriginalNode();
+        $class  = $node->getClassReflection();
+
         if (
-            $node->isAbstract()
+            !$origin instanceof Class_
+            || $origin->isAbstract()
             || $this->isTestFile($scope)
-            || !$this->isInRequestsNamespace($scope)
-            || $this->hasRulesMethod($node)
+            || !$this->isFormRequest($class, $origin)
+            || $class->hasNativeMethod('rules')
         ) {
             return [];
         }
@@ -64,30 +80,19 @@ final class RequireFormRequestRulesRule implements Rule
     }
 
     /**
-     * Determine whether the scope sits in an Http\Requests namespace.
+     * Whether the class is a form request: it descends from the framework base,
+     * or its ancestry does not resolve and its parent is written as one.
      *
-     * @param  \PHPStan\Analyser\Scope  $scope
+     * @param  \PHPStan\Reflection\ClassReflection  $class
+     * @param  \PhpParser\Node\Stmt\Class_  $origin
      * @return bool
      */
-    private function isInRequestsNamespace(Scope $scope): bool
+    private function isFormRequest(ClassReflection $class, Class_ $origin): bool
     {
-        return str_contains('\\' . ($scope->getNamespace() ?? '') . '\\', '\Http\Requests\\');
-    }
-
-    /**
-     * Determine whether the class declares a rules() method.
-     *
-     * @param  \PhpParser\Node\Stmt\Class_  $node
-     * @return bool
-     */
-    private function hasRulesMethod(Class_ $node): bool
-    {
-        foreach ($node->getMethods() as $method) {
-            if (strtolower($method->name->toString()) === 'rules') {
-                return true;
-            }
+        if ($class->is(self::FORM_REQUEST)) {
+            return true;
         }
 
-        return false;
+        return $class->getParentClass() === null && $origin->extends?->getLast() === self::FORM_REQUEST_SHORT_NAME;
     }
 }

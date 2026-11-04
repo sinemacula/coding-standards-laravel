@@ -221,7 +221,7 @@ they cannot take a predicate prefix. `BooleanMethodName` leaves classes whose na
 | `sineMaculaLaravel.foreignIdFor`               | A foreign key column in a migration is declared from its model - `foreignIdFor(Organization::class)`.                    |
 | `sineMaculaLaravel.migrationMethods`           | A migration defines both `up()` and `down()`.                                                                            |
 | `sineMaculaLaravel.schemaNaming`               | Table and column names in a migration use snake_case; digits are allowed, only casing is enforced.                       |
-| `sineMaculaLaravel.formRequestRules`           | A form request (under `Http\Requests`) defines a `rules()` method; classes declared in tests are exempt.                 |
+| `sineMaculaLaravel.formRequestRules`           | A form request, recognised by its ancestry, has a `rules()` method, its own or inherited; tests are exempt.              |
 | `sineMaculaLaravel.factoryTimestamps`          | A factory `definition()` must not set `created_at` / `updated_at`.                                                       |
 | `sineMaculaLaravel.resourceFieldNaming`        | Field keys in a resource's `toArray()` result use snake_case, nested arrays included.                                    |
 

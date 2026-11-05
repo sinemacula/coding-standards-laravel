@@ -60,6 +60,11 @@ test_patterns = [
     "**/spec_*.*",
 ]
 
+# The sinemacula source stays on PHP 8.3 for the consumers that still need it; this
+# repo analyses on 8.5.
+[runtimes.enabled]
+php = "8.5"
+
 [[source]]
 name = "default"
 default = true

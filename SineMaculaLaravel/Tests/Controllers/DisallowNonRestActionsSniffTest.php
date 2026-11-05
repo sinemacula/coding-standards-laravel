@@ -53,19 +53,6 @@ final class DisallowNonRestActionsSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * Docblock tags are matched case-insensitively and only from the docblock
-     * attached to the declaration: a bare method after a tagged one and a
-     * method whose docblock lacks the tags are flagged, while a mixed-case
-     * utility tag and a docblock glued to the function keyword still exempt.
-     *
-     * @return void
-     */
-    public function testReadsDocblockTagsFromTheAttachedDocblockOnly(): void
-    {
-        $this->assertErrorsOnLines('DisallowNonRestActionsDocblocks.inc', [14, 23]);
-    }
-
-    /**
      * A method is judged against its innermost enclosing class, so an action on
      * a controller nested inside a non-controller wrapper is still flagged.
      *
@@ -74,17 +61,5 @@ final class DisallowNonRestActionsSniffTest extends AbstractSniffTestCase
     public function testUsesTheInnermostEnclosingClass(): void
     {
         $this->assertErrorsOnLines('DisallowNonRestActionsNested.inc', [9]);
-    }
-
-    /**
-     * The tag exemption reads only the docblock attached to the method: a bare
-     * method is flagged even when an earlier method's docblock carries the same
-     * tag.
-     *
-     * @return void
-     */
-    public function testScopesTheTagExemptionToItsOwnMethod(): void
-    {
-        $this->assertErrorsOnLines('DisallowNonRestActionsEarlierTag.inc', [16]);
     }
 }

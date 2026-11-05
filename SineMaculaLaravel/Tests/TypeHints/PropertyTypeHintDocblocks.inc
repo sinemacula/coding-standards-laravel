@@ -36,4 +36,13 @@ class Dashboard extends Widget
     protected $prose;
 
     protected $orphan;
+
+    /**
+     * @untypeable
+     */
+    #[Hidden]
+    protected $attributed;
+
+    #[Hidden]
+    protected $attributedOrphan;
 }

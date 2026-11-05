@@ -47,14 +47,15 @@ final class PropertyTypeHintSniffTest extends AbstractSniffTestCase
 
     /**
      * @untypeable on the property's own docblock is the escape hatch for base
-     * classes the exempt set cannot know about; an unrelated tag, a bare
-     * mention in prose and a preceding property's docblock do not exempt.
+     * classes the exempt set cannot know about, even past an attribute; an
+     * unrelated tag, a bare mention in prose and a preceding property's
+     * docblock do not exempt.
      *
      * @return void
      */
     public function testExemptsPropertiesMarkedUntypeable(): void
     {
-        $this->assertErrorsOnLines('PropertyTypeHintDocblocks.inc', [31, 36, 38]);
+        $this->assertErrorsOnLines('PropertyTypeHintDocblocks.inc', [31, 36, 38, 47]);
     }
 
     /**

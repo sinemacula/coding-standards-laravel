@@ -10,14 +10,27 @@ use PHP_CodeSniffer\Files\File;
  * Read docblock tags attached to a class or method declaration.
  *
  * Mirrors the base @inheritable detection: walk back over the declaration's
- * modifiers to its docblock and look for a given tag. Works for both class and
- * method pointers, so a sniff can offer docblock escape hatches.
+ * modifiers and attributes to its docblock and look for a given tag. Works for
+ * class, method and property pointers, so a sniff can offer docblock escape
+ * hatches.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */
 trait ReadsDocblockTags
 {
+    /** @var array<int, int|string> Tokens between a declaration and its docblock. */
+    private const array DECLARATION_PREFIX_TOKENS = [
+        T_WHITESPACE,
+        T_ABSTRACT,
+        T_FINAL,
+        T_READONLY,
+        T_PUBLIC,
+        T_PROTECTED,
+        T_PRIVATE,
+        T_STATIC,
+    ];
+
     /**
      * Whether the declaration at the pointer carries the given docblock tag.
      *
@@ -29,12 +42,16 @@ trait ReadsDocblockTags
     protected function hasDocblockTag(File $phpcsFile, int $stackPtr, string $tag): bool
     {
         $tokens = $phpcsFile->getTokens();
-        $before = $phpcsFile->findPrevious(
-            [T_WHITESPACE, T_ABSTRACT, T_FINAL, T_READONLY, T_PUBLIC, T_PROTECTED, T_PRIVATE, T_STATIC],
-            $stackPtr - 1,
-            null,
-            true,
-        );
+        $before = $phpcsFile->findPrevious(self::DECLARATION_PREFIX_TOKENS, $stackPtr - 1, null, true);
+
+        while ($before !== false && $tokens[$before]['code'] === T_ATTRIBUTE_END) {
+            $before = $phpcsFile->findPrevious(
+                self::DECLARATION_PREFIX_TOKENS,
+                $tokens[$before]['attribute_opener'] - 1,
+                null,
+                true,
+            );
+        }
 
         if ($before === false || $tokens[$before]['code'] !== T_DOC_COMMENT_CLOSE_TAG) {
             return false;

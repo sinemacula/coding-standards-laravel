@@ -36,9 +36,9 @@ final class ReadsDocblockTagsTest extends AbstractSniffTestCase
 
     /**
      * Attributes between a docblock and its declaration do not detach the
-     * docblock: a single attribute, stacked, grouped and same-line attributes
-     * all keep the tags readable on methods and classes, while an attributed
-     * method with no docblock or an untagged one is still flagged.
+     * docblock: a single attribute, stacked, grouped, same-line and glued
+     * attributes all keep the tags readable on methods and classes, while an
+     * attributed method with no docblock or an untagged one is still flagged.
      *
      * @return void
      */

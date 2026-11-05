@@ -57,4 +57,9 @@ class AttributedController
     public function archive(): void
     {
     }
+
+    /** @non-rest-action */#[Throttle(10)]#[Middleware('signed')]
+    public function glued(): void
+    {
+    }
 }

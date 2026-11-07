@@ -22,6 +22,9 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 #[CoversTrait(ResolvesRole::class)]
 final class ResolvesRoleTest extends AbstractSniffTestCase
 {
+    /** @var string The error for a job outside a jobs directory. */
+    private const string JOB_MISPLACED = 'A Job class must live under a "Jobs" directory.';
+
     /** @var array<string, mixed> Per-test property overrides for the sniff. */
     private array $overrides = [];
 
@@ -91,7 +94,7 @@ final class ResolvesRoleTest extends AbstractSniffTestCase
         $this->assertErrorMessagesOnLines('RoleDirectoryQueuedParent.inc', [
             9  => ['A Notification class must live under a "Notifications" directory.'],
             13 => ['A Mailable class must live under a "Mail" directory.'],
-            17 => ['A Job class must live under a "Jobs" directory.'],
+            17 => [self::JOB_MISPLACED],
         ]);
     }
 
@@ -105,7 +108,7 @@ final class ResolvesRoleTest extends AbstractSniffTestCase
         $this->overrides = ['roleIdentities' => ['Command' => 'AsCommand', 'Job' => 'ShouldQueue']];
 
         $this->assertErrorMessagesOnLines('RoleDirectoryContractBeatsAttribute.inc', [
-            8 => ['A Job class must live under a "Jobs" directory.'],
+            8 => [self::JOB_MISPLACED],
         ]);
     }
 
@@ -120,7 +123,7 @@ final class ResolvesRoleTest extends AbstractSniffTestCase
     {
         $this->assertErrorsOnLines('RoleDirectoryQueuedListener.inc', []);
         $this->assertErrorMessagesOnLines('RoleDirectoryQueuedListenerConcern.inc', [
-            7 => ['A Job class must live under a "Jobs" directory.'],
+            7 => [self::JOB_MISPLACED],
         ]);
     }
 

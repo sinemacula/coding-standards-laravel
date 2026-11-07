@@ -80,6 +80,37 @@ final class ResolvesRoleTest extends AbstractSniffTestCase
     }
 
     /**
+     * A parent class outranks an interface beside it: a queued notification or
+     * mailable keeps its own role rather than reading as a job, while a class
+     * that is only queued is still a job.
+     *
+     * @return void
+     */
+    public function testPrefersTheParentOverASharedInterface(): void
+    {
+        $this->assertErrorMessagesOnLines('RoleDirectoryQueuedParent.inc', [
+            9  => ['A Notification class must live under a "Notifications" directory.'],
+            13 => ['A Mailable class must live under a "Mail" directory.'],
+            17 => ['A Job class must live under a "Jobs" directory.'],
+        ]);
+    }
+
+    /**
+     * A queued listener shares the job's identity, so its location decides:
+     * under a listener directory it is a listener, while one in an exempt
+     * sub-namespace there is not placed by that location and stays a job.
+     *
+     * @return void
+     */
+    public function testTellsAQueuedListenerFromAJobByLocation(): void
+    {
+        $this->assertErrorsOnLines('RoleDirectoryQueuedListener.inc', []);
+        $this->assertErrorMessagesOnLines('RoleDirectoryQueuedListenerConcern.inc', [
+            7 => ['A Job class must live under a "Jobs" directory.'],
+        ]);
+    }
+
+    /**
      * Drive the directory sniff, which this concern has no sniff file of its
      * own to stand in for.
      *

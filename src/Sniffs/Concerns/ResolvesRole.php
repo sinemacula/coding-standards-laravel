@@ -15,8 +15,12 @@ use PHP_CodeSniffer\Files\File;
  * fallback (concrete classes, recursive, minus exempt sub-namespaces). A bare
  * identity entry matches by short name; an entry containing `\` matches the
  * qualified name resolved through the file's imports, so same-named traits (the
- * Bus and Events `Dispatchable`) stay distinct. A class with neither is
- * unconstrained, and test classes play no role at all. An `@role-exempt`
+ * Bus and Events `Dispatchable`) stay distinct. A parent class outranks the
+ * interfaces and traits beside it, so a queued notification is a notification
+ * rather than a job, and a role that shares another's identity (a queued
+ * listener implements `ShouldQueue` just as a job does) is told apart by
+ * location. A class with neither is unconstrained, and test classes play no
+ * role at all. An `@role-exempt`
  * docblock tag or a `#[NotARole]` attribute opts a class out entirely.
  *
  * The role table and every list are public properties so a consuming ruleset
@@ -63,6 +67,11 @@ trait ResolvesRole
         'Rule'            => 'Rules',
     ];
 
+    /** @var array<string, string> Role => comma-separated roles that share its identity and are told apart by location. */
+    public array $sharedIdentityRoles = [
+        'Job' => 'Listener',
+    ];
+
     /** @var array<int, string> Sub-namespace segments the location fallback ignores. */
     public array $exemptNamespaces = [
         'Concerns', 'Support', 'Contracts', 'Enums', 'Casts', 'Builders', 'Traits', 'Exceptions',
@@ -84,17 +93,25 @@ trait ResolvesRole
             return null;
         }
 
-        return $this->roleByIdentity($phpcsFile, $classPtr)
-            ?? $this->roleByLocation($phpcsFile, $classPtr);
+        $role = $this->roleByIdentity($phpcsFile, $classPtr);
+
+        if ($role === null) {
+            return $this->roleByLocation($phpcsFile, $classPtr);
+        }
+
+        return $this->sharingRoleByLocation($phpcsFile, $role) ?? $role;
     }
 
     /**
      * Resolve a role from what the class extends, implements, uses or carries.
      *
-     * What a class declares - its parent, interfaces and traits - is settled
-     * before what it is attributed with, because an attribute names a class the
-     * subject relates to at least as often as it names what the subject is. A
-     * repository attributed with the model it serves is a repository.
+     * What a class declares is settled before what it is attributed with,
+     * because an attribute names a class the subject relates to at least as
+     * often as it names what the subject is: a repository attributed with the
+     * model it serves is a repository. Of what it declares, the parent is
+     * settled first, since an interface or trait such as `ShouldQueue` is
+     * shared by classes of several roles while the parent names what the class
+     * is.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $classPtr
@@ -105,7 +122,8 @@ trait ResolvesRole
         $imports   = $this->importMap($phpcsFile, $classPtr);
         $namespace = $this->namespaceName($phpcsFile);
 
-        return $this->roleForNames($imports, $namespace, $this->declaredNames($phpcsFile, $classPtr))
+        return $this->roleForNames($imports, $namespace, $this->parentNames($phpcsFile, $classPtr))
+            ?? $this->roleForNames($imports, $namespace, $this->contractNames($phpcsFile, $classPtr))
             ?? $this->roleForNames($imports, $namespace, $this->attributeNames($phpcsFile, $classPtr));
     }
 
@@ -125,6 +143,25 @@ trait ResolvesRole
         foreach ($this->roleLocations as $role => $paths) {
             if ($this->matchesLocation($phpcsFile, $paths)) {
                 return $role;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve the role sharing the identified role's identity whose location
+     * the class sits in, if any.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  string  $role
+     * @return string|null
+     */
+    private function sharingRoleByLocation(File $phpcsFile, string $role): ?string
+    {
+        foreach ($this->split($this->sharedIdentityRoles[$role] ?? '') as $sharingRole) {
+            if ($this->matchesLocation($phpcsFile, $this->roleLocations[$sharingRole] ?? '')) {
+                return $sharingRole;
             }
         }
 
@@ -196,27 +233,32 @@ trait ResolvesRole
     }
 
     /**
-     * Collect the names a class declares as its own identity, as written.
+     * Collect the parent class a class extends, as written.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $classPtr
      * @return array<int, string>
      */
-    private function declaredNames(File $phpcsFile, int $classPtr): array
+    private function parentNames(File $phpcsFile, int $classPtr): array
     {
-        $names      = [];
-        $extends    = $phpcsFile->findExtendedClassName($classPtr);
+        $extends = $phpcsFile->findExtendedClassName($classPtr);
+
+        return $extends === false ? [] : [$extends];
+    }
+
+    /**
+     * Collect the interfaces a class implements and the traits it uses, as
+     * written.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  int  $classPtr
+     * @return array<int, string>
+     */
+    private function contractNames(File $phpcsFile, int $classPtr): array
+    {
         $implements = $phpcsFile->findImplementedInterfaceNames($classPtr);
 
-        if ($extends !== false) {
-            $names[] = $extends;
-        }
-
-        foreach ($implements === false ? [] : $implements as $interface) {
-            $names[] = $interface;
-        }
-
-        return array_merge($names, $this->usedTraitNames($phpcsFile, $classPtr));
+        return array_merge($implements === false ? [] : $implements, $this->usedTraitNames($phpcsFile, $classPtr));
     }
 
     /**

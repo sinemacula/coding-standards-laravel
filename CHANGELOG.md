@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.7.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.6.3...v1.7.0) (2026-11-07)
+
+
+### Features
+
+* prefer the queue attributes over the properties they replace ([#130](https://github.com/sinemacula/coding-standards-laravel/issues/130)) ([1c70d93](https://github.com/sinemacula/coding-standards-laravel/commit/1c70d9358b42886cc48de2f2c6822e6f6ded76ac))
+
+
+### Bug Fixes
+
+* exempt policy abilities and queue settings from the base naming rules ([#129](https://github.com/sinemacula/coding-standards-laravel/issues/129)) ([3336f58](https://github.com/sinemacula/coding-standards-laravel/commit/3336f58fb6fe19652065415a8baa95ec15f9b285))
+* keep queued notifications, mailables and listeners out of the job role ([#139](https://github.com/sinemacula/coding-standards-laravel/issues/139)) ([a29e3e8](https://github.com/sinemacula/coding-standards-laravel/commit/a29e3e861ac3f8b3228ff06070b8325486dbbf42))
+* leave translation strings out of the line length check ([#132](https://github.com/sinemacula/coding-standards-laravel/issues/132)) ([24a72db](https://github.com/sinemacula/coding-standards-laravel/commit/24a72dbea0afa03a66ce40b920af106dee975a08))
+* let API resources resolve from the container ([#131](https://github.com/sinemacula/coding-standards-laravel/issues/131)) ([0e68c0f](https://github.com/sinemacula/coding-standards-laravel/commit/0e68c0fee6c37d464496945c133c702733aed03f))
+* permit a model's table and connection to come from config ([#128](https://github.com/sinemacula/coding-standards-laravel/issues/128)) ([88b899d](https://github.com/sinemacula/coding-standards-laravel/commit/88b899d52b13845b4c87e36f73358eed27007a4e))
+* read a declaration's docblock tags past its attributes ([#136](https://github.com/sinemacula/coding-standards-laravel/issues/136)) ([a6fb079](https://github.com/sinemacula/coding-standards-laravel/commit/a6fb0799b4263b09b2570f00a78cf4163292206f))
+* read model cast types from the casts() body ([#125](https://github.com/sinemacula/coding-standards-laravel/issues/125)) ([2d4bd8f](https://github.com/sinemacula/coding-standards-laravel/commit/2d4bd8f13f5472a0cbea722d7c11b5d6fc6ec363))
+* recognise a form request by its ancestry and accept inherited rules ([#133](https://github.com/sinemacula/coding-standards-laravel/issues/133)) ([bf9476a](https://github.com/sinemacula/coding-standards-laravel/commit/bf9476a72325996311b197f89aac9e54de2e7b1a))
+* stop reporting Blade templates as files with no code ([#127](https://github.com/sinemacula/coding-standards-laravel/issues/127)) ([9519b7d](https://github.com/sinemacula/coding-standards-laravel/commit/9519b7df083d07b25c68e674bc8fea91e7d38e71))
+* treat MorphPivot as a model base wherever Pivot is ([#134](https://github.com/sinemacula/coding-standards-laravel/issues/134)) ([0a302d1](https://github.com/sinemacula/coding-standards-laravel/commit/0a302d19f326a487400792ba6c57afd8735997f7))
+
 ## [1.6.3](https://github.com/sinemacula/coding-standards-laravel/compare/v1.6.2...v1.6.3) (2026-11-03)
 
 

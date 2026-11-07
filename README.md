@@ -144,10 +144,10 @@ class with neither is unconstrained, so genuine domain classes are never flagged
 The default role table is convention-correct for Laravel: it never requires a suffix the framework leaves
 bare, and the idiomatic bare `User` model is honoured (the `Model` role's identity covers
 `Authenticatable`, `Pivot` and `MorphPivot`). A parent class outranks the interfaces and traits beside
-it, so a queued notification or mailable keeps its own role rather than reading as a job. A role sharing
-another's identity is told apart by location (`sharedIdentityRoles`): a queued listener implements
+it, so a queued notification or mailable keeps its own role rather than reading as a job. An identity
+several roles share is told apart by location (`sharedIdentities`): a queued listener implements
 `ShouldQueue` like a job, so under a listener directory it is a listener. Every list - `roleIdentities`,
-`roleLocations`, `sharedIdentityRoles`, `requireSuffix`, `forbidSuffix`, `exemptNamespaces`,
+`roleLocations`, `sharedIdentities`, `requireSuffix`, `forbidSuffix`, `exemptNamespaces`,
 `moduleRootRoles` - is a public sniff property a ruleset can override. Identity is matched on the
 immediate base by short name, so a project's own intermediate base (e.g. a `BaseController`) is supported
 by adding it to `roleIdentities`. An identity entry containing `\` instead matches the qualified name

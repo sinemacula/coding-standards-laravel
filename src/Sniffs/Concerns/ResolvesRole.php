@@ -17,11 +17,11 @@ use PHP_CodeSniffer\Files\File;
  * qualified name resolved through the file's imports, so same-named traits (the
  * Bus and Events `Dispatchable`) stay distinct. A parent class outranks the
  * interfaces and traits beside it, so a queued notification is a notification
- * rather than a job, and a role that shares another's identity (a queued
- * listener implements `ShouldQueue` just as a job does) is told apart by
- * location. A class with neither is unconstrained, and test classes play no
- * role at all. An `@role-exempt` docblock tag or a `#[NotARole]` attribute opts
- * a class out entirely.
+ * rather than a job, and an identity several roles share (a queued listener
+ * implements `ShouldQueue` just as a job does) is told apart by location. A
+ * class with neither is unconstrained, and test classes play no role at all. An
+ * `@role-exempt` docblock tag or a `#[NotARole]` attribute opts a class out
+ * entirely.
  *
  * The role table and every list are public properties so a consuming ruleset
  * can override or extend them.
@@ -67,9 +67,9 @@ trait ResolvesRole
         'Rule'            => 'Rules',
     ];
 
-    /** @var array<string, string> Role => comma-separated roles that share its identity and are told apart by location. */
-    public array $sharedIdentityRoles = [
-        'Job' => 'Listener',
+    /** @var array<string, string> Identity (short name) => comma-separated roles that share it and are told apart by location. */
+    public array $sharedIdentities = [
+        'ShouldQueue' => 'Listener',
     ];
 
     /** @var array<int, string> Sub-namespace segments the location fallback ignores. */
@@ -93,13 +93,8 @@ trait ResolvesRole
             return null;
         }
 
-        $role = $this->roleByIdentity($phpcsFile, $classPtr);
-
-        if ($role === null) {
-            return $this->roleByLocation($phpcsFile, $classPtr);
-        }
-
-        return $this->sharingRoleByLocation($phpcsFile, $role) ?? $role;
+        return $this->roleByIdentity($phpcsFile, $classPtr)
+            ?? $this->roleByLocation($phpcsFile, $classPtr);
     }
 
     /**
@@ -123,7 +118,7 @@ trait ResolvesRole
         $namespace = $this->namespaceName($phpcsFile);
 
         return $this->roleForNames($imports, $namespace, $this->parentNames($phpcsFile, $classPtr))
-            ?? $this->roleForNames($imports, $namespace, $this->contractNames($phpcsFile, $classPtr))
+            ?? $this->roleForContracts($phpcsFile, $imports, $namespace, $this->contractNames($phpcsFile, $classPtr))
             ?? $this->roleForNames($imports, $namespace, $this->attributeNames($phpcsFile, $classPtr));
     }
 
@@ -150,18 +145,45 @@ trait ResolvesRole
     }
 
     /**
-     * Resolve the role sharing the identified role's identity whose location
-     * the class sits in, if any.
+     * Resolve a role from the interfaces and traits a class declares.
+     *
+     * A distinct identity settles the role outright. Failing that, a shared
+     * identity yields to a role that shares it when the class sits in that
+     * role's location, and only then to the role the identity table names.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
-     * @param  string  $role
+     * @param  array<string, string>  $imports
+     * @param  string  $namespace
+     * @param  array<int, string>  $contracts
      * @return string|null
      */
-    private function sharingRoleByLocation(File $phpcsFile, string $role): ?string
+    private function roleForContracts(File $phpcsFile, array $imports, string $namespace, array $contracts): ?string
     {
-        foreach ($this->split($this->sharedIdentityRoles[$role] ?? '') as $sharingRole) {
-            if ($this->matchesLocation($phpcsFile, $this->roleLocations[$sharingRole] ?? '')) {
-                return $sharingRole;
+        $shared = array_filter(
+            $contracts,
+            fn (string $name): bool => isset($this->sharedIdentities[$this->shortName($name)]),
+        );
+
+        return $this->roleForNames($imports, $namespace, array_diff($contracts, $shared))
+            ?? $this->sharingRoleByLocation($phpcsFile, $shared)
+            ?? $this->roleForNames($imports, $namespace, $shared);
+    }
+
+    /**
+     * Resolve the role sharing one of the given identities whose location the
+     * class sits in, if any.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  array<int, string>  $shared
+     * @return string|null
+     */
+    private function sharingRoleByLocation(File $phpcsFile, array $shared): ?string
+    {
+        foreach ($shared as $name) {
+            foreach ($this->split($this->sharedIdentities[$this->shortName($name)]) as $role) {
+                if ($this->matchesLocation($phpcsFile, $this->roleLocations[$role] ?? '')) {
+                    return $role;
+                }
             }
         }
 

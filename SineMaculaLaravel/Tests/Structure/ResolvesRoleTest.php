@@ -128,6 +128,21 @@ final class ResolvesRoleTest extends AbstractSniffTestCase
     }
 
     /**
+     * Location only decides between roles sharing an identity: a class with a
+     * job's distinct identity under a listener directory, queued or not, is
+     * still a job.
+     *
+     * @return void
+     */
+    public function testKeepsADistinctJobIdentityUnderAListenerDirectory(): void
+    {
+        $this->assertErrorMessagesOnLines('RoleDirectoryListenerJob.inc', [
+            8  => [self::JOB_MISPLACED],
+            13 => [self::JOB_MISPLACED],
+        ]);
+    }
+
+    /**
      * Drive the directory sniff, which this concern has no sniff file of its
      * own to stand in for.
      *

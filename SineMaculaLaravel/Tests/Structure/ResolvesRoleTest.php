@@ -22,6 +22,9 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 #[CoversTrait(ResolvesRole::class)]
 final class ResolvesRoleTest extends AbstractSniffTestCase
 {
+    /** @var string The error for a job outside a jobs directory. */
+    private const string JOB_MISPLACED = 'A Job class must live under a "Jobs" directory.';
+
     /** @var array<string, mixed> Per-test property overrides for the sniff. */
     private array $overrides = [];
 
@@ -77,6 +80,85 @@ final class ResolvesRoleTest extends AbstractSniffTestCase
     public function testMatchesABareIdentityAgainstAQualifiedDeclaration(): void
     {
         $this->assertErrorsOnLines('RoleDirectoryQualifiedDeclaration.inc', [5]);
+    }
+
+    /**
+     * A parent class outranks an interface beside it: a queued notification or
+     * mailable keeps its own role rather than reading as a job, while a class
+     * that is only queued is still a job.
+     *
+     * @return void
+     */
+    public function testPrefersTheParentOverASharedInterface(): void
+    {
+        $this->assertErrorMessagesOnLines('RoleDirectoryQueuedParent.inc', [
+            9  => ['A Notification class must live under a "Notifications" directory.'],
+            13 => ['A Mailable class must live under a "Mail" directory.'],
+            17 => [self::JOB_MISPLACED],
+        ]);
+    }
+
+    /**
+     * An implemented interface outranks an attribute, as the parent does.
+     *
+     * @return void
+     */
+    public function testPrefersAnInterfaceOverAnAttribute(): void
+    {
+        $this->overrides = ['roleIdentities' => ['Command' => 'AsCommand', 'Job' => 'ShouldQueue']];
+
+        $this->assertErrorMessagesOnLines('RoleDirectoryContractBeatsAttribute.inc', [
+            8 => [self::JOB_MISPLACED],
+        ]);
+    }
+
+    /**
+     * A queued listener shares the job's identity, so its location decides:
+     * under a listener directory it is a listener, while one in an exempt
+     * sub-namespace there is not placed by that location and stays a job.
+     *
+     * @return void
+     */
+    public function testTellsAQueuedListenerFromAJobByLocation(): void
+    {
+        $this->assertErrorsOnLines('RoleDirectoryQueuedListener.inc', []);
+        $this->assertErrorMessagesOnLines('RoleDirectoryQueuedListenerConcern.inc', [
+            7 => [self::JOB_MISPLACED],
+        ]);
+    }
+
+    /**
+     * A qualified shared identity is matched through the imports like a role
+     * identity, even when it names the interface in full: imported under an
+     * alias, it makes a queued listener a listener and any other queued class a
+     * job.
+     *
+     * @return void
+     */
+    public function testMatchesAQualifiedSharedIdentityThroughAnAlias(): void
+    {
+        $this->overrides = [
+            'roleIdentities'   => ['Job' => 'Illuminate\Contracts\Queue\ShouldQueue'],
+            'sharedIdentities' => ['Illuminate\Contracts\Queue\ShouldQueue' => 'Listener'],
+        ];
+
+        $this->assertErrorsOnLines('RoleDirectoryQueuedListenerAliased.inc', []);
+        $this->assertErrorMessagesOnLines('RoleDirectoryQueuedJobAliased.inc', [7 => [self::JOB_MISPLACED]]);
+    }
+
+    /**
+     * Location only decides between roles sharing an identity: a class with a
+     * job's distinct identity under a listener directory, queued or not, is
+     * still a job.
+     *
+     * @return void
+     */
+    public function testKeepsADistinctJobIdentityUnderAListenerDirectory(): void
+    {
+        $this->assertErrorMessagesOnLines('RoleDirectoryListenerJob.inc', [
+            8  => [self::JOB_MISPLACED],
+            13 => [self::JOB_MISPLACED],
+        ]);
     }
 
     /**

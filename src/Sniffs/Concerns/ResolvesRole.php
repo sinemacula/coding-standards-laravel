@@ -15,9 +15,13 @@ use PHP_CodeSniffer\Files\File;
  * fallback (concrete classes, recursive, minus exempt sub-namespaces). A bare
  * identity entry matches by short name; an entry containing `\` matches the
  * qualified name resolved through the file's imports, so same-named traits (the
- * Bus and Events `Dispatchable`) stay distinct. A class with neither is
- * unconstrained, and test classes play no role at all. An `@role-exempt`
- * docblock tag or a `#[NotARole]` attribute opts a class out entirely.
+ * Bus and Events `Dispatchable`) stay distinct. A parent class outranks the
+ * interfaces and traits beside it, so a queued notification is a notification
+ * rather than a job, and an identity several roles share (a queued listener
+ * implements `ShouldQueue` just as a job does) is told apart by location. A
+ * class with neither is unconstrained, and test classes play no role at all. An
+ * `@role-exempt` docblock tag or a `#[NotARole]` attribute opts a class out
+ * entirely.
  *
  * The role table and every list are public properties so a consuming ruleset
  * can override or extend them.
@@ -63,6 +67,11 @@ trait ResolvesRole
         'Rule'            => 'Rules',
     ];
 
+    /** @var array<string, string> Identity (matched as in the role table) => comma-separated roles that share it, told apart by location. */
+    public array $sharedIdentities = [
+        'ShouldQueue' => 'Listener',
+    ];
+
     /** @var array<int, string> Sub-namespace segments the location fallback ignores. */
     public array $exemptNamespaces = [
         'Concerns', 'Support', 'Contracts', 'Enums', 'Casts', 'Builders', 'Traits', 'Exceptions',
@@ -91,10 +100,13 @@ trait ResolvesRole
     /**
      * Resolve a role from what the class extends, implements, uses or carries.
      *
-     * What a class declares - its parent, interfaces and traits - is settled
-     * before what it is attributed with, because an attribute names a class the
-     * subject relates to at least as often as it names what the subject is. A
-     * repository attributed with the model it serves is a repository.
+     * What a class declares is settled before what it is attributed with,
+     * because an attribute names a class the subject relates to at least as
+     * often as it names what the subject is: a repository attributed with the
+     * model it serves is a repository. Of what it declares, the parent is
+     * settled first, since an interface or trait such as `ShouldQueue` is
+     * shared by classes of several roles while the parent names what the class
+     * is.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $classPtr
@@ -105,7 +117,8 @@ trait ResolvesRole
         $imports   = $this->importMap($phpcsFile, $classPtr);
         $namespace = $this->namespaceName($phpcsFile);
 
-        return $this->roleForNames($imports, $namespace, $this->declaredNames($phpcsFile, $classPtr))
+        return $this->roleForNames($imports, $namespace, $this->parentNames($phpcsFile, $classPtr))
+            ?? $this->roleForContracts($phpcsFile, $imports, $namespace, $this->contractNames($phpcsFile, $classPtr))
             ?? $this->roleForNames($imports, $namespace, $this->attributeNames($phpcsFile, $classPtr));
     }
 
@@ -132,25 +145,45 @@ trait ResolvesRole
     }
 
     /**
-     * Resolve the first role an identity list matches one of the names for.
+     * Resolve a role from the interfaces and traits a class declares.
      *
+     * A distinct identity settles the role outright. Failing that, a shared
+     * identity yields to a role that shares it when the class sits in that
+     * role's location, and only then to the role the identity table names.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  array<string, string>  $imports
      * @param  string  $namespace
-     * @param  array<int, string>  $names
+     * @param  array<int, string>  $contracts
      * @return string|null
      */
-    private function roleForNames(array $imports, string $namespace, array $names): ?string
+    private function roleForContracts(File $phpcsFile, array $imports, string $namespace, array $contracts): ?string
     {
-        $short     = array_map($this->shortName(...), $names);
-        $qualified = array_map(fn (string $name): string => $this->qualify($imports, $namespace, $name), $names);
+        $shared = array_filter(
+            $contracts,
+            fn (string $name): bool => $this->sharingRoles($imports, $namespace, $name) !== [],
+        );
 
-        foreach ($this->roleIdentities as $role => $identities) {
-            foreach ($this->split($identities) as $identity) {
-                $matched = str_contains($identity, '\\')
-                    ? $this->matchesQualified($identity, $qualified)
-                    : in_array($identity, $short, true);
+        return $this->roleForNames($imports, $namespace, array_diff($contracts, $shared))
+            ?? $this->sharingRoleByLocation($phpcsFile, $imports, $namespace, $shared)
+            ?? $this->roleForNames($imports, $namespace, $shared);
+    }
 
-                if ($matched) {
+    /**
+     * Resolve the role sharing one of the given identities whose location the
+     * class sits in, if any.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  array<string, string>  $imports
+     * @param  string  $namespace
+     * @param  array<int, string>  $shared
+     * @return string|null
+     */
+    private function sharingRoleByLocation(File $phpcsFile, array $imports, string $namespace, array $shared): ?string
+    {
+        foreach ($shared as $name) {
+            foreach ($this->sharingRoles($imports, $namespace, $name) as $role) {
+                if ($this->matchesLocation($phpcsFile, $this->roleLocations[$role] ?? '')) {
                     return $role;
                 }
             }
@@ -160,21 +193,80 @@ trait ResolvesRole
     }
 
     /**
-     * Whether a qualified identity matches any resolved name, by suffix.
+     * Resolve the roles sharing the identity a name matches, if it matches one.
      *
+     * @param  array<string, string>  $imports
+     * @param  string  $namespace
+     * @param  string  $name
+     * @return array<int, string>
+     */
+    private function sharingRoles(array $imports, string $namespace, string $name): array
+    {
+        foreach ($this->sharedIdentities as $identity => $roles) {
+            if ($this->matchesIdentity($imports, $namespace, $identity, $name)) {
+                return $this->split($roles);
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * Resolve the first role an identity list matches one of the names for.
+     *
+     * @param  array<string, string>  $imports
+     * @param  string  $namespace
+     * @param  array<int, string>  $names
+     * @return string|null
+     */
+    private function roleForNames(array $imports, string $namespace, array $names): ?string
+    {
+        foreach ($this->roleIdentities as $role => $identities) {
+            foreach ($this->split($identities) as $identity) {
+                if ($this->matchesAnyName($imports, $namespace, $identity, $names)) {
+                    return $role;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Whether an identity matches any of the names.
+     *
+     * @param  array<string, string>  $imports
+     * @param  string  $namespace
      * @param  string  $identity
-     * @param  array<int, string>  $qualified
+     * @param  array<int, string>  $names
      * @return bool
      */
-    private function matchesQualified(string $identity, array $qualified): bool
+    private function matchesAnyName(array $imports, string $namespace, string $identity, array $names): bool
     {
-        foreach ($qualified as $name) {
-            if (str_ends_with('\\' . $name, '\\' . $identity)) {
+        foreach ($names as $name) {
+            if ($this->matchesIdentity($imports, $namespace, $identity, $name)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Whether an identity matches a name: a bare identity by short name, and
+     * one containing `\` by suffix of the name resolved through the imports.
+     *
+     * @param  array<string, string>  $imports
+     * @param  string  $namespace
+     * @param  string  $identity
+     * @param  string  $name
+     * @return bool
+     */
+    private function matchesIdentity(array $imports, string $namespace, string $identity, string $name): bool
+    {
+        return str_contains($identity, '\\')
+            ? str_ends_with('\\' . $this->qualify($imports, $namespace, $name), '\\' . $identity)
+            : $this->shortName($name) === $identity;
     }
 
     /**
@@ -196,27 +288,32 @@ trait ResolvesRole
     }
 
     /**
-     * Collect the names a class declares as its own identity, as written.
+     * Collect the parent class a class extends, as written.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $classPtr
      * @return array<int, string>
      */
-    private function declaredNames(File $phpcsFile, int $classPtr): array
+    private function parentNames(File $phpcsFile, int $classPtr): array
     {
-        $names      = [];
-        $extends    = $phpcsFile->findExtendedClassName($classPtr);
+        $extends = $phpcsFile->findExtendedClassName($classPtr);
+
+        return $extends === false ? [] : [$extends];
+    }
+
+    /**
+     * Collect the interfaces a class implements and the traits it uses, as
+     * written.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  int  $classPtr
+     * @return array<int, string>
+     */
+    private function contractNames(File $phpcsFile, int $classPtr): array
+    {
         $implements = $phpcsFile->findImplementedInterfaceNames($classPtr);
 
-        if ($extends !== false) {
-            $names[] = $extends;
-        }
-
-        foreach ($implements === false ? [] : $implements as $interface) {
-            $names[] = $interface;
-        }
-
-        return array_merge($names, $this->usedTraitNames($phpcsFile, $classPtr));
+        return array_merge($implements === false ? [] : $implements, $this->usedTraitNames($phpcsFile, $classPtr));
     }
 
     /**

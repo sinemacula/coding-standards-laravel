@@ -67,7 +67,7 @@ trait ResolvesRole
         'Rule'            => 'Rules',
     ];
 
-    /** @var array<string, string> Identity (short name) => comma-separated roles that share it and are told apart by location. */
+    /** @var array<string, string> Identity (matched as in the role table) => comma-separated roles that share it, told apart by location. */
     public array $sharedIdentities = [
         'ShouldQueue' => 'Listener',
     ];
@@ -161,11 +161,11 @@ trait ResolvesRole
     {
         $shared = array_filter(
             $contracts,
-            fn (string $name): bool => isset($this->sharedIdentities[$this->shortName($name)]),
+            fn (string $name): bool => $this->sharingRoles($imports, $namespace, $name) !== [],
         );
 
         return $this->roleForNames($imports, $namespace, array_diff($contracts, $shared))
-            ?? $this->sharingRoleByLocation($phpcsFile, $shared)
+            ?? $this->sharingRoleByLocation($phpcsFile, $imports, $namespace, $shared)
             ?? $this->roleForNames($imports, $namespace, $shared);
     }
 
@@ -174,13 +174,15 @@ trait ResolvesRole
      * class sits in, if any.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  array<string, string>  $imports
+     * @param  string  $namespace
      * @param  array<int, string>  $shared
      * @return string|null
      */
-    private function sharingRoleByLocation(File $phpcsFile, array $shared): ?string
+    private function sharingRoleByLocation(File $phpcsFile, array $imports, string $namespace, array $shared): ?string
     {
         foreach ($shared as $name) {
-            foreach ($this->split($this->sharedIdentities[$this->shortName($name)]) as $role) {
+            foreach ($this->sharingRoles($imports, $namespace, $name) as $role) {
                 if ($this->matchesLocation($phpcsFile, $this->roleLocations[$role] ?? '')) {
                     return $role;
                 }
@@ -188,6 +190,25 @@ trait ResolvesRole
         }
 
         return null;
+    }
+
+    /**
+     * Resolve the roles sharing the identity a name matches, if it matches one.
+     *
+     * @param  array<string, string>  $imports
+     * @param  string  $namespace
+     * @param  string  $name
+     * @return array<int, string>
+     */
+    private function sharingRoles(array $imports, string $namespace, string $name): array
+    {
+        foreach ($this->sharedIdentities as $identity => $roles) {
+            if ($this->matchesIdentity($imports, $namespace, $identity, $name)) {
+                return $this->split($roles);
+            }
+        }
+
+        return [];
     }
 
     /**
@@ -200,16 +221,9 @@ trait ResolvesRole
      */
     private function roleForNames(array $imports, string $namespace, array $names): ?string
     {
-        $short     = array_map($this->shortName(...), $names);
-        $qualified = array_map(fn (string $name): string => $this->qualify($imports, $namespace, $name), $names);
-
         foreach ($this->roleIdentities as $role => $identities) {
             foreach ($this->split($identities) as $identity) {
-                $matched = str_contains($identity, '\\')
-                    ? $this->matchesQualified($identity, $qualified)
-                    : in_array($identity, $short, true);
-
-                if ($matched) {
+                if ($this->matchesAnyName($imports, $namespace, $identity, $names)) {
                     return $role;
                 }
             }
@@ -219,21 +233,40 @@ trait ResolvesRole
     }
 
     /**
-     * Whether a qualified identity matches any resolved name, by suffix.
+     * Whether an identity matches any of the names.
      *
+     * @param  array<string, string>  $imports
+     * @param  string  $namespace
      * @param  string  $identity
-     * @param  array<int, string>  $qualified
+     * @param  array<int, string>  $names
      * @return bool
      */
-    private function matchesQualified(string $identity, array $qualified): bool
+    private function matchesAnyName(array $imports, string $namespace, string $identity, array $names): bool
     {
-        foreach ($qualified as $name) {
-            if (str_ends_with('\\' . $name, '\\' . $identity)) {
+        foreach ($names as $name) {
+            if ($this->matchesIdentity($imports, $namespace, $identity, $name)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Whether an identity matches a name: a bare identity by short name, and
+     * one containing `\` by suffix of the name resolved through the imports.
+     *
+     * @param  array<string, string>  $imports
+     * @param  string  $namespace
+     * @param  string  $identity
+     * @param  string  $name
+     * @return bool
+     */
+    private function matchesIdentity(array $imports, string $namespace, string $identity, string $name): bool
+    {
+        return str_contains($identity, '\\')
+            ? str_ends_with('\\' . $this->qualify($imports, $namespace, $name), '\\' . $identity)
+            : $this->shortName($name) === $identity;
     }
 
     /**

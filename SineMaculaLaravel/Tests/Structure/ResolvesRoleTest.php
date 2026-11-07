@@ -128,6 +128,23 @@ final class ResolvesRoleTest extends AbstractSniffTestCase
     }
 
     /**
+     * A qualified shared identity is matched through the imports like a role
+     * identity, so a queued listener importing the interface under an alias is
+     * still told apart from a job by location.
+     *
+     * @return void
+     */
+    public function testMatchesAQualifiedSharedIdentityThroughAnAlias(): void
+    {
+        $this->overrides = [
+            'roleIdentities'   => ['Job' => 'Queue\ShouldQueue'],
+            'sharedIdentities' => ['Queue\ShouldQueue' => 'Listener'],
+        ];
+
+        $this->assertErrorsOnLines('RoleDirectoryQueuedListenerAliased.inc', []);
+    }
+
+    /**
      * Location only decides between roles sharing an identity: a class with a
      * job's distinct identity under a listener directory, queued or not, is
      * still a job.

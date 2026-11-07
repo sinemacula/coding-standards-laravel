@@ -20,8 +20,8 @@ use PHP_CodeSniffer\Files\File;
  * rather than a job, and a role that shares another's identity (a queued
  * listener implements `ShouldQueue` just as a job does) is told apart by
  * location. A class with neither is unconstrained, and test classes play no
- * role at all. An `@role-exempt`
- * docblock tag or a `#[NotARole]` attribute opts a class out entirely.
+ * role at all. An `@role-exempt` docblock tag or a `#[NotARole]` attribute opts
+ * a class out entirely.
  *
  * The role table and every list are public properties so a consuming ruleset
  * can override or extend them.

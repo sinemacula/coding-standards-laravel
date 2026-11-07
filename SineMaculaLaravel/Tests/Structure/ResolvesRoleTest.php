@@ -96,6 +96,20 @@ final class ResolvesRoleTest extends AbstractSniffTestCase
     }
 
     /**
+     * An implemented interface outranks an attribute, as the parent does.
+     *
+     * @return void
+     */
+    public function testPrefersAnInterfaceOverAnAttribute(): void
+    {
+        $this->overrides = ['roleIdentities' => ['Command' => 'AsCommand', 'Job' => 'ShouldQueue']];
+
+        $this->assertErrorMessagesOnLines('RoleDirectoryContractBeatsAttribute.inc', [
+            8 => ['A Job class must live under a "Jobs" directory.'],
+        ]);
+    }
+
+    /**
      * A queued listener shares the job's identity, so its location decides:
      * under a listener directory it is a listener, while one in an exempt
      * sub-namespace there is not placed by that location and stays a job.

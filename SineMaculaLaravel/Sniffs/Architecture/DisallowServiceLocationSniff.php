@@ -7,9 +7,7 @@ namespace SineMaculaLaravel\Sniffs\Architecture;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsFunctionCalls;
-use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsTestClasses;
-use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesImports;
-use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
 
 /**
  * Disallow service location in class bodies.
@@ -27,14 +25,19 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
  * `Model::factory()`, so neither its constructor nor `definition()` can be
  * given a collaborator, and an API resource is built with `new` or
  * `::collection()` around the record it presents, and a toolkit resource's
- * `schema()` is static. Helper names and both exempt sets are configurable.
+ * `schema()` is static. Nor does it fire in a hook the framework calls without
+ * the container on a class built with `new`: a queued job, mailable or
+ * notification is rebuilt from its payload and its `failed()` called directly.
+ * A queued listener is not among them, since the container builds it and its
+ * constructor can take the collaborator. Helper names and the exempt sets are
+ * configurable.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */
 final class DisallowServiceLocationSniff implements Sniff
 {
-    use DetectsFunctionCalls, DetectsTestClasses, ResolvesImports, ResolvesNamespace;
+    use DetectsFunctionCalls, ResolvesRole;
 
     /** @var array<int, string> Container helper functions forbidden inside a class body. */
     public array $helpers = ['app', 'resolve'];
@@ -55,6 +58,11 @@ final class DisallowServiceLocationSniff implements Sniff
         'Illuminate\Http\Resources\Json\ResourceCollection',
         'SineMacula\ApiToolkit\Http\Resources\ApiResource',
         'SineMacula\ApiToolkit\Http\Resources\ReportResource',
+    ];
+
+    /** @var array<string, string> Hook method => comma-separated roles the framework calls it on without the container. */
+    public array $uninjectableHooks = [
+        'failed' => 'Job,Mailable,Notification',
     ];
 
     /**
@@ -120,7 +128,8 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Whether the call is exempt: test code, wiring class, or dynamic argument.
+     * Whether the call is exempt: test code, a dynamic argument, or a place
+     * with no injection point to use instead.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -129,9 +138,23 @@ final class DisallowServiceLocationSniff implements Sniff
     private function isExempt(File $phpcsFile, int $stackPtr): bool
     {
         return $this->isDynamicResolution($phpcsFile, $stackPtr)
-            || $this->isWiringClass($phpcsFile, $stackPtr)
+            || $this->isTestFile($phpcsFile)
+            || $this->isOutsideInjection($phpcsFile, $stackPtr);
+    }
+
+    /**
+     * Whether the call sits where injection does not apply: a wiring class, a
+     * class the framework constructs, or a hook it calls without the container.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  int  $stackPtr
+     * @return bool
+     */
+    private function isOutsideInjection(File $phpcsFile, int $stackPtr): bool
+    {
+        return $this->isWiringClass($phpcsFile, $stackPtr)
             || $this->isUninjectableClass($phpcsFile, $stackPtr)
-            || $this->isTestFile($phpcsFile);
+            || $this->isUninjectableHook($phpcsFile, $stackPtr);
     }
 
     /**
@@ -229,6 +252,65 @@ final class DisallowServiceLocationSniff implements Sniff
         }
 
         return $this->matchesUninjectableBase($phpcsFile, (int) $classPtr, $parent);
+    }
+
+    /**
+     * Whether the token sits in a hook the framework calls without the
+     * container, on a class whose role leaves it no other injection point.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  int  $stackPtr
+     * @return bool
+     */
+    private function isUninjectableHook(File $phpcsFile, int $stackPtr): bool
+    {
+        $classPtr  = $this->nearestNamedClass($phpcsFile, $stackPtr);
+        $methodPtr = $classPtr === null ? null : $this->enclosingMethod($phpcsFile, $stackPtr, $classPtr);
+
+        if ($methodPtr === null) {
+            return false;
+        }
+
+        $roles = $this->uninjectableHooks[strtolower((string) $phpcsFile->getDeclarationName($methodPtr))] ?? '';
+
+        return in_array($this->resolveRole($phpcsFile, $classPtr), $this->split($roles), true);
+    }
+
+    /**
+     * Find the innermost class-like scope the token sits in, if it is a named
+     * class, so a class nested in a hook is judged on its own.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  int  $stackPtr
+     * @return int|null
+     */
+    private function nearestNamedClass(File $phpcsFile, int $stackPtr): ?int
+    {
+        $conditions = array_reverse($phpcsFile->getTokens()[$stackPtr]['conditions'], true);
+
+        foreach ($conditions as $ptr => $code) {
+            if (in_array($code, [T_CLASS, T_ANON_CLASS, T_TRAIT, T_ENUM], true)) {
+                return $code === T_CLASS ? $ptr : null;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Find the method of the class that the token sits in, if any: the scope
+     * nested directly in a class body can only be one of its methods.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  int  $stackPtr
+     * @param  int  $classPtr
+     * @return int|null
+     */
+    private function enclosingMethod(File $phpcsFile, int $stackPtr, int $classPtr): ?int
+    {
+        $owners = array_keys($phpcsFile->getTokens()[$stackPtr]['conditions']);
+
+        return $owners[array_search($classPtr, $owners, true) + 1] ?? null;
     }
 
     /**

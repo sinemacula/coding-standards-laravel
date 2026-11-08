@@ -128,7 +128,8 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Whether the call is exempt: test code, wiring class, or dynamic argument.
+     * Whether the call is exempt: test code, a dynamic argument, or a place
+     * with no injection point to use instead.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -137,10 +138,23 @@ final class DisallowServiceLocationSniff implements Sniff
     private function isExempt(File $phpcsFile, int $stackPtr): bool
     {
         return $this->isDynamicResolution($phpcsFile, $stackPtr)
-            || $this->isWiringClass($phpcsFile, $stackPtr)
+            || $this->isTestFile($phpcsFile)
+            || $this->isOutsideInjection($phpcsFile, $stackPtr);
+    }
+
+    /**
+     * Whether the call sits where injection does not apply: a wiring class, a
+     * class the framework constructs, or a hook it calls without the container.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  int  $stackPtr
+     * @return bool
+     */
+    private function isOutsideInjection(File $phpcsFile, int $stackPtr): bool
+    {
+        return $this->isWiringClass($phpcsFile, $stackPtr)
             || $this->isUninjectableClass($phpcsFile, $stackPtr)
-            || $this->isUninjectableHook($phpcsFile, $stackPtr)
-            || $this->isTestFile($phpcsFile);
+            || $this->isUninjectableHook($phpcsFile, $stackPtr);
     }
 
     /**
@@ -263,7 +277,8 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Find the method of the class that the token sits in, if any.
+     * Find the method of the class that the token sits in, if any: the scope
+     * nested directly in a class body can only be one of its methods.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -272,11 +287,9 @@ final class DisallowServiceLocationSniff implements Sniff
      */
     private function enclosingMethod(File $phpcsFile, int $stackPtr, int $classPtr): ?int
     {
-        $conditions = $phpcsFile->getTokens()[$stackPtr]['conditions'];
-        $owners     = array_keys($conditions);
-        $methodPtr  = $owners[array_search($classPtr, $owners, true) + 1] ?? null;
+        $owners = array_keys($phpcsFile->getTokens()[$stackPtr]['conditions']);
 
-        return $methodPtr !== null && $conditions[$methodPtr] === T_FUNCTION ? $methodPtr : null;
+        return $owners[array_search($classPtr, $owners, true) + 1] ?? null;
     }
 
     /**

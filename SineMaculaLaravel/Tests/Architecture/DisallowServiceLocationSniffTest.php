@@ -195,6 +195,31 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
+     * The framework rebuilds a queued job, mailable or notification from its
+     * payload and calls its failed() directly, so service location is allowed
+     * there - whatever the method's case, and in a closure within it - while
+     * handle(), which the container calls, and a failed() on any other class
+     * are still flagged.
+     *
+     * @return void
+     */
+    public function testExemptsTheFailedHookOfAQueuedPayload(): void
+    {
+        $this->assertErrorsOnLines('QueuedFailedHook.inc', [15, 54]);
+    }
+
+    /**
+     * A queued listener is built by the container, so its constructor can take
+     * the collaborator and its failed() is not exempt.
+     *
+     * @return void
+     */
+    public function testDoesNotExemptTheFailedHookOfAQueuedListener(): void
+    {
+        $this->assertErrorsOnLines('QueuedListenerFailedHook.inc', [13]);
+    }
+
+    /**
      * Test code may resolve services from the container to assert on them.
      *
      * @return void

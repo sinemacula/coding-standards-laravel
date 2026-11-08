@@ -264,8 +264,8 @@ final class DisallowServiceLocationSniff implements Sniff
      */
     private function isUninjectableHook(File $phpcsFile, int $stackPtr): bool
     {
-        $classPtr  = $phpcsFile->getCondition($stackPtr, T_CLASS);
-        $methodPtr = $classPtr === false ? null : $this->enclosingMethod($phpcsFile, $stackPtr, $classPtr);
+        $classPtr  = $this->nearestNamedClass($phpcsFile, $stackPtr);
+        $methodPtr = $classPtr === null ? null : $this->enclosingMethod($phpcsFile, $stackPtr, $classPtr);
 
         if ($methodPtr === null) {
             return false;
@@ -274,6 +274,27 @@ final class DisallowServiceLocationSniff implements Sniff
         $roles = $this->uninjectableHooks[strtolower((string) $phpcsFile->getDeclarationName($methodPtr))] ?? '';
 
         return in_array($this->resolveRole($phpcsFile, $classPtr), $this->split($roles), true);
+    }
+
+    /**
+     * Find the innermost class-like scope the token sits in, if it is a named
+     * class, so a class nested in a hook is judged on its own.
+     *
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
+     * @param  int  $stackPtr
+     * @return int|null
+     */
+    private function nearestNamedClass(File $phpcsFile, int $stackPtr): ?int
+    {
+        $conditions = array_reverse($phpcsFile->getTokens()[$stackPtr]['conditions'], true);
+
+        foreach ($conditions as $ptr => $code) {
+            if (in_array($code, [T_CLASS, T_ANON_CLASS, T_TRAIT, T_ENUM], true)) {
+                return $code === T_CLASS ? $ptr : null;
+            }
+        }
+
+        return null;
     }
 
     /**

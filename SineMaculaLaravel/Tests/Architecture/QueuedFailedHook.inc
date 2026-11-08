@@ -54,3 +54,34 @@ class NoticeSender
         app(Notices::class)->revert();
     }
 }
+
+class ArchiveNoticeJob implements ShouldQueue
+{
+    public function failed(Throwable $exception): void
+    {
+        $handler = new class {
+            public function handle(): void
+            {
+                app(Notices::class)->revert();
+            }
+        };
+
+        if (!class_exists(NoticeArchiver::class)) {
+            class NoticeArchiver
+            {
+                public function handle(): void
+                {
+                    resolve(Notices::class)->archive();
+                }
+            }
+        }
+    }
+}
+
+trait RevertsNotices
+{
+    public function failed(Throwable $exception): void
+    {
+        app(Notices::class)->revert();
+    }
+}

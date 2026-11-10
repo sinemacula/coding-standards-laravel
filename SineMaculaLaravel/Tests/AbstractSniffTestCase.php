@@ -90,7 +90,7 @@ abstract class AbstractSniffTestCase extends TestCase
         return str_replace(
             [DIRECTORY_SEPARATOR . 'Tests' . DIRECTORY_SEPARATOR, 'SniffTest.php'],
             [DIRECTORY_SEPARATOR . 'Sniffs' . DIRECTORY_SEPARATOR, 'Sniff.php'],
-            (new \ReflectionClass(static::class))->getFileName(),
+            $this->testFile(),
         );
     }
 
@@ -132,6 +132,24 @@ abstract class AbstractSniffTestCase extends TestCase
      */
     private function directory(): string
     {
-        return dirname((new \ReflectionClass(static::class))->getFileName());
+        return dirname($this->testFile());
+    }
+
+    /**
+     * Resolve the absolute path of the concrete test class.
+     *
+     * @return string
+     *
+     * @throws \LogicException
+     */
+    private function testFile(): string
+    {
+        $file = (new \ReflectionClass(static::class))->getFileName();
+
+        if ($file === false) {
+            throw new \LogicException(sprintf('Test class %s is not declared in a file.', static::class));
+        }
+
+        return $file;
     }
 }

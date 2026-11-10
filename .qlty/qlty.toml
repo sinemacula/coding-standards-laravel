@@ -45,7 +45,7 @@ default = true
 [[source]]
 name = "sinemacula"
 repository = "https://github.com/sinemacula/coding-standards"
-tag = "v1.29.0"
+tag = "v1.30.0"
 
 [[plugin]]
 name = "ripgrep"
@@ -65,7 +65,7 @@ package_filters = ["slevomat", "dealerdirect", "sinemacula"]
 # key makes qlty ignore extra_packages.
 [[plugin]]
 name = "php-cs-fixer"
-extra_packages = ["sinemacula/coding-standards@1.29.0"]
+extra_packages = ["sinemacula/coding-standards@1.30.0"]
 
 # phpstan runs in GitHub Actions instead (phpstan.neon.dist): qlty Cloud never runs
 # `composer install`, so it cannot autoload the in-repo PHPStan rules or scan

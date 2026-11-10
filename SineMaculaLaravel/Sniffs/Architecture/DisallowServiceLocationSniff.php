@@ -290,7 +290,7 @@ final class DisallowServiceLocationSniff implements Sniff
 
         foreach ($conditions as $ptr => $code) {
             if (in_array($code, [T_CLASS, T_ANON_CLASS, T_TRAIT, T_ENUM], true)) {
-                return $code === T_CLASS ? $ptr : null;
+                return $code === T_CLASS && is_int($ptr) ? $ptr : null;
             }
         }
 
@@ -309,8 +309,9 @@ final class DisallowServiceLocationSniff implements Sniff
     private function enclosingMethod(File $phpcsFile, int $stackPtr, int $classPtr): ?int
     {
         $owners = array_keys($phpcsFile->getTokens()[$stackPtr]['conditions']);
+        $method = $owners[array_search($classPtr, $owners, true) + 1] ?? null;
 
-        return $owners[array_search($classPtr, $owners, true) + 1] ?? null;
+        return is_int($method) ? $method : null;
     }
 
     /**

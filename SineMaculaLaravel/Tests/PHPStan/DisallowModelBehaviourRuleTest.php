@@ -183,7 +183,7 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
         self::assertIsArray($default);
 
         $this->hooks = [
-            ...$default,
+            ...array_values(array_filter($default, is_string(...))),
             'resolveRouteBinding',
             'resolveSoftDeletableRouteBinding',
             'resolveChildRouteBinding',

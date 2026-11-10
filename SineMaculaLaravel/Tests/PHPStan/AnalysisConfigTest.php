@@ -139,16 +139,21 @@ final class AnalysisConfigTest extends TestCase
      */
     public function testDeclaresTheParametersItSetsForOtherExtensions(): void
     {
-        $config = self::readConfig();
+        $config     = self::readConfig();
+        $schema     = $config['parametersSchema'] ?? [];
+        $parameters = $config['parameters']       ?? [];
+
+        self::assertIsArray($schema);
+        self::assertIsArray($parameters);
 
         foreach (['databaseMigrationsPath', 'parseModelCastsMethod'] as $parameter) {
             self::assertArrayHasKey(
                 $parameter,
-                $config['parametersSchema'] ?? [],
+                $schema,
                 "The config sets {$parameter} without declaring it, which refuses to start without the "
                 . 'extension that owns it.',
             );
-            self::assertArrayHasKey($parameter, $config['parameters'] ?? []);
+            self::assertArrayHasKey($parameter, $parameters);
         }
     }
 

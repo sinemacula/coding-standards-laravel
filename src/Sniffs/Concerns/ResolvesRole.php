@@ -31,7 +31,7 @@ use PHP_CodeSniffer\Files\File;
  */
 trait ResolvesRole
 {
-    use DetectsTestClasses, ResolvesImports, ResolvesNamespace;
+    use DetectsTestClasses, ReadsRelatedNames, ResolvesImports, ResolvesNamespace;
 
     /** @var array<string, string> Role => comma-separated identity names (short, or `\`-qualified to match through imports). */
     public array $roleIdentities = [
@@ -76,9 +76,6 @@ trait ResolvesRole
     public array $exemptNamespaces = [
         'Concerns', 'Support', 'Contracts', 'Enums', 'Casts', 'Builders', 'Traits', 'Exceptions',
     ];
-
-    /** @var array<int, int|string> Token codes that form a (possibly qualified) name. */
-    private array $nameTokens = [T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED];
 
     /**
      * Resolve the single role a class plays, or null when it has none.
@@ -285,191 +282,6 @@ trait ResolvesRole
         }
 
         return false;
-    }
-
-    /**
-     * Collect the parent class a class extends, as written.
-     *
-     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
-     * @param  int  $classPtr
-     * @return array<int, string>
-     */
-    private function parentNames(File $phpcsFile, int $classPtr): array
-    {
-        $extends = $phpcsFile->findExtendedClassName($classPtr);
-
-        return $extends === false ? [] : [$extends];
-    }
-
-    /**
-     * Collect the interfaces a class implements and the traits it uses, as
-     * written.
-     *
-     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
-     * @param  int  $classPtr
-     * @return array<int, string>
-     */
-    private function contractNames(File $phpcsFile, int $classPtr): array
-    {
-        $implements = $phpcsFile->findImplementedInterfaceNames($classPtr);
-
-        return array_merge($implements === false ? [] : $implements, $this->usedTraitNames($phpcsFile, $classPtr));
-    }
-
-    /**
-     * Collect the names of traits used directly in the class body, as written.
-     *
-     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
-     * @param  int  $classPtr
-     * @return array<int, string>
-     */
-    private function usedTraitNames(File $phpcsFile, int $classPtr): array
-    {
-        $tokens = $phpcsFile->getTokens();
-        $closer = $tokens[$classPtr]['scope_closer'] ?? $classPtr;
-        $names  = [];
-
-        for ($i = ($tokens[$classPtr]['scope_opener'] ?? $classPtr) + 1; $i < $closer; $i++) {
-            if ($tokens[$i]['code'] !== T_USE || array_key_last($tokens[$i]['conditions']) !== $classPtr) {
-                continue;
-            }
-
-            $names = array_merge($names, $this->namesUntil($phpcsFile, $i, [T_SEMICOLON, T_OPEN_CURLY_BRACKET]));
-        }
-
-        return $names;
-    }
-
-    /**
-     * Collect the names of attributes attached to the class declaration.
-     *
-     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
-     * @param  int  $classPtr
-     * @return array<int, string>
-     */
-    private function attributeNames(File $phpcsFile, int $classPtr): array
-    {
-        $tokens = $phpcsFile->getTokens();
-        $names  = [];
-        $ptr    = $classPtr;
-
-        while (($end = $this->precedingAttributeEnd($phpcsFile, $ptr)) !== null) {
-            $opener = (int) $phpcsFile->findPrevious(T_ATTRIBUTE, $end - 1);
-            $names  = array_merge($names, $this->attributeGroupNames($tokens, $opener, $end));
-            $ptr    = $opener;
-        }
-
-        return $names;
-    }
-
-    /**
-     * Find the closer of an attribute group immediately preceding $ptr.
-     *
-     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
-     * @param  int  $ptr
-     * @return int|null
-     */
-    private function precedingAttributeEnd(File $phpcsFile, int $ptr): ?int
-    {
-        $tokens = $phpcsFile->getTokens();
-        $prev   = $phpcsFile->findPrevious([T_WHITESPACE, T_ABSTRACT, T_FINAL, T_READONLY], $ptr - 1, null, true);
-
-        return $prev !== false && $tokens[$prev]['code'] === T_ATTRIBUTE_END ? $prev : null;
-    }
-
-    /**
-     * Collect the attribute names within one attribute group, skipping args.
-     *
-     * @param  array<int, array<string, mixed>>  $tokens
-     * @param  int  $opener
-     * @param  int  $closer
-     * @return array<int, string>
-     */
-    private function attributeGroupNames(array $tokens, int $opener, int $closer): array
-    {
-        $names   = [];
-        $current = '';
-        $i       = $opener + 1;
-
-        while ($i < $closer) {
-            if ($tokens[$i]['code'] === T_OPEN_PARENTHESIS) {
-                $i = $tokens[$i]['parenthesis_closer'] + 1;
-            } elseif ($this->isNamePart($tokens[$i]['code'])) {
-                $current .= $tokens[$i]['content'];
-                $i++;
-
-                continue;
-            } else {
-                $i++;
-            }
-
-            $current = $this->flushName($names, $current);
-        }
-
-        $this->flushName($names, $current);
-
-        return $names;
-    }
-
-    /**
-     * Collect the names between a pointer and the next of $stops, as written.
-     *
-     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
-     * @param  int  $from
-     * @param  array<int, int|string>  $stops
-     * @return array<int, string>
-     */
-    private function namesUntil(File $phpcsFile, int $from, array $stops): array
-    {
-        $tokens  = $phpcsFile->getTokens();
-        $end     = (int) $phpcsFile->findNext($stops, $from + 1);
-        $names   = [];
-        $current = '';
-
-        for ($i = $from + 1; $i < $end; $i++) {
-            if ($this->isNamePart($tokens[$i]['code'])) {
-                $current .= $tokens[$i]['content'];
-
-                continue;
-            }
-
-            $current = $this->flushName($names, $current);
-        }
-
-        $this->flushName($names, $current);
-
-        return $names;
-    }
-
-    /**
-     * Whether the token code forms part of a possibly-qualified name.
-     *
-     * PHP_CodeSniffer 3.x splits a qualified name into T_STRING/T_NS_SEPARATOR
-     * tokens while 4.x keeps it whole, so contiguous runs of either form are
-     * joined back into the name as written.
-     *
-     * @param  int|string  $code
-     * @return bool
-     */
-    private function isNamePart(int|string $code): bool
-    {
-        return $code === T_NS_SEPARATOR || in_array($code, $this->nameTokens, true);
-    }
-
-    /**
-     * Append a completed name run to the list and reset the accumulator.
-     *
-     * @param  array<int, string>  $names
-     * @param  string  $current
-     * @return string
-     */
-    private function flushName(array &$names, string $current): string
-    {
-        if ($current !== '') {
-            $names[] = $current;
-        }
-
-        return '';
     }
 
     /**

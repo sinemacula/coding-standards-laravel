@@ -56,13 +56,12 @@ trait ReadsAttributes
      */
     private function attributeNames(File $phpcsFile, int $stackPtr): array
     {
-        $tokens = $phpcsFile->getTokens();
-        $names  = [];
-        $ptr    = $stackPtr;
+        $names = [];
+        $ptr   = $stackPtr;
 
         while (($end = $this->precedingAttributeEnd($phpcsFile, $ptr)) !== null) {
             $opener = (int) $phpcsFile->findPrevious(T_ATTRIBUTE, $end - 1);
-            $names  = array_merge($names, $this->attributeGroupNames($tokens, $opener, $end));
+            $names  = array_merge($names, $this->attributeGroupNames($phpcsFile, $opener, $end));
             $ptr    = $opener;
         }
 
@@ -87,15 +86,16 @@ trait ReadsAttributes
     /**
      * The short names declared in a single attribute group.
      *
-     * @param  array<int, array<string, mixed>>  $tokens
+     * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $opener
      * @param  int  $closer
      * @return array<int, string>
      */
-    private function attributeGroupNames(array $tokens, int $opener, int $closer): array
+    private function attributeGroupNames(File $phpcsFile, int $opener, int $closer): array
     {
-        $names = [];
-        $i     = $opener + 1;
+        $tokens = $phpcsFile->getTokens();
+        $names  = [];
+        $i      = $opener + 1;
 
         while ($i < $closer) {
             if ($tokens[$i]['code'] === T_OPEN_PARENTHESIS) {

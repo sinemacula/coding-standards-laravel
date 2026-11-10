@@ -68,6 +68,12 @@ jobs:
             -   name: Install dependencies
                 run: composer install --prefer-dist --no-interaction --no-progress
 
+            # Analysed on the PHP floor only: newer versions ask for attributes,
+            # such as #[\Override] on a property, that the floor cannot parse.
+            -   name: PHPStan
+                if: ${{ matrix.php == '8.3' }}
+                run: composer analyse
+
             -   name: PHPUnit
                 run: composer test:coverage
 

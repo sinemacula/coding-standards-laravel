@@ -7,6 +7,7 @@ namespace SineMaculaLaravel\Tests\Structure;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversTrait;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDeclarationNames;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsRelatedNames;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesImports;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
@@ -23,6 +24,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
  */
 #[CoversClass(RequireRoleNamingSniff::class)]
 #[CoversTrait(ReadsDeclarationNames::class)]
+#[CoversTrait(ReadsRelatedNames::class)]
 #[CoversTrait(ResolvesImports::class)]
 #[CoversTrait(ResolvesNamespace::class)]
 #[CoversTrait(ResolvesRole::class)]

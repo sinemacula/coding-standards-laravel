@@ -272,8 +272,10 @@ trait DetectsLaravelVersion
     /**
      * The entries a map holds for the Laravel packages, in preference order.
      *
-     * @param  array<array-key, mixed>  $entries
-     * @return array<int, mixed>
+     * @template TEntry
+     *
+     * @param  array<array-key, TEntry>  $entries
+     * @return array<int, TEntry>
      */
     private function laravelEntries(array $entries): array
     {

@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace SineMaculaLaravel\Tests\Structure;
 
 use PHPUnit\Framework\Attributes\CoversTrait;
+use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsRelatedNames;
 use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
 use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 
@@ -19,6 +20,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
  *
  * @internal
  */
+#[CoversTrait(ReadsRelatedNames::class)]
 #[CoversTrait(ResolvesRole::class)]
 final class ResolvesRoleTest extends AbstractSniffTestCase
 {

@@ -67,9 +67,13 @@ package_filters = ["slevomat", "dealerdirect", "sinemacula"]
 name = "php-cs-fixer"
 extra_packages = ["sinemacula/coding-standards@1.29.0"]
 
-# phpstan is NOT wired here: qlty Cloud never runs `composer install`, so it cannot
-# autoload the in-repo PHPStan rules or scan PHP_CodeSniffer's non-PSR-4 source that
-# the sniff code depends on. It runs in GitHub Actions instead (phpstan.neon.dist).
+# phpstan runs in GitHub Actions instead (phpstan.neon.dist): qlty Cloud never runs
+# `composer install`, so it cannot autoload the in-repo PHPStan rules or scan
+# PHP_CodeSniffer's non-PSR-4 source that the sniff code depends on. The shared
+# source enables phpstan for every consumer, so it is turned off here.
+[[plugin]]
+name = "phpstan"
+mode = "disabled"
 
 # php/ holds shipped tool configs, not source, so the PHP plugins skip it - they
 # target src/ and SineMaculaLaravel (Sniffs + Tests).

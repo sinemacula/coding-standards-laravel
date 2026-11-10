@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/sinemacula/coding-standards-laravel/compare/v1.7.0...v1.7.1) (2026-11-10)
+
+
+### Bug Fixes
+
+* **deps:** require a released sinemacula/coding-standards ([#143](https://github.com/sinemacula/coding-standards-laravel/issues/143)) ([eeabba7](https://github.com/sinemacula/coding-standards-laravel/commit/eeabba7265088044dc79d335cf0e78ac7c836288))
+
 ## [1.7.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.6.3...v1.7.0) (2026-11-10)
 
 

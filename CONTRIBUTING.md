@@ -1,10 +1,10 @@
 # Contributing
 
-Contributions are welcome via GitHub pull requests. This guide covers the expectations for working on this package.
+Contributions are welcome via GitHub pull requests.
 
-This package layers Laravel-specific rules on top of the framework-agnostic
-[`sinemacula/coding-standards`](https://github.com/sinemacula/coding-standards). Keep rules here non-overlapping with
-the base: the base owns the framework-agnostic rules, this package owns only the Laravel-specific ones.
+This package layers Laravel-specific rules on top of
+[`sinemacula/coding-standards`](https://github.com/sinemacula/coding-standards). A rule that is not Laravel-specific
+belongs in the base package instead.
 
 ## Requirements
 
@@ -46,50 +46,45 @@ chore: update qlty configuration
 
 ### Code Quality
 
-All code must pass static analysis before submission:
-
 ```bash
-composer check    # Static analysis and lint checks via qlty (PHPStan, PHP-CS-Fixer, CodeSniffer)
-composer format   # Format the codebase via qlty
-composer smells   # Advisory code smells (duplication, complexity)
+composer check    # Lint via qlty (CodeSniffer, PHP-CS-Fixer)
+composer analyse  # PHPStan over the package's own sniffs and rules
+composer format   # Format via qlty
+composer smells   # Duplication and complexity smells via qlty
 ```
 
 ### Testing
 
-Run the full test suite before submitting:
-
 ```bash
-composer test            # Run the PHPUnit sniff/rule test suite
+composer test            # PHPUnit sniff/rule suite
 composer test:coverage   # With Clover coverage report (requires Xdebug)
+composer test:mutation   # Mutation gate against origin/master
 ```
 
 Single test file or method:
 
 ```bash
-vendor/bin/phpunit SineMaculaLaravel/Tests/Sniffs/<Category>/<Name>SniffTest.php
-vendor/bin/phpunit --filter testDetectsViolations SineMaculaLaravel/Tests/Sniffs/<Category>/<Name>SniffTest.php
+vendor/bin/phpunit SineMaculaLaravel/Tests/<Category>/<Name>SniffTest.php
+vendor/bin/phpunit --filter <testMethod> SineMaculaLaravel/Tests/<Category>/<Name>SniffTest.php
 ```
 
 ### Standards
 
-- New sniffs and PHPStan rules ship with tests and maintain 100% line coverage; the package's mutation-testing gate
-  (`composer test:mutation`) is the enforced floor
-- Sniffs are token-based and must not reference Laravel classes (they see tokens, not types)
-- PHPStan rules are pure AST/reflection; this package does not require `laravel/framework`, so rules cannot reflect on
-  `Illuminate\...` types directly
-- Full type hints on all method parameters and return types, with PHPDoc on all classes and methods
+- New sniffs and PHPStan rules ship with tests; the mutation gate (`composer test:mutation`) is the enforced floor
+- Sniffs are token-based and must not reference Laravel classes
+- PHPStan rules name `Illuminate\...` classes as strings: `laravel/framework` is only a dev dependency
+- Full type hints on all parameters and return types, with PHPDoc on all classes and methods
 
 ## Pull Requests
 
 - Keep changes minimal and scoped to a single concern
 - Do not change static-analysis or formatting configuration without prior discussion
 - Include tests for new or changed behaviour
-- Ensure `composer check` and `composer test` pass
+- `composer check`, `composer analyse`, `composer smells` and `composer test` pass
 
 ## Security
 
-If you discover a security vulnerability, please report it directly to Sine Macula rather than opening a public issue.
-See [SECURITY.md](SECURITY.md) for details.
+Report vulnerabilities privately, not in a public issue. See [SECURITY.md](SECURITY.md).
 
 ## License
 

@@ -21,13 +21,6 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * Require snake_case table and column names in migrations.
  *
- * Database identifiers are snake_case by Laravel convention. Inside a class
- * extending Migration this flags non-snake_case literal names passed to the
- * Schema table calls (create/table/rename/drop) and to the Blueprint column and
- * index methods. Only string-literal name arguments are inspected - value
- * arguments (an enum's cases, a column default) and dynamic names are left
- * alone. Digits are permitted (line_1, oauth2); only casing is enforced.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  *

@@ -18,20 +18,6 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsTestFiles;
 /**
  * Require every mass-assignable attribute to declare a cast.
  *
- * A cast is the single in-code declaration of an attribute's type, so every
- * attribute a model exposes to mass assignment must carry one, documenting the
- * shape of each settable field. For each `$fillable` entry (or the
- * `#[Fillable]` attribute form) this requires a matching key in the `casts()`
- * method (or a `$casts` property). It runs only on a concrete model that
- * directly extends `Model`, `Authenticatable`, `Pivot` or `MorphPivot`, so a
- * subclass whose parent declares the casts is left alone; models declared in
- * tests are exempt.
- *
- * The fillable list and the cast set must both be statically enumerable. When
- * either is assembled dynamically - a `$fillable` built from a variable, or a
- * `casts()` that merges `parent::casts()` - the model is skipped rather than
- * risk a false positive against keys the rule cannot see.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  *
@@ -109,10 +95,8 @@ final class RequireFillableCastsRule implements Rule
     }
 
     /**
-     * Resolve the model's fillable attributes as string literals.
-     *
-     * Returns null when a `$fillable` or `#[Fillable]` declaration is present
-     * but not a plain array of string literals, so the caller skips the model.
+     * Resolve the model's fillable attributes, or null when one is declared but
+     * not as an array literal.
      *
      * @param  \PhpParser\Node\Stmt\Class_  $node
      * @return array<int, \PhpParser\Node\Scalar\String_>|null
@@ -176,10 +160,8 @@ final class RequireFillableCastsRule implements Rule
     }
 
     /**
-     * The cast keys a model declares via `casts()` or a `$casts` property.
-     *
-     * Returns null when a declaration is present but not statically enumerable,
-     * so the caller skips the model rather than flag keys it cannot see.
+     * The cast keys a model declares via `casts()` or a `$casts` property, or
+     * null when either is not statically enumerable.
      *
      * @param  \PhpParser\Node\Stmt\Class_  $node
      * @return array<int, string>|null

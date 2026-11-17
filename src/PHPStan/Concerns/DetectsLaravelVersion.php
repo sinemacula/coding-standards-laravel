@@ -10,16 +10,6 @@ use Composer\Semver\VersionParser;
 /**
  * Detect the Laravel versions a project declares and resolves.
  *
- * Walks up from an analysed file to the nearest composer.json and reads the
- * `illuminate/database` constraint (falling back to `laravel/framework`, and a
- * rule may name other packages), returning the lower bound of that constraint.
- * A version-gated rule can use this to enforce attributes only when the
- * project's floor supports them.
- *
- * The resolved version is read separately from composer.lock beside that
- * composer.json, so a rule can tell a project that genuinely cannot use a
- * feature from one whose floor is merely lagging what it runs.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */
@@ -97,8 +87,7 @@ trait DetectsLaravelVersion
     }
 
     /**
-     * The packages whose constraint and locked version stand for the project's
-     * Laravel, most telling first.
+     * The packages that stand for the project's Laravel, most telling first.
      *
      * @return array<int, string>
      */
@@ -108,8 +97,7 @@ trait DetectsLaravelVersion
     }
 
     /**
-     * The version the project's Laravel is taken to be, from those of the
-     * Laravel packages present in preference order: the first of them.
+     * Choose the project's Laravel version: the first found, in package order.
      *
      * @param  array<int, string|null>  $versions
      * @return string|null
@@ -120,9 +108,8 @@ trait DetectsLaravelVersion
     }
 
     /**
-     * The Laravel version the project containing $file resolves to, when that
-     * reaches $required but the declared $floor does not, or null when the two
-     * agree or either cannot be read.
+     * The locked Laravel version when it reaches $required, or null when it
+     * does not or the declared $floor cannot be read.
      *
      * @param  string|null  $floor
      * @param  string  $required
@@ -187,9 +174,11 @@ trait DetectsLaravelVersion
     }
 
     /**
-     * Read the resolved version of the first Laravel package a composer.lock
-     * carries. An application locks laravel/framework, which replaces the
-     * illuminate packages, so the fallback is the usual hit.
+     * Read the locked version of the first Laravel package a composer.lock
+     * carries.
+     *
+     * An application locks laravel/framework, which replaces the illuminate
+     * packages, so the fallback is the usual hit.
      *
      * @param  string  $lock
      * @return string|null

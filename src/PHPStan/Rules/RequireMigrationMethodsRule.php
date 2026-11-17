@@ -13,10 +13,6 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * Require migrations to define both up() and down().
  *
- * A migration without down() cannot be rolled back, and one without up() does
- * nothing. Every class extending Migration - named or the anonymous form a
- * migration file returns - must declare both methods.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  *

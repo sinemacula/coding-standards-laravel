@@ -17,21 +17,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsLaravelVersion;
 /**
  * Prefer model attributes over their legacy property and method forms.
  *
- * Eloquent exposes attribute classes that replace configuration properties
- * (#[Table], #[Fillable], #[Hidden]) and method overrides (#[UseFactory],
- * #[CollectedBy], #[UseEloquentBuilder]). On a model the legacy form is flagged
- * in favour of its attribute - but only for the attributes a project enables,
- * configurable via the `sineMaculaLaravel.modelAttributes` parameter.
- *
- * #[Table]/#[Fillable]/#[Hidden] landed in 13.2, so they are enforced only when
- * the project's Laravel floor reaches 13.2 - taken from `minLaravelVersion` or
- * detected from composer.json. Below that the property form stands, because a
- * project supporting older versions cannot emit the attribute at all; but where
- * composer.lock shows it already resolves to 13.2 or above, the legacy form is
- * reported as a lagging floor rather than passed over in silence, so the
- * migration surfaces one model at a time instead of arriving all at once when
- * the floor is eventually raised. $hidden stays a property once it lists more
- * than five fields.
+ * `$hidden` stays a property once it lists more than five fields.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -206,9 +192,8 @@ final class PreferModelAttributesRule implements Rule
     }
 
     /**
-     * Build the error for an enabled attribute's legacy form: the plain
-     * replacement where the floor already supports it, otherwise the lagging
-     * floor notice where the project resolves to a version that does.
+     * Build the error for an enabled attribute's legacy form, or the lagging
+     * floor notice where only the resolved version supports it.
      *
      * @param  string  $attribute
      * @param  string  $legacy
@@ -234,8 +219,7 @@ final class PreferModelAttributesRule implements Rule
     }
 
     /**
-     * Build the notice for a legacy form the project's resolved Laravel could
-     * already replace, were its declared floor not holding it back.
+     * Build the notice for a legacy form only the declared floor still holds.
      *
      * @param  string  $attribute
      * @param  string  $legacy

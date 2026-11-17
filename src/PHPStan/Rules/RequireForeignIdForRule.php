@@ -19,14 +19,6 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * Require foreign key columns to be declared from their model.
  *
- * `foreignIdFor(Organization::class)` derives the column name and the key type
- * from the model, so a migration says which model it points at rather than
- * restating a name and a type that have to be kept in step by hand. Inside a
- * class extending Migration this flags the longhand `foreignId`, `foreignUuid`
- * and `foreignUlid` calls whose literal column name ends in `_id`, which is
- * exactly the shape the helper produces. A dynamic name, or a column named
- * anything else, is left alone.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  *

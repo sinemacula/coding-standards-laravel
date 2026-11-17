@@ -13,10 +13,6 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * Forbid the deprecated Eloquent $dates property.
  *
- * The `$dates` property was removed from Eloquent; date attributes are cast
- * through the `casts()` method (`'published_at' => 'datetime'`). This flags the
- * `$dates` property so it never reappears.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  *

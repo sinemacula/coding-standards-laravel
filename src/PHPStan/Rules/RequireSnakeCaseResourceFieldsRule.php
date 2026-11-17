@@ -18,14 +18,6 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * Require snake_case field names in API resources.
  *
- * A resource's output keys are part of the public API contract and are
- * snake_case by Laravel convention. On a class extending JsonResource this
- * flags non-snake_case string-literal keys in the array returned directly from
- * toArray(), recursing into nested array literals. Computed keys, a toArray()
- * that does not return an array literal, and non-resource classes are left
- * alone. Digits are permitted (line_1) and leading-underscore keys are exempt
- * meta-fields (e.g. _type); only casing is enforced on data fields.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  *

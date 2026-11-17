@@ -14,11 +14,6 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsRelationships;
 /**
  * Require a return type on Eloquent relationship methods.
  *
- * A method that returns a relationship (`return $this->hasMany(...)`, etc.)
- * without a declared return type hides the relationship type from IDEs and
- * static analysis. Any method whose returned expression resolves to a
- * `$this-><relationship>()` call must declare its return type.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  *

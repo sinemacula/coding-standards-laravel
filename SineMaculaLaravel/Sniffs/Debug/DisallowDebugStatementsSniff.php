@@ -12,15 +12,6 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\DetectsFunctionCalls;
 /**
  * Disallow debug statements in committed code.
  *
- * Flags the common debug helpers (`dd`, `dump`, `ray`, `var_dump`, `print_r`)
- * when used as function calls, so leftover debugging never reaches a commit.
- * Method/static calls of the same name (e.g. a collection's `->dump()`) are not
- * flagged. The forbidden list is configurable.
- *
- * A truthy second argument turns `print_r` into a plain string function that
- * prints nothing - the form log and exception messages are built from - so it
- * is left alone. `var_dump` has no such form and is always flagged.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */
@@ -82,8 +73,7 @@ final class DisallowDebugStatementsSniff implements Sniff
     }
 
     /**
-     * Whether the call returns its output rather than printing it, which makes
-     * it an ordinary string function rather than a debug statement.
+     * Whether the call returns its output rather than printing it.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -100,8 +90,7 @@ final class DisallowDebugStatementsSniff implements Sniff
     }
 
     /**
-     * Whether the call's second argument is present and is anything other than
-     * a literal that leaves it printing.
+     * Whether the call has a second argument other than a printing literal.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -125,8 +114,7 @@ final class DisallowDebugStatementsSniff implements Sniff
     }
 
     /**
-     * Pointer to the comma separating the first two arguments, or null when the
-     * call has only one. Commas nested in an inner expression are skipped.
+     * Pointer to the top-level comma after the first argument, if any.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $opener

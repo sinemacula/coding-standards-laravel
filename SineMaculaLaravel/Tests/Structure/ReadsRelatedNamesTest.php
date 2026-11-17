@@ -9,10 +9,7 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsRelatedNames;
 use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 
 /**
- * Tests for reading the names a class relates to, rather than for the role
- * resolution that consumes them. The role directory sniff is driven with a
- * single `Marker` identity, so a class is reported as a misplaced job exactly
- * when `Marker` is among the names read.
+ * Tests for reading the names a class relates to.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -26,9 +23,7 @@ final class ReadsRelatedNamesTest extends AbstractSniffTestCase
     private const string JOB_MISPLACED = 'A Job class must live under a "Jobs" directory.';
 
     /**
-     * Every trait the class body uses is read - from each `use` statement and
-     * every name in a list - while names in a conflict-resolution block and a
-     * closure's `use` are not traits the class uses.
+     * Reads every trait the class body uses, but not conflict or closure names.
      *
      * @return void
      */
@@ -41,9 +36,7 @@ final class ReadsRelatedNamesTest extends AbstractSniffTestCase
     }
 
     /**
-     * Every attribute on the class is read - from each stacked group, past
-     * another name in the group and glued to the declaration - while a name
-     * passed as an attribute argument is not an attribute.
+     * Reads every attribute on the class, but not names passed as arguments.
      *
      * @return void
      */
@@ -58,8 +51,7 @@ final class ReadsRelatedNamesTest extends AbstractSniffTestCase
     }
 
     /**
-     * Drive the role directory sniff, which names the resolved role in its
-     * message.
+     * Drive the role directory sniff, which names the resolved role.
      *
      * @return string
      */

@@ -1,9 +1,4 @@
 # Reference: https://qlty.sh/d/qlty-toml
-#
-# Code-quality configuration for both the Qlty CLI and Qlty Cloud. Lint and
-# format rules come from the shared sinemacula/coding-standards source; this
-# file wires that source in and selects the plugins relevant to this
-# repository.
 config_version = "0"
 
 exclude_patterns = [
@@ -25,9 +20,7 @@ exclude_patterns = [
 test_patterns = [
     "**/test/**",
     "**/spec/**",
-    # This repo follows PHPUnit's PascalCase convention (SineMaculaLaravel/Tests, *Test.php),
-    # which the default lowercase patterns below do not match; without these, qlty
-    # treats the sniff tests as source and reports their boilerplate as duplication.
+    # The PascalCase test layout is not matched by the default lowercase patterns.
     "**/Tests/**",
     "**/*Test.php",
     "**/*.test.*",
@@ -51,38 +44,27 @@ tag = "v1.30.2"
 name = "ripgrep"
 mode = "comment"
 
-# Dogfood the SineMacula PHP standards on this repo's own code. phpcs and php-cs-fixer
-# read the in-tree configs under .qlty/configs (phpcs.xml, .php-cs-fixer.dist.php). The
-# shared standard plus slevomat + the installer come from composer.json so the ruleset's
-# sniffs resolve in qlty's sandbox.
 [[plugin]]
 name = "php-codesniffer"
 package_file = "composer.json"
 package_filters = ["slevomat", "dealerdirect", "sinemacula"]
 
-# The in-tree fixer config builds on the base PhpCsFixerConfig, so the standards package
-# is installed into the sandbox directly. It cannot come from package_file: setting that
-# key makes qlty ignore extra_packages.
+# Setting package_file makes qlty ignore extra_packages.
 [[plugin]]
 name = "php-cs-fixer"
 extra_packages = ["sinemacula/coding-standards@1.30.2"]
 
-# phpstan runs in GitHub Actions instead (phpstan.neon.dist): qlty Cloud never runs
-# `composer install`, so it cannot autoload the in-repo PHPStan rules or scan
-# PHP_CodeSniffer's non-PSR-4 source that the sniff code depends on. The shared
-# source enables phpstan for every consumer, so it is turned off here.
+# Runs in CI instead: qlty Cloud never installs the vendor the rules depend on.
 [[plugin]]
 name = "phpstan"
 mode = "disabled"
 
-# php/ holds shipped tool configs, not source, so the PHP plugins skip it - they
-# target src/ and SineMaculaLaravel (Sniffs + Tests).
+# php/ holds shipped tool configs, not source.
 [[exclude]]
 plugins = ["php-codesniffer", "php-cs-fixer"]
 file_patterns = ["php/**"]
 
-# The PHPStan fixtures hold deliberately old or malformed lockfiles to exercise
-# Laravel version detection; they are never installed.
+# Deliberately old or malformed fixture lockfiles, never installed.
 [[exclude]]
 plugins = ["osv-scanner", "trivy"]
 file_patterns = ["SineMaculaLaravel/Tests/PHPStan/data/**"]

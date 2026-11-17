@@ -14,12 +14,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsTestFiles;
 /**
  * Require an explicit mass-assignment declaration on Eloquent models.
  *
- * A model that declares neither `$fillable` nor `$guarded` inherits Eloquent's
- * default of guarding nothing, which silently exposes every column to mass
- * assignment. Each concrete model that extends `Model` must declare one - via
- * the `$fillable`/`$guarded` property or the 13.2+ `#[Fillable]`/`#[Guarded]`
- * attribute. Abstract base models, non-models (e.g. a pivot extending `Pivot`),
- * and models declared in tests (not attack surface) are not affected.
+ * Only a class extending `Model` itself is read, so a `Pivot` is left alone.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited

@@ -29,9 +29,7 @@ final class RequireMigrationMethodsRuleTest extends RuleTestCase
     private const string UP_ERROR = 'A migration must define the up() method.';
 
     /**
-     * A migration missing up() or down() is flagged (an empty one for both); a
-     * complete migration, one whose method names differ only by case, and a
-     * non-migration are not.
+     * Flags a migration missing up() or down().
      *
      * @return void
      */

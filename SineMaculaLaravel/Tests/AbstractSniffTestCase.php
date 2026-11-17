@@ -12,11 +12,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * Base test case for Sine Macula Laravel PHP_CodeSniffer sniffs.
  *
- * A concrete test is named "<SniffName>SniffTest" and lives under
- * SineMaculaLaravel/Tests/<Category>/ alongside its fixtures. The sniff under
- * test, its file path and its dotted code are all derived from the test class
- * by convention, so a sniff test is just a fixture plus one assertion per
- * scenario.
+ * The sniff under test is derived from the test class's name and directory.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -67,8 +63,7 @@ abstract class AbstractSniffTestCase extends TestCase
     }
 
     /**
-     * Property overrides to apply to the sniff under test (e.g. lowered
-     * limits).
+     * Property overrides to apply to the sniff under test.
      *
      * @return array<string, mixed>
      */
@@ -80,8 +75,7 @@ abstract class AbstractSniffTestCase extends TestCase
     /**
      * Resolve the absolute path of the sniff under test from this test class.
      *
-     * A test named for a concern rather than a sniff overrides this to name the
-     * sniff it drives, since the concern has no sniff file of its own.
+     * Concern tests override this to name the sniff they drive.
      *
      * @return string
      */
@@ -102,9 +96,7 @@ abstract class AbstractSniffTestCase extends TestCase
      */
     private function process(string $fixture): LocalFile
     {
-        // A built-in standard gives the Ruleset something valid to construct
-        // from (it rejects an empty sniff set); its sniffs are then dropped so
-        // only the sniff under test, registered directly from its file, runs.
+        // An empty sniff set is rejected; load a standard, drop its sniffs.
         $config            = new Config(['--extensions=inc,php'], false);
         $config->standards = ['Generic'];
 

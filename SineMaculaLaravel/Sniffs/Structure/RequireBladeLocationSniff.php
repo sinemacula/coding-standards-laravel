@@ -10,10 +10,6 @@ use PHP_CodeSniffer\Sniffs\Sniff;
 /**
  * Require Blade templates to live under a views directory.
  *
- * A `*.blade.php` file must sit somewhere under a `resources/views` (standard
- * Laravel) or `Resources/views` (module) directory. The check is purely on the
- * file path, so it runs once per file on its first token.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */

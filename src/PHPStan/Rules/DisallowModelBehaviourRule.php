@@ -19,59 +19,6 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsRelationships;
 /**
  * Limit an Eloquent model to its schema and its relations.
  *
- * A model describes what a record is; behaviour belongs to the layer that owns
- * it, a repository or a service. A model that accumulates behaviour is the
- * usual way a codebase stops being navigable, so a public method that is not a
- * relation, a framework hook or an accessor is reported.
- *
- * Every method the class declares is read, which includes the ones a trait
- * imports, so moving a method into a trait does not take it out of scope. An
- * imported method is reported against the line the class declares itself on,
- * since that is where the decision to import it lives and the trait may sit in
- * another file. A trait is only read where its file is among the analysed
- * paths, so one installed as a dependency is reported only in the package that
- * ships it. Anonymous classes are read the same way, so extending a model base
- * inline is not a way around the rule either.
- *
- * A model is recognised through its whole ancestry rather than the name of its
- * immediate parent, so a project that puts its own base class between its
- * models and the framework is covered like any other. The parent name as
- * written is read alongside that ancestry rather than only when nothing
- * resolved, so a class whose parent is written as one of the framework bases
- * stays covered even where a dependency is only partly installed and the
- * ancestry above that parent is invisible. What neither reaches is a base of
- * the project's own, named something else, that resolves while the framework
- * base above it does not: nothing left to read names a model base.
- *
- * A query scope is called out separately, because the framework invites it and
- * it is where the erosion tends to start: it belongs on a repository, which can
- * compose it as an ordinary fluent method. A scope is reported whatever its
- * visibility, since the attribute form is conventionally not public.
- *
- * Non-public methods are left alone - a helper called only from a relation is
- * detail, whereas a public one is what other layers reach for. So is a public
- * method that satisfies an interface the model's own author opted into: the
- * obligation comes from outside the model and no list of hooks can anticipate
- * every contract a package declares. The interfaces the framework base already
- * carries are excluded from that, because they would otherwise exempt
- * `toArray()`, `jsonSerialize()` and the array-access methods on every model
- * there is, which is the very way behaviour gets smuggled onto one. An abstract
- * method inherited from a base class is deliberately not exempt either, because
- * that obligation is written in the project itself and this rule already
- * reports it where it is declared; exempting the implementations would turn one
- * suppression on a base class into unlimited behaviour on every model beneath
- * it.
- *
- * The permitted hooks are the configurable `modelHooks` parameter. A method is
- * a default hook only if Eloquent declares it publicly, only an override can
- * say what it says on every supported Laravel version, and it describes rather
- * than performs: it returns a name, a class, a list, a generated value or a
- * query that has not run, and never runs a query, returns a fetched record,
- * changes state or calls anything external. The route binding resolvers fail
- * the last test, since each runs the lookup and returns the record, so a
- * project whose models resolve their own bindings appends them in its own
- * config.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  *
@@ -248,11 +195,6 @@ final readonly class DisallowModelBehaviourRule implements Rule
     /**
      * Whether an interface the model's own author opted into declares the
      * method.
-     *
-     * The interfaces the framework base already implements are passed over,
-     * since they are not a choice the model made. What is left is what the
-     * class or a base of the project's own added, and a method any interface
-     * those extend declares counts too.
      *
      * @param  \PHPStan\Reflection\ClassReflection  $class
      * @param  array<int, \PHPStan\Reflection\ClassReflection>  $bases

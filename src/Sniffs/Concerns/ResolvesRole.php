@@ -7,24 +7,7 @@ namespace SineMacula\CodingStandardsLaravel\Sniffs\Concerns;
 use PHP_CodeSniffer\Files\File;
 
 /**
- * Resolve the Laravel "role" a class plays, for the structure sniffs.
- *
- * Detection is identity-first: a class is matched to at most one role by what
- * it extends, implements, uses or is attributed with - resolved against a
- * configurable identity list - and only then by a tightly-scoped location
- * fallback (concrete classes, recursive, minus exempt sub-namespaces). A bare
- * identity entry matches by short name; an entry containing `\` matches the
- * qualified name resolved through the file's imports, so same-named traits (the
- * Bus and Events `Dispatchable`) stay distinct. A parent class outranks the
- * interfaces and traits beside it, so a queued notification is a notification
- * rather than a job, and an identity several roles share (a queued listener
- * implements `ShouldQueue` just as a job does) is told apart by location. A
- * class with neither is unconstrained, and test classes play no role at all. An
- * `@role-exempt` docblock tag or a `#[NotARole]` attribute opts a class out
- * entirely.
- *
- * The role table and every list are public properties so a consuming ruleset
- * can override or extend them.
+ * Resolve the Laravel role a class plays, for the structure sniffs.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -97,13 +80,7 @@ trait ResolvesRole
     /**
      * Resolve a role from what the class extends, implements, uses or carries.
      *
-     * What a class declares is settled before what it is attributed with,
-     * because an attribute names a class the subject relates to at least as
-     * often as it names what the subject is: a repository attributed with the
-     * model it serves is a repository. Of what it declares, the parent is
-     * settled first, since an interface or trait such as `ShouldQueue` is
-     * shared by classes of several roles while the parent names what the class
-     * is.
+     * Attributes rank last, as one often names a related class instead.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $classPtr
@@ -144,10 +121,6 @@ trait ResolvesRole
     /**
      * Resolve a role from the interfaces and traits a class declares.
      *
-     * A distinct identity settles the role outright. Failing that, a shared
-     * identity yields to a role that shares it when the class sits in that
-     * role's location, and only then to the role the identity table names.
-     *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  array<string, string>  $imports
      * @param  string  $namespace
@@ -167,8 +140,7 @@ trait ResolvesRole
     }
 
     /**
-     * Resolve the role sharing one of the given identities whose location the
-     * class sits in, if any.
+     * Resolve the sharing role whose location the class sits in, if any.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  array<string, string>  $imports
@@ -323,8 +295,7 @@ trait ResolvesRole
     }
 
     /**
-     * Find the closer of the docblock attached to the class, walking back over
-     * any attribute groups sitting between the docblock and the declaration.
+     * Find the closer of the class docblock, skipping any attribute groups.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $classPtr

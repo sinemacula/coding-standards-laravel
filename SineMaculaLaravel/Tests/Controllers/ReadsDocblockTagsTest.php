@@ -9,9 +9,7 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDocblockTags;
 use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 
 /**
- * Tests for reading a declaration's docblock tags, rather than for any sniff
- * that offers them as an escape hatch. The non-REST action sniff is driven
- * because it reads tags on both classes and methods.
+ * Tests for reading a declaration's docblock tags.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -22,10 +20,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class ReadsDocblockTagsTest extends AbstractSniffTestCase
 {
     /**
-     * Docblock tags are matched case-insensitively and only from the docblock
-     * attached to the declaration: a bare method after a tagged one and a
-     * method whose docblock lacks the tags are flagged, while a mixed-case
-     * utility tag and a docblock glued to the function keyword still exempt.
+     * Matches tags case-insensitively from the attached docblock only.
      *
      * @return void
      */
@@ -35,10 +30,7 @@ final class ReadsDocblockTagsTest extends AbstractSniffTestCase
     }
 
     /**
-     * Attributes between a docblock and its declaration do not detach the
-     * docblock: a single attribute, stacked, grouped, same-line and glued
-     * attributes all keep the tags readable on methods and classes, while an
-     * attributed method with no docblock or an untagged one is still flagged.
+     * Attributes between a docblock and its declaration do not detach it.
      *
      * @return void
      */
@@ -48,9 +40,7 @@ final class ReadsDocblockTagsTest extends AbstractSniffTestCase
     }
 
     /**
-     * The tag exemption reads only the docblock attached to the method: a bare
-     * method is flagged even when an earlier method's docblock carries the same
-     * tag.
+     * An earlier method's tag does not exempt a later bare method.
      *
      * @return void
      */
@@ -60,8 +50,7 @@ final class ReadsDocblockTagsTest extends AbstractSniffTestCase
     }
 
     /**
-     * Drive the non-REST action sniff, which this concern has no sniff file of
-     * its own to stand in for.
+     * Drive the non-REST action sniff, which reads tags on classes and methods.
      *
      * @return string
      */

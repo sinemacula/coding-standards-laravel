@@ -17,9 +17,7 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * Disallow defining timestamps in a factory definition().
  *
- * Eloquent sets created_at and updated_at automatically, so a factory must not
- * hard-set them in `definition()`. Only the array returned directly from the
- * method is inspected; classes that do not extend Factory are unaffected.
+ * Only an array returned directly from the method is inspected.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited

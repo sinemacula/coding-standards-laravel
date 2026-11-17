@@ -3,12 +3,8 @@
 <div align="center">
 
 [![Latest Stable Version](https://img.shields.io/packagist/v/sinemacula/coding-standards-laravel.svg)](https://packagist.org/packages/sinemacula/coding-standards-laravel)
-[![PHP Version](https://img.shields.io/packagist/dependency-v/sinemacula/coding-standards-laravel/php.svg)](https://packagist.org/packages/sinemacula/coding-standards-laravel)
 [![Build Status](https://github.com/sinemacula/coding-standards-laravel/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/sinemacula/coding-standards-laravel/actions/workflows/tests.yml)
-[![Quality Gates](https://github.com/sinemacula/coding-standards-laravel/actions/workflows/quality-gates.yml/badge.svg?branch=master)](https://github.com/sinemacula/coding-standards-laravel/actions/workflows/quality-gates.yml)
-[![Maintainability](https://qlty.sh/gh/sinemacula/projects/coding-standards-laravel/maintainability.svg)](https://qlty.sh/gh/sinemacula/projects/coding-standards-laravel)
 [![Code Coverage](https://qlty.sh/gh/sinemacula/projects/coding-standards-laravel/coverage.svg)](https://qlty.sh/gh/sinemacula/projects/coding-standards-laravel)
-[![Total Downloads](https://img.shields.io/packagist/dt/sinemacula/coding-standards-laravel.svg)](https://packagist.org/packages/sinemacula/coding-standards-laravel)
 [![License](https://img.shields.io/github/license/sinemacula/coding-standards-laravel.svg)](LICENSE)
 
 </div>
@@ -17,8 +13,7 @@ Laravel-specific coding standards, static-analysis rules, and code-quality tooli
 
 Install this **only in Laravel projects**. Framework-agnostic, language-wide standards live in
 [`sinemacula/coding-standards`](https://github.com/sinemacula/coding-standards); this package adds the
-Laravel-specific layer. Non-Laravel repos simply don't install it - that is how the Laravel rules stay
-scoped to Laravel projects (no runtime framework detection).
+Laravel-specific layer. Non-Laravel repos don't install it; there is no runtime framework detection.
 
 ## Installation
 
@@ -39,15 +34,14 @@ Wire it into the PHP tools through the same Qlty plugin setup you already use fo
 linter tool environment automatically.
 
 `php-cs-fixer` is the exception: give it `extra_packages` instead, listing the standards package. Qlty
-ignores `extra_packages` whenever `package_file` is set on the same plugin. Qlty resolves each tool sandbox
-for the PHP set in `[runtimes.enabled]`, so no Symfony pin is needed on any runtime.
+ignores `extra_packages` whenever `package_file` is set on the same plugin.
 
 ### PHPCS
 
 Two standards ship; reference exactly one (each pulls in `SineMacula`, so it replaces it - don't reference both):
 
 - **`SineMaculaLaravel`** - for applications. The full standard, including the role-based structure
-  rules (placement and naming of controllers, models, providers, …) and the controller rules.
+  rules (placement and naming of controllers, models, providers, ...) and the controller rules.
 - **`SineMaculaLaravelPackage`** - for libraries and packages. The same standard with the app-skeleton
   rules (`Structure.*`, `Controllers.*`) excluded, since a package is organised by domain rather than
   Laravel's app directory layout. Composition only - it redefines nothing.
@@ -74,9 +68,8 @@ The Laravel rules are auto-included via this package's `extra.phpstan.includes` 
 `phpstan/extension-installer`), alongside the base config. Your project's `phpstan.neon` only needs its
 own `paths`.
 
-Do not set `level`. Analysis runs through qlty, whose phpstan driver passes `--level=9` on the command
-line, and a command-line level overrides the config file outright - so a level set here does nothing
-except mislead whoever reads it next.
+Do not set `level`. qlty's phpstan driver passes `--level=9` on the command line, which overrides the
+config file.
 
 ### PHP CS Fixer
 
@@ -95,13 +88,13 @@ A deliberate exception can be bypassed with the native directive - `// phpcs:ign
 |--------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
 | `SineMaculaLaravel.Architecture.DisallowServiceLocation`     | No service location (`app()`, `resolve()`, `App::make()`) in a class body - inject collaborators instead.                                         |
 | `SineMaculaLaravel.Configuration.DisallowEnvOutsideConfig`   | `env()` only inside `config/` files (test code exempt); use `config()` everywhere else.                                                           |
-| `SineMaculaLaravel.Controllers.DisallowDatabaseAccess`       | No `DB::` facade or direct Eloquent model queries in a controller - read through a repository.                                                    |
-| `SineMaculaLaravel.Controllers.DisallowInlineValidation`     | No inline validation (`$request->validate()`, `Validator::make()`) in a controller - use a form request.                                          |
+| `SineMaculaLaravel.Controllers.DisallowDatabaseAccess`       | No `DB::` calls or static calls on a class imported from a `Models` namespace in a controller - read through a repository.                        |
+| `SineMaculaLaravel.Controllers.DisallowInlineValidation`     | No inline validation (any `->validate()` call, `Validator::make()`) in a controller - use a form request.                                         |
 | `SineMaculaLaravel.Controllers.DisallowNonRestActions`       | A controller's actions are REST verbs or `__invoke`; `@non-rest-action` or `@utility` allows an exception.                                        |
 | `SineMaculaLaravel.Debug.DisallowDebugStatements`            | No debug calls (`dd`, `dump`, `ray`, `var_dump`, `print_r`); the string-returning `print_r($value, true)` is allowed.                             |
-| `SineMaculaLaravel.Eloquent.DisallowLegacyAttributeAccessor` | No legacy `getXAttribute()` / `setXAttribute()` accessors on an Eloquent model - use `Attribute::make()`.                                         |
+| `SineMaculaLaravel.Eloquent.DisallowLegacyAttributeAccessor` | No legacy `getXAttribute()` (no parameters) / `setXAttribute()` (one) accessors on an Eloquent model - use `Attribute::make()`.                   |
 | `SineMaculaLaravel.Routing.CollapseResourceRoutes`           | Routes for one controller that together form a whole resource collapse into `Route::apiResource(...)->only([...])`.                               |
-| `SineMaculaLaravel.Services.DisallowHttpAbort`               | No `abort()` / `abort_if` / `abort_unless` / `HttpException` in a service - throw a domain exception.                                             |
+| `SineMaculaLaravel.Services.DisallowHttpAbort`               | No `abort()` / `abort_if` / `abort_unless` / `*HttpException` in a `Services` namespace - throw a domain exception.                               |
 | `SineMaculaLaravel.Structure.RequireBladeLocation`           | A `*.blade.php` template must live under a `resources/views` (or module `Resources/views`) directory.                                             |
 | `SineMaculaLaravel.Structure.RequireRoleDirectory`           | A class whose role is recognised by identity lives under that role's directory - a controller under `Http/Controllers`.                           |
 | `SineMaculaLaravel.Structure.RequireRoleNaming`              | A class is named for its role - a required suffix for controllers, providers, form requests, resources and policies.                              |
@@ -119,8 +112,8 @@ to Eloquent's `Factory`, `JsonResource` and `ResourceCollection`, and the API to
 `ReportResource`, whose `schema()` is static); a hook the framework calls without the container on a class
 built with `new` (the `uninjectableHooks` map, defaulting to `failed()` on a queued job, mailable or
 notification, which is rebuilt from its payload and called directly - a queued listener is not included,
-since the container builds it and its constructor can inject); and resolution of a runtime variable,
-`app($class)`, which injection cannot replace.
+since the container builds it and its constructor can inject); resolution of a runtime variable,
+`app($class)`, which injection cannot replace; and a bare `app()`, which only fetches the container.
 
 An entry in `uninjectableBaseClasses` containing a `\` is matched against the parent resolved through the
 file's imports, so an unrelated `Illuminate\View\Factory` is not exempted. A bare entry matches the short
@@ -135,7 +128,8 @@ flagged, and `var_dump` has no return form at all.
 
 `CollapseResourceRoutes` is deliberately conservative. Any extra or nested route, a renamed action, an
 inconsistent parameter, or a per-route modifier beyond the URI-constraint family leaves the group
-untouched, and routes are only grouped within their enclosing `group()` closure.
+untouched, and routes are only grouped within their enclosing `group()` closure. Existing `apiResource` and
+`resource` calls are left alone.
 
 #### Role-based structure
 
@@ -169,7 +163,7 @@ The `TypeHints.*` sniffs replace the base standard's Slevomat native-type requir
 Laravel-aware equivalents (the base Slevomat `MissingNativeTypeHint` / `MissingAnyTypeHint` codes are
 excluded; the traversable-specification checks are kept). They are needed because the Slevomat sniffs
 are inheritance-blind: PHP forbids typing a property that overrides an untyped parent (`$table`,
-`$fillable`, …) or changing an inherited method signature, so the original rules force types that
+`$fillable`, ...) or changing an inherited method signature, so the original rules force types that
 fatal at class load. Native types are still required everywhere else. The exempt property set is the
 configurable `magicProperties` list on `PropertyTypeHint`, and an overriding method opts its
 signature out with the native `#[\Override]` attribute. A non-private trait method is also exempt
@@ -192,11 +186,12 @@ protected $view;
 
 #### Readonly properties
 
-The base standard requires every public property to be `readonly`. An Eloquent model is exempt: it overrides
-the framework's public magic properties (`$timestamps`, `$incrementing`, …), which are declared non-readonly
-on the base class, and PHP forbids making an inherited property readonly. This standard sets the base
-sniff's `ignoredParentClasses` to the model bases (`Model`, `Authenticatable`, `Pivot`, `MorphPivot`),
-matched by the immediate parent name as written.
+The base standard requires every public property to be `readonly`. A class extending a framework base that
+declares public magic properties is exempt: it overrides them (`$timestamps` on a model, `$collects` on a
+resource collection, `$withinTransaction` on a migration, ...), they are declared non-readonly on the base,
+and PHP forbids making an inherited property readonly. This standard sets the base sniff's
+`ignoredParentClasses` to `Model`, `Authenticatable`, `Pivot`, `MorphPivot`, `Migration`, `JsonResource` and
+`ResourceCollection`, matched by the immediate parent name as written.
 
 A class that implements `ShouldQueue`, `ShouldQueueAfterCommit` or `ShouldBroadcast` is exempt for the
 properties the framework reads off it - `$tries`, `$timeout`, `$backoff`, `$queue`, `$connection` and the
@@ -215,7 +210,7 @@ they cannot take a predicate prefix. `BooleanMethodName` leaves classes whose na
 |------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
 | `sineMaculaLaravel.castsProperty`              | No `$casts` property on an Eloquent model - use the `casts()` method.                                                    |
 | `sineMaculaLaravel.datesProperty`              | No `$dates` property on a model (deprecated) - cast dates via `casts()`.                                                 |
-| `sineMaculaLaravel.massAssignment`             | Every concrete production model declares mass assignment via `$fillable`/`$guarded` or the attribute form.               |
+| `sineMaculaLaravel.massAssignment`             | A concrete production model directly extending `Model` declares `$fillable`/`$guarded` or the attribute form.            |
 | `sineMaculaLaravel.fillableCasts`              | Every `$fillable` entry on a model declares a matching cast, documenting each settable field's type.                     |
 | `sineMaculaLaravel.relationshipReturnType`     | A relationship method declares a return-type hint.                                                                       |
 | `sineMaculaLaravel.modelBehaviour`             | A model, at any depth of ancestry, carries its schema and its relations; behaviour belongs to a repository or a service. |
@@ -429,10 +424,8 @@ parameters:
 
 #### Where model columns come from
 
-This section, and the builder ignore above it, describe behaviour that comes from larastan. The package
-suggests it rather than requiring it, so that a project analysing without it is not made to install a
-framework it does not use; the rules this package ships work either way, and the settings written for
-larastan are inert without it rather than fatal.
+This section and the builder ignore above it apply only with larastan installed. The package suggests it
+rather than requiring it; the shipped rules work either way, and the larastan settings are inert without it.
 
 A model's columns are read from its migrations, and everything that rests on them - the property
 checks, the cast types, the `model property of ...` parameter types - is only as good as that scan.
@@ -478,7 +471,7 @@ instead.
 ```bash
 composer test                # PHPUnit sniff/rule suite
 composer test:coverage       # suite with Clover coverage output (requires Xdebug)
-composer test:mutation       # Infection mutation gate (min MSI 90)
+composer test:mutation       # Infection mutation gate (min MSI 85)
 composer test:mutation:full  # full mutation suite without thresholds
 composer analyse             # PHPStan over the package's own sniffs and rules
 composer check               # static analysis and lint via qlty
@@ -488,17 +481,15 @@ composer smells              # duplication / complexity smells via qlty
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for a list of notable changes.
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on branching, commits, code
-quality, and pull requests.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Security
 
-If you discover a security vulnerability, please report it responsibly. See [SECURITY.md](SECURITY.md) for the
-disclosure policy and contact details.
+Report vulnerabilities privately; see [SECURITY.md](SECURITY.md).
 
 ## License
 

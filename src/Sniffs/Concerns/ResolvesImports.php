@@ -9,11 +9,7 @@ use PHP_CodeSniffer\Files\File;
 /**
  * Resolve a file's class imports into an alias => qualified-name map.
  *
- * Collects every file-level `use` statement before a given pointer - plain,
- * aliased, comma-separated and group forms - so a short or relative name
- * written elsewhere in the file can be resolved back to the qualified name it
- * imports. Function and constant imports, closure `use` clauses and trait `use`
- * statements inside a class body are all ignored.
+ * Function and constant imports, closure captures and trait uses are ignored.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -100,9 +96,7 @@ trait ResolvesImports
     /**
      * Append a name token to the entry being parsed, in alias or name position.
      *
-     * A leading `function` or `const` keyword - written as a bare word followed
-     * by another name rather than a `\` separator - marks a function/constant
-     * import, which resolves in a different symbol space and is skipped.
+     * A leading `function` or `const` keyword marks an import to skip.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $ptr
@@ -156,11 +150,7 @@ trait ResolvesImports
     }
 
     /**
-     * Resolve a name as written to its qualified form.
-     *
-     * A fully-qualified name is taken as-is; otherwise the leading segment is
-     * resolved through the given imports, falling back to the enclosing
-     * namespace as PHP itself would.
+     * Resolve a name as written to its qualified form, as PHP would.
      *
      * @param  array<string, string>  $imports
      * @param  string  $namespace

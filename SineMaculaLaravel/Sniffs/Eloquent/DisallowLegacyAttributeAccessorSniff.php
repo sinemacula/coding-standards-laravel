@@ -11,14 +11,6 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDeclarationNames;
 /**
  * Disallow legacy Eloquent accessors and mutators.
  *
- * The legacy `getXAttribute()` / `setXAttribute()` accessor and mutator methods
- * are superseded by `Attribute::make()`. To avoid flagging unrelated methods
- * that merely share the name, two gates must both hold: the declaring class
- * extends an Eloquent model base (Model, Authenticatable, Pivot, MorphPivot -
- * configurable, matched on the immediate base by short name), and the signature
- * matches a real accessor (a getter takes no parameters, a setter takes exactly
- * one).
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */

@@ -13,13 +13,6 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * Forbid the Eloquent $casts property.
  *
- * Laravel 11+ declares attribute casts through the `casts()` method, which can
- * call into other casts and merges cleanly with a parent's casts. The `$casts`
- * property is flagged so casts are always declared via `casts()` - but only on
- * an Eloquent model (a class extending `Model`, `Authenticatable`, `Pivot` or
- * `MorphPivot`), so a non-model class with its own `$casts` (e.g. a cache) is
- * left alone.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  *

@@ -23,8 +23,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireSnakeCaseSchemaRule;
 final class RequireSnakeCaseSchemaRuleTest extends RuleTestCase
 {
     /**
-     * Non-snake_case table and column names are flagged inside a migration;
-     * snake_case names, value arguments, and code outside a migration are not.
+     * Flags non-snake_case table and column names inside a migration.
      *
      * @return void
      */

@@ -29,8 +29,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class RequireRoleDirectorySniffTest extends AbstractSniffTestCase
 {
     /**
-     * A class whose role is resolved by identity must live under that role's
-     * location; a controller or model in the service layer is flagged.
+     * Flags identity-resolved role classes outside their role's location.
      *
      * @return void
      */
@@ -40,8 +39,7 @@ final class RequireRoleDirectorySniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * Nested role directories and classes resolved by location are placed and
-     * therefore clean; an abstract base is never located.
+     * Allows nested role directories and location-resolved classes.
      *
      * @return void
      */
@@ -91,9 +89,7 @@ final class RequireRoleDirectorySniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * An idiomatic event using the Events `Dispatchable` trait is not a Job:
-     * the qualified Job identity resolves through the file's imports, so the
-     * short-name collision with the Bus trait never fires.
+     * The Events `Dispatchable` trait does not make an event a job.
      *
      * @return void
      */
@@ -103,8 +99,7 @@ final class RequireRoleDirectorySniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A trait `use` inside an earlier class body never leaks into the import
-     * map of a later class, and an import between classes still resolves.
+     * A class-body trait `use` never leaks into a later class's import map.
      *
      * @return void
      */

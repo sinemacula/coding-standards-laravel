@@ -10,10 +10,6 @@ use PHP_CodeSniffer\Sniffs\Sniff;
 /**
  * Require the routes file to sit at the root of an Http directory.
  *
- * A module's route file does not have to exist, but if it does it belongs
- * directly inside the module's `Http` directory (not a subdirectory of it, and
- * not anywhere else).
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */

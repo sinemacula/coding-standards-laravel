@@ -15,11 +15,6 @@ use PhpParser\NodeFinder;
 /**
  * Recognise the methods of a model that declare a relationship.
  *
- * A relationship method is one whose returned expression resolves to a
- * `$this-><relationship>()` call, through any chain of further calls on it. The
- * rules that treat relationships differently share this so they agree on what
- * one is.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */

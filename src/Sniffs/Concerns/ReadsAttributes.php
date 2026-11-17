@@ -8,12 +8,7 @@ use PHP_CodeSniffer\Files\File;
 use SineMacula\CodingStandards\Sniffs\Concerns\ResolvesQualifiedNames;
 
 /**
- * Read the attributes declared on a class member.
- *
- * Token-based sniffs cannot resolve inheritance, but they can read the
- * attributes written directly above a declaration. This reports whether a
- * member carries a given attribute by short name (so `#[Override]` and
- * `#[\Override]` both match), across PHP_CodeSniffer 3.x and 4.x name forms.
+ * Read the attributes declared on a class member, by short name.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited

@@ -23,8 +23,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowCastsPropertyRule;
 final class DisallowCastsPropertyRuleTest extends RuleTestCase
 {
     /**
-     * The $casts property is flagged on an Eloquent model; a non-model class
-     * with its own $casts, and a model without one, are not.
+     * Flags the $casts property on Eloquent models only.
      *
      * @return void
      */

@@ -45,10 +45,7 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
     private ?array $hooks = null;
 
     /**
-     * A public method carrying logic and a query scope in either form are
-     * reported, and so is a framework method left out of the hooks once it is
-     * widened to public; relations, the hooks, accessors declared by their
-     * return type, non-public helpers and non-models are not.
+     * Flags behaviour and query scopes on a model, not its permitted surface.
      *
      * @return void
      */
@@ -63,8 +60,7 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
     }
 
     /**
-     * The permitted hooks are configurable, so a project on a version with a
-     * different set is not forced to keep the default one.
+     * Honours a configured hook set in place of the default.
      *
      * @return void
      */
@@ -81,18 +77,7 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
     }
 
     /**
-     * A model is recognised through its whole ancestry, so behaviour on a model
-     * sitting behind the project's own base class is reported; a class whose
-     * ancestry reaches no model base is still left alone. A method an interface
-     * the model's author opted into declares is permitted, including one that
-     * interface inherits from another, while the contracts the framework base
-     * already carries exempt nothing: `toArray()`, `jsonSerialize()` and the
-     * array-access methods are on every model there is and are the usual way
-     * behaviour is smuggled onto one. Every framework base in the ancestry is
-     * read for that, so the contracts a model gains from `Authenticatable`
-     * exempt nothing either. A method an inherited abstract mandates is not
-     * exempt: the rule reports the mandate where it is declared, and reports
-     * each implementation of it too.
+     * Resolves a model through its ancestry; only opted-in interfaces exempt.
      *
      * @return void
      */
@@ -111,9 +96,7 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
     }
 
     /**
-     * The hooks the default set names are permitted on a model reached through
-     * an intermediate base, and reported once the set no longer names them, so
-     * every entry in the default earns its place.
+     * Every default hook is reported once the configured set omits it.
      *
      * @return void
      */
@@ -142,11 +125,7 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
     }
 
     /**
-     * A framework method fails as a default hook when it is not public on
-     * Eloquent, has a declarative form, comes from outside the framework or
-     * performs work, so each is reported once a model declares it publicly. The
-     * route binding resolvers are in the last group, since each runs the lookup
-     * and returns the record.
+     * Reports the framework methods that fail a default-hook test.
      *
      * @return void
      */
@@ -169,9 +148,7 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
     }
 
     /**
-     * A project whose models resolve their own route bindings appends the
-     * resolvers to the default set, which leaves the defaults in force and
-     * permits the resolvers alone.
+     * Appended route binding resolvers are permitted alongside the defaults.
      *
      * @return void
      */
@@ -203,11 +180,9 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
     }
 
     /**
-     * Every method the class declares is read, so a trait is not a way of
-     * carrying behaviour past the rule and neither is an anonymous class. An
-     * imported method is reported against the line the class declares itself
-     * on, since the trait may live in another file, and the permitted hooks
-     * still apply to it.
+     * Reads trait-imported methods and anonymous classes.
+     *
+     * Imported methods report on the class line, as the trait may be elsewhere.
      *
      * @return void
      */
@@ -221,11 +196,7 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
     }
 
     /**
-     * The parent name as written is read alongside the resolved ancestry rather
-     * than only when nothing resolved, so a model behind a base of the
-     * project's own named for the framework base stays covered where the
-     * framework base itself is invisible. A base named something else is the
-     * shape name-based recovery cannot reach, and is left alone.
+     * Reads the parent name as written alongside the resolved ancestry.
      *
      * @return void
      */
@@ -237,10 +208,7 @@ final class DisallowModelBehaviourRuleTest extends RuleTestCase
     }
 
     /**
-     * Where the ancestry resolves to nothing at all, the parent name as written
-     * decides, so a model extending the framework base is still covered instead
-     * of quietly exempting itself, and a class extending something else is
-     * still left alone.
+     * Falls back to the parent name when the ancestry does not resolve.
      *
      * @return void
      */

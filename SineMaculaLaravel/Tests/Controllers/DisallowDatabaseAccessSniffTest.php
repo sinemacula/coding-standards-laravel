@@ -23,9 +23,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class DisallowDatabaseAccessSniffTest extends AbstractSniffTestCase
 {
     /**
-     * DB:: facade calls and static calls on imported models are flagged in a
-     * controller; other facades, variable/instance calls, constants and
-     * non-controllers are not.
+     * Flags DB facade calls and static calls on imported models in controllers.
      *
      * @return void
      */
@@ -35,8 +33,7 @@ final class DisallowDatabaseAccessSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * The facade error and the Eloquent error (with the model name filled in)
-     * are rendered exactly as written.
+     * Renders the facade and Eloquent errors verbatim.
      *
      * @return void
      */
@@ -50,10 +47,7 @@ final class DisallowDatabaseAccessSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * Model imports are collected from an import on the open-tag line, after a
-     * non-model import and from an import glued to the previous semicolon;
-     * static:: and instance calls are never treated as class calls, and a
-     * controller declared inside a function is still recognised.
+     * Resolves model imports and controller scope across edge cases.
      *
      * @return void
      */

@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace SineMaculaLaravel\Tests\Routing;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use SineMacula\CodingStandardsLaravel\Sniffs\Routing\RouteCall;
 use SineMacula\CodingStandardsLaravel\Sniffs\Routing\RouteParser;
 use SineMaculaLaravel\Sniffs\Routing\CollapseResourceRoutesSniff;
@@ -24,8 +25,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class CollapseResourceRoutesSniffTest extends AbstractSniffTestCase
 {
     /**
-     * A partial set of resource routes for one controller collapses; the
-     * suggestion lists the present actions in canonical order.
+     * Collapses a partial resource, listing its actions in canonical order.
      *
      * @return void
      */
@@ -38,8 +38,7 @@ final class CollapseResourceRoutesSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A whole resource - including update registered on both PUT and PATCH -
-     * collapses to a bare apiResource call with no only() constraint.
+     * Collapses a whole resource to a bare apiResource call.
      *
      * @return void
      */
@@ -52,135 +51,57 @@ final class CollapseResourceRoutesSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * Routes are grouped within their enclosing group closure: a resource split
-     * across two group() blocks is not merged, so the two-route block collapses
-     * while the lone route in the other block is left alone.
+     * Fixtures that collapse, with the line the group is reported on.
      *
-     * @return void
+     * @return iterable<string, array{string, int}>
      */
-    public function testGroupsRoutesWithinTheirClosure(): void
+    public static function collapsibleFixtures(): iterable
     {
-        $this->assertErrorsOnLines('CollapseInGroups.inc', [4]);
+        yield 'within a group closure' => ['CollapseInGroups.inc', 4];
+        yield 'uppercase verb' => ['CollapseUppercaseVerb.inc', 3];
+        yield 'leading slash' => ['CollapseLeadingSlash.inc', 3];
+        yield 'beside a closure route' => ['CollapseClosureIndex.inc', 4];
+        yield 'beside a sub-resource controller' => ['CollapseMultipleControllers.inc', 3];
     }
 
     /**
-     * The HTTP verb is matched case-insensitively, so upper-case verb calls
-     * resolve to their resource action and still collapse.
+     * Collapses a resource whatever the grouping, verb case or route mix.
      *
+     * @param  string  $fixture
+     * @param  int  $line
      * @return void
      */
-    public function testCollapsesCaseInsensitiveVerbs(): void
+    #[DataProvider('collapsibleFixtures')]
+    public function testCollapsesAResource(string $fixture, int $line): void
     {
-        $this->assertErrorsOnLines('CollapseUppercaseVerb.inc', [3]);
+        $this->assertErrorsOnLines($fixture, [$line]);
     }
 
     /**
-     * A leading slash on the URI is trimmed before the base is resolved, so
-     * `/roles` collapses exactly as `roles` does.
+     * Fixtures that must not collapse.
      *
-     * @return void
+     * @return iterable<string, array{string}>
      */
-    public function testCollapsesUrisWithALeadingSlash(): void
+    public static function nonCollapsibleFixtures(): iterable
     {
-        $this->assertErrorsOnLines('CollapseLeadingSlash.inc', [3]);
+        yield 'existing registrations and lone routes' => ['Clean.inc'];
+        yield 'single routes across group closures' => ['ScopeIsolationSingles.inc'];
+        yield 'extra route' => ['SuppressExtraRoute.inc'];
+        yield 'renamed method' => ['SuppressRenamedMethod.inc'];
+        yield 'non-constraint modifier' => ['SuppressModifier.inc'];
+        yield 'inconsistent parameters' => ['SuppressInconsistentParam.inc'];
+        yield 'duplicate action' => ['SuppressDuplicateAction.inc'];
     }
 
     /**
-     * Single resource routes for one controller split across two group closures
-     * stay in their own scope and are not merged into a collapsible set.
+     * Leaves routes alone that do not form a clean, whole resource.
      *
+     * @param  string  $fixture
      * @return void
      */
-    public function testDoesNotMergeSingleRoutesAcrossScopes(): void
+    #[DataProvider('nonCollapsibleFixtures')]
+    public function testLeavesNonCollapsibleRoutesAlone(string $fixture): void
     {
-        $this->assertErrorsOnLines('ScopeIsolationSingles.inc', []);
-    }
-
-    /**
-     * A route dispatched to a closure carries no controller and neither blocks
-     * nor joins a collapse; the controller-backed routes beside it still fold.
-     *
-     * @return void
-     */
-    public function testIgnoresClosureRoutesWhenCollapsing(): void
-    {
-        $this->assertErrorsOnLines('CollapseClosureIndex.inc', [4]);
-    }
-
-    /**
-     * Routes are keyed by controller, so a nested sub-resource on another
-     * controller does not disturb the base resource's collapse.
-     *
-     * @return void
-     */
-    public function testKeepsControllersDistinct(): void
-    {
-        $this->assertErrorsOnLines('CollapseMultipleControllers.inc', [3]);
-    }
-
-    /**
-     * Existing apiResource/resource registrations, closure routes and a lone
-     * resource route are all left alone.
-     *
-     * @return void
-     */
-    public function testLeavesNonCollapsibleRoutesAlone(): void
-    {
-        $this->assertErrorsOnLines('Clean.inc', []);
-    }
-
-    /**
-     * An extra, non-resource route for the same base is a reason the routes
-     * were split, so the group is not flagged.
-     *
-     * @return void
-     */
-    public function testSuppressesOnAnExtraRoute(): void
-    {
-        $this->assertErrorsOnLines('SuppressExtraRoute.inc', []);
-    }
-
-    /**
-     * A resource-shaped route dispatched to a non-canonical method name is a
-     * custom mapping apiResource cannot express, so the group is not flagged.
-     *
-     * @return void
-     */
-    public function testSuppressesOnARenamedMethod(): void
-    {
-        $this->assertErrorsOnLines('SuppressRenamedMethod.inc', []);
-    }
-
-    /**
-     * A per-route modifier beyond the URI-constraint family (here name()) is
-     * not expressible on the resource, so the group is not flagged.
-     *
-     * @return void
-     */
-    public function testSuppressesOnANonConstraintModifier(): void
-    {
-        $this->assertErrorsOnLines('SuppressModifier.inc', []);
-    }
-
-    /**
-     * Member routes with different parameter names cannot share one resource
-     * parameter, so the group is not flagged.
-     *
-     * @return void
-     */
-    public function testSuppressesOnInconsistentParameters(): void
-    {
-        $this->assertErrorsOnLines('SuppressInconsistentParam.inc', []);
-    }
-
-    /**
-     * A duplicated action (two routes mapping to index) is a malformed set, so
-     * the group is not flagged.
-     *
-     * @return void
-     */
-    public function testSuppressesOnADuplicateAction(): void
-    {
-        $this->assertErrorsOnLines('SuppressDuplicateAction.inc', []);
+        $this->assertErrorsOnLines($fixture, []);
     }
 }

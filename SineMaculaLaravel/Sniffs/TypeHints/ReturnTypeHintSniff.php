@@ -11,12 +11,6 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsAttributes;
 /**
  * Require a native return type hint, Laravel-aware.
  *
- * Every function, method and closure must declare a native return type - except
- * on a method carrying `#[\Override]`, whose signature the parent fixes.
- * Constructors, destructors and clone handlers, which cannot declare a return
- * type, are skipped. This replaces the Slevomat ReturnTypeHint requirement,
- * which is inheritance-blind, and keeps the same scope.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */

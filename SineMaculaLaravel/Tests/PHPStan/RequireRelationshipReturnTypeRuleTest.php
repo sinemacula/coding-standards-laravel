@@ -23,9 +23,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireRelationshipReturnTyp
 final class RequireRelationshipReturnTypeRuleTest extends RuleTestCase
 {
     /**
-     * Relationship methods without a return type are flagged (including chained
-     * ones); typed methods, non-relationship methods and relationship calls on
-     * something other than $this are not.
+     * Flags relationship methods without a return type.
      *
      * @return void
      */

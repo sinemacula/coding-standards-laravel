@@ -34,9 +34,7 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
     private array $overrides = [];
 
     /**
-     * A class is named by its role: a controller must end with `Controller`, a
-     * model must not end with `Model`/`Entity`, and free roles (commands, jobs,
-     * mailables) carry no constraint. Detection is by identity.
+     * Flags names that break the constraints of their resolved role.
      *
      * @return void
      */
@@ -68,8 +66,7 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * Identity resolves against configured bases, covering a project's own base
-     * the short-name match cannot follow through inheritance.
+     * Resolves identity through configured project bases.
      *
      * @return void
      */
@@ -81,8 +78,7 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * Free roles resolved only by location (listeners, events, middleware) are
-     * bare and never flagged.
+     * Never flags free roles resolved only by location.
      *
      * @return void
      */
@@ -92,8 +88,7 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A concrete class with no identity resolves its role from the namespace
-     * location; an abstract class in the same location never does.
+     * Resolves a concrete class's role from its namespace location.
      *
      * @return void
      */
@@ -113,9 +108,7 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * Trait use resolves identity in every declaration shape: single and
-     * repeated statements, grouped and fully-qualified names, and a compact
-     * class body.
+     * Resolves identity from trait use in every declaration shape.
      *
      * @return void
      */
@@ -130,8 +123,7 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * Class attributes resolve identity, skipping their arguments and working
-     * across stacked groups and a final class.
+     * Resolves identity from class attributes, skipping their arguments.
      *
      * @return void
      */
@@ -146,8 +138,7 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A docblock without the exempt tag - attributed or not - or an attribute
-     * argument merely named NotARole, does not opt a class out.
+     * Look-alikes of the escape hatches do not opt a class out.
      *
      * @return void
      */
@@ -157,9 +148,7 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A test class - by name or by its test-case base - plays no role even in a
-     * namespace mirroring a role location; a non-test helper beside it is still
-     * located.
+     * A test class plays no role, even under a mirrored role namespace.
      *
      * @return void
      */
@@ -193,9 +182,7 @@ final class RequireRoleNamingSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * The docblock escape hatch reads only the docblock attached to the class:
-     * a following bare class is still flagged, and an implements-only identity
-     * still resolves its role.
+     * Scopes the docblock escape hatch to the class it is attached to.
      *
      * @return void
      */

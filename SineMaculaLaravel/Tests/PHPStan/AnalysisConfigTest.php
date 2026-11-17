@@ -12,10 +12,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowModelBehaviourRule;
 /**
  * Tests the analysis config this package ships to consuming projects.
  *
- * Loading the real file proves it parses and that the ignored-report patterns
- * match the reports they are written for - which are verbatim captures from a
- * Laravel project analysed with this standard, not paraphrases - while leaving
- * unrelated reports of the same kind untouched.
+ * The reports below are verbatim captures from a Laravel project.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -52,8 +49,7 @@ final class AnalysisConfigTest extends TestCase
     ];
 
     /**
-     * Ordinary query code - the query methods and the terminal calls - is
-     * ignored on both the Eloquent and the query builder.
+     * Ignores ordinary query code reports on both Eloquent and query builders.
      *
      * @return void
      */
@@ -65,9 +61,7 @@ final class AnalysisConfigTest extends TestCase
     }
 
     /**
-     * A scope declared with the attribute is forwarded onto the builder like
-     * any query method, as is a builder generic bound to static or to the base
-     * model, so those reports are ignored too.
+     * Ignores attribute-scope and generically bound builder reports.
      *
      * @return void
      */
@@ -79,9 +73,7 @@ final class AnalysisConfigTest extends TestCase
     }
 
     /**
-     * The pattern is scoped to the framework builders, so a genuine dynamic
-     * call to a static method elsewhere still surfaces - including one on a
-     * project's own builder, which the shipped pattern cannot name.
+     * Still reports dynamic calls outside the framework builders.
      *
      * @return void
      */
@@ -95,10 +87,9 @@ final class AnalysisConfigTest extends TestCase
     }
 
     /**
-     * The migration path is named rather than left to the application's own
-     * database path, which resolves from the booted application and so can
-     * point away from the project being analysed - taking every model's
-     * columns, and the checks that rest on them, with it.
+     * Pins the migration path to the analysed project.
+     *
+     * The booted application's database path can point away from the project.
      *
      * @return void
      */
@@ -111,10 +102,9 @@ final class AnalysisConfigTest extends TestCase
     }
 
     /**
-     * The hook set the shipped config names and the rule's own default are the
-     * same list. Nothing else holds the two together: a project that leaves the
-     * parameter alone runs the config's list, while the rule tests construct
-     * the rule without one, so the pair can drift apart unnoticed.
+     * The shipped hook set matches the rule's own default.
+     *
+     * Rule tests use the default, so only this catches the two drifting apart.
      *
      * @return void
      */
@@ -129,11 +119,9 @@ final class AnalysisConfigTest extends TestCase
     }
 
     /**
-     * Every parameter the config sets outside PHPStan's own is declared by the
-     * config itself. PHPStan rejects a parameter no schema declares, so one set
-     * here on behalf of another extension stops the whole run - a configuration
-     * error rather than a finding - in any project that analyses without that
-     * extension installed.
+     * Declares in its own schema every parameter it sets for other extensions.
+     *
+     * PHPStan rejects an undeclared parameter, failing runs without its owner.
      *
      * @return void
      */
@@ -175,10 +163,7 @@ final class AnalysisConfigTest extends TestCase
     /**
      * Load the analysis config this package ships.
      *
-     * The config loader is internal, so a minor upgrade may move it; that is
-     * acceptable here, where the alternative is a second neon parser carried
-     * only to read one shipped file, and any breakage surfaces as a failure of
-     * this test rather than in anything the package ships.
+     * The loader is internal API, accepted over carrying a second neon parser.
      *
      * @return array<string, mixed>
      */

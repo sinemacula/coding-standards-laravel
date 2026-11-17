@@ -1,25 +1,8 @@
-# ==============================================================================
-# Laravel-specific PHPStan rules for Sine Macula projects.
-# ==============================================================================
-#
-# This file is auto-included in consuming projects via the package's
-# `extra.phpstan.includes` (resolved by phpstan/extension-installer). It carries
-# ONLY Laravel-specific custom rules - the framework-agnostic PHPStan config is
-# provided separately by sinemacula/coding-standards' own php/phpstan.neon.
-#
-# Register Laravel rule classes (from src/PHPStan/Rules/) under `rules:`. They
-# are Composer-autoloaded via the `SineMacula\CodingStandardsLaravel\` PSR-4 map,
-# so they load in a consumer's PHPStan run exactly as the base rules do.
-#
-# No level is set here, and a project should not set one either: analysis runs
-# through qlty, whose phpstan driver passes --level=9 on the command line, which
-# overrides whatever a config file says.
+# Laravel layer on top of the base standard's php/phpstan.neon. No level: the
+# runner passes --level=9 on the command line, which overrides any config value.
 parameters:
     sineMaculaLaravel:
-        # Attribute names PreferModelAttributesRule mandates. Defaults to the
-        # expressive set added in Laravel 13.2; set it to the attributes your
-        # minimum version provides (e.g. the ObservedBy/ScopedBy/CollectedBy
-        # family from 11). Use `modelAttributes!:` to replace, not append.
+        # Laravel 13.2 attributes; `modelAttributes!:` replaces the set.
         modelAttributes:
             - Table
             - Fillable
@@ -28,10 +11,7 @@ parameters:
         # Leave empty to detect the floor from the nearest composer.json.
         minLaravelVersion: ''
 
-        # Hooks a model may declare besides its relations and accessors: each is
-        # public on Eloquent, sayable only by an override, and describes rather
-        # than performs. A project appends its own under `modelHooks:`, with the
-        # reason in a comment; `modelHooks!:` replaces the set instead.
+        # Append under `modelHooks:` with the reason; `modelHooks!:` replaces.
         modelHooks:
             - uniqueIds
             - newUniqueId
@@ -58,12 +38,8 @@ parameters:
             identifier: staticMethod.dynamicCall
             message: '#^Dynamic call to static method Illuminate\\Database\\(Eloquent|Query)\\Builder#'
 
-    # Extend the base standard's unchecked-exception set with Laravel exceptions
-    # that are effectively unchecked in an application: a ValidationException is
-    # turned into a 422 response by the framework's handler, and a
-    # BindingResolutionException signals a container misconfiguration - a
-    # programming error - so a @throws for either everywhere is noise rather than
-    # signal. This list is appended to the base's, not a replacement for it.
+    # The handler renders a validation failure as a 422, and a binding failure is
+    # a container misconfiguration, so a @throws for either is noise.
     exceptions:
         uncheckedExceptionClasses:
             - Illuminate\Contracts\Container\BindingResolutionException
@@ -93,8 +69,7 @@ rules:
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireSnakeCaseResourceFieldsRule
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireSnakeCaseSchemaRule
 
-# These rules are registered as services rather than under `rules:` so the sets
-# they read can be injected from the parameters above.
+# Registered as services so the parameters above can be injected.
 services:
     -
         class: SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowModelBehaviourRule

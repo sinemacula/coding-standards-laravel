@@ -11,14 +11,10 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests that the SineMaculaLaravel standard exempts the framework bases that
- * declare public magic properties from the readonly-public-property
- * requirement.
+ * Tests that the standard exempts framework bases declaring public magic
+ * properties from the readonly-public-property requirement.
  *
- * Building the real standard proves the ruleset wiring: it sets the base
- * RequireReadonlyPublicProperty sniff's ignoredParentClasses to those bases, so
- * an inherited public magic property is not flagged while an ordinary class
- * still is.
+ * Builds the real standard to prove its ignoredParentClasses wiring.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -29,9 +25,7 @@ use PHPUnit\Framework\TestCase;
 final class ReadonlyFrameworkExemptionTest extends TestCase
 {
     /**
-     * A public property on a Model, Authenticatable, Pivot, Migration,
-     * JsonResource or ResourceCollection subclass is not flagged as needing
-     * readonly; one on an ordinary class still is.
+     * Flags an ordinary class's public property but not a framework base's.
      *
      * @return void
      */
@@ -41,8 +35,7 @@ final class ReadonlyFrameworkExemptionTest extends TestCase
     }
 
     /**
-     * Run the SineMaculaLaravel standard over the fixture and collect the lines
-     * flagged by the readonly-public-property sniff.
+     * Collect the lines the readonly-public-property sniff flags.
      *
      * @return array<int, int>
      */

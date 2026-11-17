@@ -7,12 +7,6 @@ namespace SineMacula\CodingStandardsLaravel\Sniffs\Routing;
 /**
  * A single parsed `Route::verb(...)` registration.
  *
- * Carries just enough about one route to decide whether a set of routes for the
- * same controller and resource base can collapse into an `apiResource` call:
- * the enclosing group scope, the controller and base they attach to, the
- * canonical resource action the verb and URI map to (null when the route is not
- * a clean resource action), the member parameter, and the token position.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */

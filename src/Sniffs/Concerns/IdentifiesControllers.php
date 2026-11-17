@@ -9,9 +9,6 @@ use PHP_CodeSniffer\Files\File;
 /**
  * Identify whether a token sits inside a controller class.
  *
- * Controllers are identified by the `*Controller` class-name suffix, which is a
- * universal Laravel convention regardless of base class or route protection.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */

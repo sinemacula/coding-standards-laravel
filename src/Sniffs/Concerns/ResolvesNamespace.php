@@ -9,8 +9,6 @@ use PHP_CodeSniffer\Files\File;
 /**
  * Resolve information about a file's namespace.
  *
- * Used by the structural sniffs to map a class to its role directory and back.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */
@@ -46,10 +44,7 @@ trait ResolvesNamespace
         $name  = '';
         $parts = [T_STRING, T_NS_SEPARATOR, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED];
 
-        // PHP_CodeSniffer 3.x splits a namespace into T_STRING/T_NS_SEPARATOR
-        // tokens, but 4.x keeps it as one T_NAME_QUALIFIED token, so both forms
-        // are collected to rebuild the name. The declaration ends at `;` or, in
-        // the braced syntax, at `{`.
+        // 3.x splits the name across tokens; 4.x keeps one T_NAME_QUALIFIED.
         for ($i = $namespace; isset($tokens[$i]) && !in_array($tokens[$i]['code'], [T_SEMICOLON, T_OPEN_CURLY_BRACKET], true); $i++) {
             if (!in_array($tokens[$i]['code'], $parts, true)) {
                 continue;

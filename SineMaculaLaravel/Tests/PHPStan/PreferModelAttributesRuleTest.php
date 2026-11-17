@@ -25,7 +25,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\PreferModelAttributesRule;
 #[CoversTrait(DetectsLaravelVersion::class)]
 final class PreferModelAttributesRuleTest extends RuleTestCase
 {
-    /** @var string The expected-property error message. */
+    /** @var string The expected error message. */
     private const string TABLE_ERROR = 'Use the #[Table] attribute instead of the $table property.';
 
     /** @var string The expected error message. */
@@ -53,11 +53,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     private string $minLaravelVersion = '';
 
     /**
-     * On a supporting version the constructor's default expressive set flags
-     * $table/$fillable/$hidden - including a $fillable declared alongside an
-     * exempt property and a $hidden at exactly the field limit; a $hidden over
-     * the limit, the disabled attributes, a property with no attribute
-     * equivalent and non-models are not.
+     * Flags the default expressive set on a supporting version.
      *
      * @return void
      */
@@ -76,8 +72,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * A project enables only the attributes its version provides; the ungated
-     * configured set is honoured for both properties and method overrides.
+     * Honours a configured set for both properties and method overrides.
      *
      * @return void
      */
@@ -98,8 +93,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * A method override whose attribute is not enabled does not stop the ones
-     * after it from being reported.
+     * An unconfigured method override does not stop later ones being reported.
      *
      * @return void
      */
@@ -115,8 +109,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * A composer.json declaring illuminate/database >= 13.2 enables the gated
-     * attributes; the constraint is read from the nearest parent directory.
+     * Enables gated attributes from the nearest composer.json's constraint.
      *
      * @return void
      */
@@ -129,8 +122,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * A ^12.0 || ^13.0 floor is below 13.2, so the property form is left alone
-     * even though #[Table] is enabled.
+     * A ^12.0 || ^13.0 floor is below 13.2, so the property form is left alone.
      *
      * @return void
      */
@@ -152,8 +144,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * When both constraints are declared, illuminate/database wins over
-     * laravel/framework - here it supplies the supporting floor.
+     * Prefers illuminate/database to laravel/framework when both are declared.
      *
      * @return void
      */
@@ -165,8 +156,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * With no detectable version the gated attributes are never enforced, so an
-     * attribute that may be unavailable is never flagged.
+     * Never enforces gated attributes when no version is detectable.
      *
      * @return void
      */
@@ -176,8 +166,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * An explicit minLaravelVersion overrides composer.json, enforcing gated
-     * attributes regardless of the detected floor.
+     * An explicit minLaravelVersion overrides composer.json.
      *
      * @return void
      */
@@ -191,9 +180,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * An unparseable explicit minLaravelVersion yields no gated enforcement
-     * rather than an error, and no lagging-floor notice either - a floor that
-     * cannot be read is not evidence that it lags.
+     * An unparseable explicit floor enforces nothing and reports no lag.
      *
      * @return void
      */
@@ -205,9 +192,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * A floor below 13.2 on a project whose composer.lock already resolves
-     * above it reports the lagging floor rather than staying silent, so the
-     * migration is not deferred wholesale to the day the floor is raised.
+     * Reports a declared floor below 13.2 that the lock already resolves past.
      *
      * @return void
      */
@@ -223,8 +208,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * The locked illuminate/database version wins over laravel/framework, as
-     * the declared constraint does.
+     * Prefers the locked illuminate/database version over laravel/framework.
      *
      * @return void
      */
@@ -240,8 +224,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * A project that both declares and resolves below 13.2 genuinely cannot use
-     * the attribute, so it stays silent.
+     * Stays silent when both the floor and the lock predate 13.2.
      *
      * @return void
      */
@@ -251,8 +234,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * A composer.lock carrying no readable Laravel entry is treated as no
-     * resolved version at all.
+     * A lock with no readable Laravel entry resolves no version.
      *
      * @return void
      */
@@ -262,8 +244,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * A floor that already reaches 13.2 reports the plain replacement, never
-     * the lagging-floor notice, even with a lock present.
+     * A floor reaching 13.2 reports the plain replacement, even with a lock.
      *
      * @return void
      */
@@ -277,8 +258,7 @@ final class PreferModelAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * An unparseable composer.json constraint is treated as undetectable, so
-     * the gated attributes are not enforced.
+     * An unparseable composer.json constraint enforces no gated attributes.
      *
      * @return void
      */

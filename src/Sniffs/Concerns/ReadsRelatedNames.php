@@ -9,11 +9,6 @@ use PHP_CodeSniffer\Files\File;
 /**
  * Read the names a class declaration relates to, as written.
  *
- * Collects the parent a class extends, the interfaces it implements, the traits
- * its body uses and the attributes attached to it, each name exactly as the
- * source writes it - short, qualified or fully qualified - so a caller can
- * resolve it through the file's imports.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */
@@ -37,8 +32,7 @@ trait ReadsRelatedNames
     }
 
     /**
-     * Collect the interfaces a class implements and the traits it uses, as
-     * written.
+     * Collect the interfaces and traits a class declares, as written.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $classPtr
@@ -54,10 +48,7 @@ trait ReadsRelatedNames
     /**
      * Collect the names of traits used directly in the class body, as written.
      *
-     * A trait `use` is the one whose innermost scope is the class itself, so a
-     * closure's `use` and a nested class's traits are left out. Each statement
-     * ends at its semicolon, or at the brace opening a conflict-resolution
-     * block, whose names are not traits the class uses.
+     * A statement ends at a conflict-resolution block; its names add no uses.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $classPtr
@@ -80,8 +71,7 @@ trait ReadsRelatedNames
     }
 
     /**
-     * Collect the names of attributes attached to the class declaration, from
-     * the group nearest the declaration outwards.
+     * Collect the names of the attributes attached to the class, as written.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $classPtr
@@ -117,12 +107,9 @@ trait ReadsRelatedNames
     }
 
     /**
-     * Collect the names written between two pointers, as written, skipping any
-     * parenthesised arguments.
+     * Collect the names between two pointers, skipping parenthesised arguments.
      *
-     * PHP_CodeSniffer 3.x splits a qualified name into T_STRING/T_NS_SEPARATOR
-     * tokens while 4.x keeps it whole, so each contiguous run of name tokens is
-     * read back as the one name it spells.
+     * 3.x splits a qualified name across tokens, so each run reads as one name.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $start

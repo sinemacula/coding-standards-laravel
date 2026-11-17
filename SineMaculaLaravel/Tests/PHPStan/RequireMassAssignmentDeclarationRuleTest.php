@@ -23,9 +23,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireMassAssignmentDeclara
 final class RequireMassAssignmentDeclarationRuleTest extends RuleTestCase
 {
     /**
-     * A concrete production model declaring neither mass-assignment property
-     * nor attribute is flagged; the property form, the #[Fillable]/#[Guarded]
-     * attribute, abstract models and non-models are not.
+     * Flags a concrete model declaring neither mass-assignment form.
      *
      * @return void
      */
@@ -40,8 +38,7 @@ final class RequireMassAssignmentDeclarationRuleTest extends RuleTestCase
     }
 
     /**
-     * Models declared in a test file - including an inline anonymous model -
-     * are not attack surface and are exempt.
+     * Exempts models declared in a test file.
      *
      * @return void
      */

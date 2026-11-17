@@ -9,17 +9,13 @@ use PHP_CodeSniffer\Files\File;
 /**
  * Detect direct global function calls in a token stream.
  *
- * Shared by sniffs that flag a bare function call (e.g. `dd()`, `env()`) while
- * ignoring same-named method calls, static calls and declarations.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */
 trait DetectsFunctionCalls
 {
     /**
-     * Determine whether the string token is a direct function call (not a
-     * method, static call or declaration).
+     * Determine whether the string token is a direct global function call.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr

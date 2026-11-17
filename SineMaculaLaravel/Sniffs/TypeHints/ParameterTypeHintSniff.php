@@ -11,14 +11,6 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsAttributes;
 /**
  * Require a native parameter type hint, Laravel-aware.
  *
- * Every function and method parameter must declare a native type - except where
- * the signature is fixed by a parent: a method carrying `#[\Override]`, or a
- * non-private trait method, whose effective parent is the consuming class's and
- * so is invisible to a token sniff (typing an inherited untyped parameter would
- * change the signature and fatal). This replaces the Slevomat ParameterTypeHint
- * native-type requirement, which is inheritance-blind, and keeps the same scope
- * (functions and methods, not closures).
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */
@@ -80,10 +72,6 @@ final class ParameterTypeHintSniff implements Sniff
 
     /**
      * Whether the function is a non-private method declared in a trait.
-     *
-     * A trait method's effective parent is whatever the consuming class
-     * extends, which a token sniff cannot see, so a public or protected one may
-     * override a framework signature. A private method never overrides.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr

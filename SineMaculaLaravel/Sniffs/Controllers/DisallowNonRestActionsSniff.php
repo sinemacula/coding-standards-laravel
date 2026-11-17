@@ -12,18 +12,7 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDocblockTags;
 /**
  * Disallow non-REST public actions on controllers.
  *
- * Routes live in `routes/*.php`, so the sniff infers which methods are actions:
- * a candidate action is a public, non-static instance method on a concrete
- * `*Controller`. Static methods, abstract classes/methods, the constructor and
- * framework overrides (middleware, authorize, callAction) are auto-exempt, so
- * the directive is rarely needed. A candidate action whose name is not in the
- * canonical set (the Laravel resource verbs plus `__invoke`) is flagged.
- *
- * Two escape hatches, kept distinct for auditability:
- * - `@utility` (class or method) - not a routable action (helpers, a base
- *   controller's machinery); a class-level tag exempts the whole class.
- * - `@non-rest-action` (method) - a deliberate non-CRUD route action
- *   (streaming, SSE, the rare genuine webhook); allowed but explicit.
+ * A class-level `@utility` tag exempts the whole controller.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited

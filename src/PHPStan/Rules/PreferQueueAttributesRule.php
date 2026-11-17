@@ -20,33 +20,6 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Concerns\DetectsLaravelVersion;
 /**
  * Prefer the queue attributes over the properties they replace.
  *
- * Laravel 13 reads a queued class's settings - `#[Tries]`, `#[Timeout]`,
- * `#[Backoff]`, `#[Queue]` and the rest - from attributes, falling back to the
- * public properties of the same name. A public property declared only to give
- * one of those settings a value is reported in favour of its attribute, which
- * says the same thing without a public mutable property on the class.
- *
- * Each setting is enforced from the floor at which the attribute behaves like
- * the property on every path the framework takes for the class's kind. None is
- * earlier than 13.4, the first release in which a value set on the object at
- * runtime, such as by `onQueue()`, wins over the attribute as it wins over a
- * declared default. Some are later: a job's `#[Delay]` is honoured by every
- * queue driver only from 13.24, and a mailable's `#[FailOnTimeout]` only from
- * 13.36. The floor is taken from `minLaravelVersion` or detected from
- * composer.json; below it, where composer.lock already resolves past it, the
- * property is reported as a lagging floor instead, as the model attributes are.
- *
- * A setting is left alone where the attribute would not say the same thing: a
- * default the attribute cannot carry, such as a notification's per-channel
- * `$delay` array or a `$failOnTimeout` of false; a method the framework calls
- * instead; the queue, connection and delay of a class using `Queueable`, whose
- * setters and chains change them at runtime, including back to null, which an
- * attribute cannot follow; a broadcast event's queue and connection, which the
- * broadcaster reads before the attribute, so an inherited default would win;
- * and a setting the framework never reads for the kind. A class is read as its
- * most specific kind, so a queued mailable is held to what the mail sender
- * supports rather than what a job does.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  *
@@ -191,9 +164,8 @@ final class PreferQueueAttributesRule implements Rule
     }
 
     /**
-     * The packages whose constraint and locked version stand for the project's
-     * Laravel: the queue-side components a package of jobs, mail or
-     * notifications requires, before the database and framework packages.
+     * The packages that stand for the project's Laravel, queue-side components
+     * first.
      *
      * @return array<int, string>
      */
@@ -207,10 +179,11 @@ final class PreferQueueAttributesRule implements Rule
     }
 
     /**
-     * The lowest of the versions the queue-side components declare or lock,
-     * since each component reads only its own kinds' attributes and the runtime
-     * precedence lives in the support component; null when any of them cannot
-     * be read.
+     * The lowest version the components declare or lock, or null when any of
+     * them cannot be read.
+     *
+     * Each component reads only its own kinds' attributes, and the runtime
+     * precedence lives in illuminate/support.
      *
      * @param  array<int, string|null>  $versions
      * @return string|null
@@ -239,8 +212,7 @@ final class PreferQueueAttributesRule implements Rule
     }
 
     /**
-     * The attribute floors for the most specific queued kind the class is,
-     * keyed by the settings the framework reads for that kind.
+     * The attribute floors, by setting, for the class's most specific kind.
      *
      * @param  \PHPStan\Reflection\ClassReflection  $class
      * @return array<string, string>
@@ -263,9 +235,10 @@ final class PreferQueueAttributesRule implements Rule
     }
 
     /**
-     * The items of a property declaration that hold a setting's value: only a
-     * public instance property is visible to the framework, and one with hooks
-     * computes the value rather than declaring it.
+     * The items of a property declaration that hold a setting's value.
+     *
+     * Only a public instance property is visible to the framework, and a hooked
+     * one computes its value.
      *
      * @param  \PhpParser\Node\Stmt\Property  $property
      * @return array<int, \PhpParser\Node\PropertyItem>
@@ -276,8 +249,7 @@ final class PreferQueueAttributesRule implements Rule
     }
 
     /**
-     * Build the error for a property declaration, if it sets a queue setting
-     * the class's kind reads from an attribute that can say the same thing.
+     * Build the error for a property declaring a queue setting, if one applies.
      *
      * @param  \PhpParser\Node\PropertyItem  $item
      * @param  array<string, string>  $floors
@@ -336,9 +308,8 @@ final class PreferQueueAttributesRule implements Rule
     }
 
     /**
-     * Build the error for a property its attribute replaces: the plain
-     * replacement where the floor already supports it, otherwise the lagging
-     * floor notice where the project resolves to a version that does.
+     * Build the error for a property its attribute replaces, or the lagging
+     * floor notice where only the resolved version supports it.
      *
      * @param  string  $name
      * @param  string  $floor

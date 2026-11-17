@@ -1,11 +1,5 @@
-# ==============================================================================
-# TESTS
-# ==============================================================================
 name: Tests
 
-# ==============================================================================
-# TRIGGERS
-# ==============================================================================
 on:
     push:
         branches: [ master ]
@@ -13,32 +7,19 @@ on:
         types: [ opened, synchronize, reopened, ready_for_review ]
     workflow_dispatch:
 
-# ==============================================================================
-# CONCURRENCY
-# ==============================================================================
 concurrency:
     group: tests-${{ github.event.pull_request.number || github.ref }}
     cancel-in-progress: true
 
-# ==============================================================================
-# PERMISSIONS
-# ==============================================================================
 permissions:
     contents: read
     id-token: write
 
-# ==============================================================================
-# DEFAULTS
-# ==============================================================================
 defaults:
     run:
         shell: bash
 
 jobs:
-
-    # ==========================================================================
-    # JOB: TESTS
-    # ==========================================================================
     tests:
         name: Test / PHP ${{ matrix.php }}
         runs-on: ubuntu-latest
@@ -54,10 +35,7 @@ jobs:
                 with:
                     persist-credentials: false
 
-            # This repo diverges from the shared setup-php action, which pins the
-            # coverage driver to pcov: php_codesniffer loads sniffs through its own
-            # include()-based autoloader, which pcov does not instrument (it reports
-            # 0%). Xdebug is the only driver that sees them, so it is set directly.
+            # pcov does not instrument sniffs loaded by php_codesniffer's autoloader.
             -   name: Setup PHP
                 uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
                 with:
@@ -68,8 +46,7 @@ jobs:
             -   name: Install dependencies
                 run: composer install --prefer-dist --no-interaction --no-progress
 
-            # Analysed on the PHP floor only: newer versions ask for attributes,
-            # such as #[\Override] on a property, that the floor cannot parse.
+            # Newer PHP asks for attributes, such as #[\Override] on a property, that 8.3 cannot parse.
             -   name: PHPStan
                 if: ${{ matrix.php == '8.3' }}
                 run: composer analyse
@@ -84,9 +61,6 @@ jobs:
                     oidc: true
                     files: clover.xml
 
-    # ==========================================================================
-    # JOB: LARAVEL TESTS
-    # ==========================================================================
     laravel:
         name: Test / Laravel ${{ matrix.laravel.label }}
         runs-on: ubuntu-latest

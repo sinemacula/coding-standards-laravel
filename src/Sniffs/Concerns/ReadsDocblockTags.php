@@ -7,12 +7,7 @@ namespace SineMacula\CodingStandardsLaravel\Sniffs\Concerns;
 use PHP_CodeSniffer\Files\File;
 
 /**
- * Read docblock tags attached to a class or method declaration.
- *
- * Mirrors the base @inheritable detection: walk back over the declaration's
- * modifiers and attributes to its docblock and look for a given tag. Works for
- * class, method and property pointers, so a sniff can offer docblock escape
- * hatches.
+ * Read docblock tags attached to a class, method or property declaration.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited

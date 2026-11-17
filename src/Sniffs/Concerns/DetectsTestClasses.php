@@ -10,14 +10,6 @@ use SineMacula\CodingStandards\Sniffs\Concerns\DetectsTestClasses as BaseDetects
 /**
  * Detect PHPUnit test files and classes.
  *
- * A file is treated as a test when it lives under a `tests/` directory or
- * declares a class whose name ends in `Test` or that extends a `*TestCase`.
- * Sniffs whose correctness basis only holds for runtime `src` - env()
- * disappearing once config is cached, for instance - use this to exempt tests.
- *
- * The class-level check defers to the base sinemacula/coding-standards
- * DetectsTestClasses; this trait adds only the file-level wrapper.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */

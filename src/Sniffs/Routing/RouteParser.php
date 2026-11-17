@@ -10,11 +10,7 @@ use PHP_CodeSniffer\Util\Tokens;
 /**
  * Parse the `Route::verb(...)` registrations in a file into RouteCall values.
  *
- * Reads each facade call's verb, literal URI, controller action and chained
- * modifiers, resolving them to the resource base, action and member parameter a
- * collapse decision needs. Calls that are not a `[Controller::class, 'method']`
- * dispatch with a literal URI - closures, invokables, dynamic URIs, existing
- * apiResource registrations - are skipped, as they cannot form a resource.
+ * Only calls with a literal URI and a `[Controller::class, ...]` action parse.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -132,8 +128,7 @@ final readonly class RouteParser
     }
 
     /**
-     * The literal URI of a call's first argument, or null when not a plain
-     * string.
+     * The call's first argument, when it is a plain string literal.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $open
@@ -286,8 +281,7 @@ final readonly class RouteParser
     }
 
     /**
-     * The resource action for a verb, but only when the method matches the
-     * action name.
+     * The resource action for a verb, when the method is named for it.
      *
      * @param  array<string, string>  $actions
      * @param  string  $verb
@@ -302,8 +296,7 @@ final readonly class RouteParser
     }
 
     /**
-     * The parameter name inside a `{param}` segment, without cast or optional
-     * markers.
+     * The parameter name inside a `{param}` segment, minus any markers.
      *
      * @param  string  $segment
      * @return string

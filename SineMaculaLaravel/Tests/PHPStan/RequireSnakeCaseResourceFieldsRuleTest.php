@@ -23,9 +23,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireSnakeCaseResourceFiel
 final class RequireSnakeCaseResourceFieldsRuleTest extends RuleTestCase
 {
     /**
-     * Non-snake_case keys in a resource's toArray() result are flagged, nested
-     * arrays included; snake_case keys, leading-underscore meta-keys, list
-     * values, a spread, a non-literal return and non-resource classes are not.
+     * Flags non-snake_case keys in a resource's toArray(), nested arrays too.
      *
      * @return void
      */

@@ -39,14 +39,7 @@ final class PreferQueueAttributesRuleTest extends RuleTestCase
     private string $minLaravelVersion = '';
 
     /**
-     * At a 13.4 floor each kind is held to the settings its sender reads from
-     * an attribute by then, while a job's delay and debounce wait for later
-     * floors, as do a mailable's and a notification's timeout flag and a
-     * broadcast's unique lock. Left alone throughout: a setting with no
-     * default, a default the attribute cannot carry, a non-public or static
-     * property, a setting the class answers with a method, a chainable job's
-     * queue, connection and delay, a broadcast's queue, a setting the kind
-     * never reads, and a class that is not queued at all.
+     * Holds each kind to the settings a 13.4 floor reads from attributes.
      *
      * @return void
      */
@@ -72,8 +65,7 @@ final class PreferQueueAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * Once the floor reaches the latest of them, every setting a kind reads
-     * from an attribute is enforced, while the ones left alone stay so.
+     * Enforces every later setting once the floor reaches it.
      *
      * @return void
      */
@@ -104,9 +96,7 @@ final class PreferQueueAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * A property with hooks computes the setting rather than declaring it, so
-     * an attribute could not say the same thing, while a plain one beside it is
-     * still reported.
+     * A hooked property computes its setting, so it is left alone.
      *
      * @return void
      */
@@ -120,9 +110,7 @@ final class PreferQueueAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * Before 13.4 a value set on the object at runtime did not win over the
-     * attribute, so no floor below it enforces anything, and with nothing
-     * resolved beside it there is no lagging floor to report either.
+     * Enforces nothing below 13.4, where a runtime value lost to the attribute.
      *
      * @return void
      */
@@ -134,8 +122,7 @@ final class PreferQueueAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * A package of jobs or notifications need not require the database or the
-     * framework, so the floor is read from the queue-side components as well.
+     * Reads the floor from the queue-side components as well.
      *
      * @return void
      */
@@ -149,8 +136,7 @@ final class PreferQueueAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * Each queue-side component reads only its own kinds' attributes, so the
-     * floor is the lowest the declared components share, never the highest.
+     * Takes the lowest floor the declared queue-side components share.
      *
      * @return void
      */
@@ -163,10 +149,7 @@ final class PreferQueueAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * A floor behind what composer.lock resolves reports each setting the
-     * resolved version could already replace as a lagging floor, naming the
-     * floor that setting needs, and leaves alone one it could not. The lowest
-     * locked component is the version taken.
+     * Reports a lagging floor naming the floor each setting needs.
      *
      * @return void
      */
@@ -189,8 +172,7 @@ final class PreferQueueAttributesRuleTest extends RuleTestCase
     }
 
     /**
-     * A project that both declares and resolves below the attributes genuinely
-     * cannot use them, so it stays silent.
+     * Stays silent when both the floor and the lock predate the attributes.
      *
      * @return void
      */

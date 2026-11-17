@@ -26,10 +26,7 @@ final class RequireForeignIdForRuleTest extends RuleTestCase
     private const string REASON = 'which restates the column name and key type.';
 
     /**
-     * Each longhand foreign key column naming a model is flagged, with the
-     * model derived from the column; the helper itself, an _id column declared
-     * with another column method, a dynamic name, a bare "_id" and calls
-     * outside a migration are not.
+     * Flags longhand foreign key columns, deriving the model from the column.
      *
      * @return void
      */

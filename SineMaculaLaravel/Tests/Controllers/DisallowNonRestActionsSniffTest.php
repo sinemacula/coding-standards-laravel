@@ -25,10 +25,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class DisallowNonRestActionsSniffTest extends AbstractSniffTestCase
 {
     /**
-     * Only a genuine non-canonical action is flagged: the REST verbs, __invoke,
-     * the constructor, framework overrides, static and non-public helpers,
-     * abstract bases, non-controllers, and methods marked utility or
-     * non-rest-action.
+     * Flags a public non-REST action and none of the exempt methods.
      *
      * @return void
      */
@@ -38,7 +35,7 @@ final class DisallowNonRestActionsSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * The error names the offending method and spells out both escape hatches.
+     * Renders the error naming the method and both escape hatches.
      *
      * @return void
      */
@@ -53,8 +50,7 @@ final class DisallowNonRestActionsSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A method is judged against its innermost enclosing class, so an action on
-     * a controller nested inside a non-controller wrapper is still flagged.
+     * Judges a method against its innermost enclosing class.
      *
      * @return void
      */

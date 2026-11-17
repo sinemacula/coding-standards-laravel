@@ -17,9 +17,7 @@ use SineMaculaLaravel\Sniffs\TypeHints\ReturnTypeHintSniff;
  * Tests that the SineMaculaLaravel standard swaps the Slevomat native-type
  * requirement for the Laravel-aware sniffs.
  *
- * Building the real standard proves the ruleset wiring: the Laravel sniff fires
- * on an untyped property, while the excluded Slevomat native/any codes never
- * fire (so nothing is reported twice).
+ * Builds the real standard to prove the ruleset wiring.
  *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
@@ -42,8 +40,7 @@ final class TypeHintsRulesetTest extends TestCase
     ];
 
     /**
-     * The Laravel property sniff fires under the full standard, and none of the
-     * excluded Slevomat native/any type-hint codes are reported.
+     * The Laravel property sniff fires and no excluded Slevomat code does.
      *
      * @return void
      */
@@ -56,8 +53,7 @@ final class TypeHintsRulesetTest extends TestCase
     }
 
     /**
-     * Run the SineMaculaLaravel standard over the fixture and collect the
-     * sources of every reported type-hint error.
+     * Collect the sources of every type-hint error the standard reports.
      *
      * @return array<int, string>
      */

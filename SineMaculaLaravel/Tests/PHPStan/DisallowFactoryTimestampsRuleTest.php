@@ -23,8 +23,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowFactoryTimestampsRul
 final class DisallowFactoryTimestampsRuleTest extends RuleTestCase
 {
     /**
-     * Timestamp keys in a factory definition() are flagged; a clean factory, a
-     * non-array return, a missing definition() and non-factories are not.
+     * Flags timestamp keys in a factory definition() only.
      *
      * @return void
      */

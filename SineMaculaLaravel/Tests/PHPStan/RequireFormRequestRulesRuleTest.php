@@ -26,10 +26,7 @@ final class RequireFormRequestRulesRuleTest extends RuleTestCase
     private const string MESSAGE = 'A form request must define a rules() method.';
 
     /**
-     * A concrete form request without a public rules() is flagged, including
-     * one whose abstract base declares none either or hides it. One that
-     * declares rules() in any case, one that inherits it from a base request,
-     * and an abstract base are not.
+     * Flags a concrete form request without a public rules().
      *
      * @return void
      */
@@ -44,9 +41,7 @@ final class RequireFormRequestRulesRuleTest extends RuleTestCase
     }
 
     /**
-     * A form request is recognised by its ancestry wherever it lives, so one
-     * outside an Http\Requests namespace is still held to the rule while the
-     * ordinary classes beside it are not.
+     * Recognises a form request by its ancestry, wherever it lives.
      *
      * @return void
      */
@@ -58,8 +53,7 @@ final class RequireFormRequestRulesRuleTest extends RuleTestCase
     }
 
     /**
-     * A validation rule or any other class kept under an Http\Requests
-     * namespace is not a form request and is left alone.
+     * Ignores other classes under an Http\Requests namespace.
      *
      * @return void
      */
@@ -69,8 +63,7 @@ final class RequireFormRequestRulesRuleTest extends RuleTestCase
     }
 
     /**
-     * Where the ancestry does not resolve, a parent written as FormRequest
-     * still marks a form request, and any other unresolved parent does not.
+     * Falls back to a parent written as FormRequest when the ancestry fails.
      *
      * @return void
      */
@@ -82,8 +75,7 @@ final class RequireFormRequestRulesRuleTest extends RuleTestCase
     }
 
     /**
-     * A class declared under a tests/ directory is never flagged, even in a
-     * namespace mirroring Http\Requests.
+     * A class declared under tests/ is never flagged.
      *
      * @return void
      */

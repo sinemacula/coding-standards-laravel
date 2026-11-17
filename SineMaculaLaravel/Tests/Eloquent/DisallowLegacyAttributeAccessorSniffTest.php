@@ -23,9 +23,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class DisallowLegacyAttributeAccessorSniffTest extends AbstractSniffTestCase
 {
     /**
-     * Only genuine accessors are flagged: a get/set XAttribute with the right
-     * arity on a Model. A signature mismatch, a non-model class (even one whose
-     * method shares the name), and a non-accessor name are all clean.
+     * Flags only get/set XAttribute methods with accessor arity on a model.
      *
      * @return void
      */
@@ -35,8 +33,7 @@ final class DisallowLegacyAttributeAccessorSniffTest extends AbstractSniffTestCa
     }
 
     /**
-     * The reported error names the offending method and points at the
-     * Attribute::make() replacement.
+     * Names the offending method and points at Attribute::make().
      *
      * @return void
      */
@@ -50,8 +47,7 @@ final class DisallowLegacyAttributeAccessorSniffTest extends AbstractSniffTestCa
     }
 
     /**
-     * The accessor pattern covers the whole method name: a prefixed or suffixed
-     * near-miss is clean, as is a non-accessor name of any arity.
+     * Matches the accessor pattern against the whole method name only.
      *
      * @return void
      */
@@ -61,8 +57,7 @@ final class DisallowLegacyAttributeAccessorSniffTest extends AbstractSniffTestCa
     }
 
     /**
-     * A class declared inside another class's method is judged by its own
-     * parent, so a model nested in a non-model method is still flagged.
+     * Judges a class nested in a method by its own parent.
      *
      * @return void
      */

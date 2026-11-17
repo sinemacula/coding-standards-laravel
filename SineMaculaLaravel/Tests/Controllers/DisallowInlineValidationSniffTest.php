@@ -20,8 +20,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class DisallowInlineValidationSniffTest extends AbstractSniffTestCase
 {
     /**
-     * validate()/Validator::make() are flagged inside a *Controller class; the
-     * same calls in a service, and unrelated make() calls, are not.
+     * Flags validate() and Validator::make() in controllers only.
      *
      * @return void
      */
@@ -31,8 +30,7 @@ final class DisallowInlineValidationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * Only Validator::make() is flagged on the Validator facade; another
-     * static Validator call in the same controller is not.
+     * Flags only make() among static calls on the Validator facade.
      *
      * @return void
      */

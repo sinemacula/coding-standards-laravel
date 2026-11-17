@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace SineMaculaLaravel\Tests\Structure;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use SineMaculaLaravel\Sniffs\Structure\RequireBladeLocationSniff;
 use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 
@@ -20,45 +21,28 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class RequireBladeLocationSniffTest extends AbstractSniffTestCase
 {
     /**
-     * A Blade template outside a views directory is flagged.
+     * Templates outside a views directory.
      *
-     * @return void
+     * @return iterable<string, array{string}>
      */
-    public function testFlagsBladeOutsideViews(): void
+    public static function misplacedFixtures(): iterable
     {
-        $this->assertErrorsOnLines('template.blade.inc', [1]);
+        yield 'outside resources' => ['template.blade.inc'];
+        yield 'opening with a PHP tag' => ['script.blade.inc'];
+        yield 'path merely ending in a views path' => ['resources/notresources/views/template.blade.inc'];
+        yield 'directory merely prefixed with views' => ['resources/viewsmore/template.blade.inc'];
     }
 
     /**
-     * A Blade template that opens with a PHP tag is still flagged.
+     * Flags a Blade template outside a views directory.
      *
+     * @param  string  $fixture
      * @return void
      */
-    public function testFlagsBladeStartingWithPhpTag(): void
+    #[DataProvider('misplacedFixtures')]
+    public function testFlagsBladeOutsideViews(string $fixture): void
     {
-        $this->assertErrorsOnLines('script.blade.inc', [1]);
-    }
-
-    /**
-     * A Blade template under a directory whose path merely ends in a views path
-     * is flagged.
-     *
-     * @return void
-     */
-    public function testFlagsBladeUnderSuffixedViewsPath(): void
-    {
-        $this->assertErrorsOnLines('resources/notresources/views/template.blade.inc', [1]);
-    }
-
-    /**
-     * A Blade template under a directory whose name merely starts with views is
-     * flagged.
-     *
-     * @return void
-     */
-    public function testFlagsBladeUnderPrefixedViewsDirectory(): void
-    {
-        $this->assertErrorsOnLines('resources/viewsmore/template.blade.inc', [1]);
+        $this->assertErrorsOnLines($fixture, [1]);
     }
 
     /**

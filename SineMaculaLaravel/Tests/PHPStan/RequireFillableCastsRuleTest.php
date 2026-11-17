@@ -23,11 +23,7 @@ use SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireFillableCastsRule;
 final class RequireFillableCastsRuleTest extends RuleTestCase
 {
     /**
-     * Each fillable attribute without a matching cast is flagged. A cast in the
-     * casts() method or a $casts property satisfies it, the #[Fillable] form is
-     * read too, and a pivot is covered; a casts() that merges or spreads a
-     * parent, a dynamically-built $fillable, an abstract model, a non-model and
-     * a subclass of an intermediate base are all skipped.
+     * Flags each fillable attribute without a matching cast.
      *
      * @return void
      */
@@ -62,8 +58,7 @@ final class RequireFillableCastsRuleTest extends RuleTestCase
     }
 
     /**
-     * A model declared in a test file is exempt even when a fillable attribute
-     * declares no cast.
+     * A model declared in a test file is exempt.
      *
      * @return void
      */

@@ -23,8 +23,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class ReturnTypeHintSniffTest extends AbstractSniffTestCase
 {
     /**
-     * A function, method or closure without a native return type is flagged; a
-     * typed method, a constructor and a method carrying #[\Override] are not.
+     * Flags missing return types except on constructors and overrides.
      *
      * @return void
      */
@@ -34,8 +33,7 @@ final class ReturnTypeHintSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * The error names the offending declaration: a method or function by name
-     * with parentheses, a closure as "Closure".
+     * Names a function or method with parentheses and a closure as "Closure".
      *
      * @return void
      */
@@ -49,10 +47,7 @@ final class ReturnTypeHintSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * #[\Override] is recognised in every written form: unqualified, stacked
-     * across groups (adjacent or not), grouped after another attribute with
-     * arguments, flush against the declaration, and on a closure inside a call.
-     * An Override name inside another attribute's arguments does not count.
+     * Recognises #[\Override] in every attribute form, but not as an argument.
      *
      * @return void
      */

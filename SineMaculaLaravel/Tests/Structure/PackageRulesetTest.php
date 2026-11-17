@@ -16,10 +16,6 @@ use SineMaculaLaravel\Sniffs\Structure\RequireRoleNamingSniff;
  * Tests that the package standard composes the app standard without its
  * directory-skeleton rules.
  *
- * A misnamed, misplaced controller is flagged by the app standard but yields
- * zero Structure/Controllers violations under the package standard, so a
- * domain-organised library never inherits app layout rules.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  *
@@ -30,8 +26,7 @@ use SineMaculaLaravel\Sniffs\Structure\RequireRoleNamingSniff;
 final class PackageRulesetTest extends TestCase
 {
     /**
-     * The app standard flags the controller's structure; the package standard
-     * excludes those sniffs, so it reports none.
+     * Only the app standard flags the fixture's structure violations.
      *
      * @return void
      */
@@ -42,8 +37,7 @@ final class PackageRulesetTest extends TestCase
     }
 
     /**
-     * Run a standard over the fixture and collect its Structure/Controllers
-     * violation sources.
+     * Collect a standard's Structure and Controllers violation sources.
      *
      * @param  string  $standard
      * @return array<int, string>

@@ -23,9 +23,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class PropertyTypeHintSniffTest extends AbstractSniffTestCase
 {
     /**
-     * An untyped class property is flagged; framework-magic properties (incl.
-     * $dateFormat and a factory's $model), a typed property, parameters, locals
-     * and top-level vars are not.
+     * Flags untyped class properties other than framework-magic ones.
      *
      * @return void
      */
@@ -35,8 +33,7 @@ final class PropertyTypeHintSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * Every name in the exempt set covers a framework base class that declares
-     * the property untyped, so none of them is flagged.
+     * No property in the framework-magic exempt set is flagged.
      *
      * @return void
      */
@@ -46,10 +43,7 @@ final class PropertyTypeHintSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * @untypeable on the property's own docblock is the escape hatch for base
-     * classes the exempt set cannot know about, even past an attribute; an
-     * unrelated tag, a bare mention in prose and a preceding property's
-     * docblock do not exempt.
+     * Exempts a property whose own docblock is tagged @untypeable.
      *
      * @return void
      */

@@ -25,8 +25,7 @@ use SineMaculaLaravel\Tests\AbstractSniffTestCase;
 final class DisallowHttpAbortSniffTest extends AbstractSniffTestCase
 {
     /**
-     * abort() helpers and *HttpException instantiations are flagged inside a
-     * Services namespace; domain exceptions are not.
+     * Flags abort() helpers and *HttpException instantiations in services.
      *
      * @return void
      */
@@ -51,9 +50,7 @@ final class DisallowHttpAbortSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * An uppercase abort call, a fully qualified HTTP exception and a `new`
-     * separated from its class only by a comment are flagged; a same-named
-     * method call is not.
+     * Flags abort edge cases but not a same-named method call.
      *
      * @return void
      */
@@ -83,8 +80,7 @@ final class DisallowHttpAbortSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A namespace declared directly after a compact declare statement is still
-     * resolved.
+     * Resolves a namespace declared directly after a compact declare.
      *
      * @return void
      */
@@ -104,8 +100,7 @@ final class DisallowHttpAbortSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A namespace segment merely ending or starting with Services is not a
-     * service namespace.
+     * A segment merely containing Services is not a service namespace.
      *
      * @return void
      */
@@ -126,8 +121,7 @@ final class DisallowHttpAbortSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A namespace-less file importing a Services class is still not a service
-     * namespace.
+     * Importing a Services class does not make a namespace-less file a service.
      *
      * @return void
      */

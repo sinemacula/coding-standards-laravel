@@ -20,8 +20,7 @@ use SineMacula\CodingStandardsLaravel\Attributes\NotARole;
 final class NotARoleTest extends TestCase
 {
     /**
-     * The attribute targets classes only, so the escape hatch cannot drift onto
-     * methods or properties the sniffs never read.
+     * The attribute targets classes only.
      *
      * @return void
      */

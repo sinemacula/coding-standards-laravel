@@ -32,10 +32,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     private ?array $uninjectableBaseClasses = null;
 
     /**
-     * Container helpers and the App::make/App::makeWith facade with a literal
-     * class are flagged inside a class; injected dependencies, helpers outside
-     * a class, same-named methods, other App facade calls and dynamic
-     * resolution of a runtime variable are not.
+     * Flags container helpers and App::make/makeWith inside a class body.
      *
      * @return void
      */
@@ -45,8 +42,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * The error names the offending call: a helper by its bare name, a facade
-     * resolution with the App:: prefix.
+     * Names a helper by its bare name and a facade call with its App:: prefix.
      *
      * @return void
      */
@@ -62,8 +58,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * Container-wiring classes - a service provider (by namespace) and a
-     * registrar (by suffix or base class) - may use the container.
+     * Exempts service providers and registrars, which wire the container.
      *
      * @return void
      */
@@ -74,8 +69,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A class in a wiring namespace is exempt even without a wiring suffix or
-     * base class.
+     * Exempts a wiring-namespace class without a wiring suffix or base class.
      *
      * @return void
      */
@@ -85,8 +79,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A class extending a fully qualified wiring base is exempt outside a
-     * wiring namespace and without a wiring suffix.
+     * Exempts a class extending a fully qualified wiring base.
      *
      * @return void
      */
@@ -96,10 +89,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A model factory is constructed by the framework through Model::factory(),
-     * so it has no injection point - neither its constructor nor definition(),
-     * configure() or a state method can be given a collaborator - and may
-     * resolve from the container.
+     * Exempts model factories, which have no injection point.
      *
      * @return void
      */
@@ -109,9 +99,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * An API resource is built with `new` or `::collection()` around the record
-     * it presents, and a toolkit resource's `schema()` is static, so neither
-     * has an injection point and either may resolve from the container.
+     * Exempts API resources, which have no injection point.
      *
      * @return void
      */
@@ -121,8 +109,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A project class that merely shares the toolkit resource's short name is
-     * an ordinary injectable class.
+     * A project class sharing the toolkit resource's short name is not exempt.
      *
      * @return void
      */
@@ -132,9 +119,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A class extending an unrelated framework class whose name merely ends in
-     * the same word - Illuminate\View\Factory - is an ordinary injectable
-     * service, so its service location is still reported.
+     * Does not exempt an unrelated base such as Illuminate\View\Factory.
      *
      * @return void
      */
@@ -144,8 +129,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A factory behind an intermediate base of the project's own is exempt once
-     * that base is configured, which is how a bare entry is matched.
+     * Exempts a factory behind a configured intermediate base.
      *
      * @return void
      */
@@ -157,8 +141,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * Without that configuration the intermediate base is unknown, so the
-     * factory beneath it is reported.
+     * Reports a factory behind an unconfigured intermediate base.
      *
      * @return void
      */
@@ -168,8 +151,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A configured base may be written with a leading separator, as it would be
-     * in an import.
+     * Accepts a configured base written with a leading separator.
      *
      * @return void
      */
@@ -181,9 +163,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A qualified entry matches whole segments, so a parent whose namespace
-     * merely ends in the same letters - App\Support\MyFactories\Factory against
-     * Factories\Factory - is not exempted.
+     * Matches qualified configured bases on whole namespace segments.
      *
      * @return void
      */
@@ -195,12 +175,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * The framework rebuilds a queued job, mailable or notification from its
-     * payload and calls its failed() directly, so service location is allowed
-     * there - whatever the method's case, and in a closure within it - while
-     * handle(), which the container calls, a failed() on any other class or
-     * trait, and a class nested in the hook, named or anonymous, are still
-     * flagged.
+     * Exempts only the failed() hook the framework calls on a queued payload.
      *
      * @return void
      */
@@ -210,8 +185,7 @@ final class DisallowServiceLocationSniffTest extends AbstractSniffTestCase
     }
 
     /**
-     * A queued listener is built by the container, so its constructor can take
-     * the collaborator and its failed() is not exempt.
+     * Does not exempt failed() on a container-built queued listener.
      *
      * @return void
      */

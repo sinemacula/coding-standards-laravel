@@ -1,17 +1,10 @@
-# Dogfood the SineMacula PHPStan standard on this repo's own sniffs. Run in CI
-# (GitHub Actions) and locally via `composer analyse`, where the full Composer
-# vendor is installed. NOT run via qlty: qlty Cloud never runs `composer install`,
-# so it cannot scan PHP_CodeSniffer's (non-PSR-4) source that the sniff code
-# depends on. The framework-agnostic SineMacula PHPStan config is auto-included
-# from the installed sinemacula/coding-standards package via extension-installer.
+# Run by `composer analyse` in CI, not through qlty, which never installs the
+# vendor and so cannot see PHP_CodeSniffer's source.
 parameters:
-    # This repo runs PHPStan itself rather than through qlty, so it is one of
-    # the few configs that has to state the level. 9 is what qlty's driver
-    # enforces everywhere else.
+    # Matches the level qlty passes everywhere else.
     level: 9
 
-    # PHP_CodeSniffer ships a bespoke autoloader (its classes are not on the
-    # Composer classmap), so its source is scanned explicitly.
+    # PHP_CodeSniffer classes are not on the Composer classmap.
     scanDirectories:
         - vendor/squizlabs/php_codesniffer/src
 
@@ -21,17 +14,14 @@ parameters:
         - SineMaculaLaravel/Tests
 
     ignoreErrors:
-        # PHP_CodeSniffer exposes token data as mixed, so sniff code that reads,
-        # iterates and accumulates token values trips these level-9 mixed checks.
+        # PHP_CodeSniffer exposes token data as mixed.
         - identifier: offsetAccess.invalidOffset
         - identifier: binaryOp.invalid
         - identifier: assignOp.invalid
         - identifier: postInc.type
         - identifier: foreach.nonIterable
 
-        # composer/semver's parseConstraints() throws UnexpectedValueException on
-        # a malformed constraint but does not declare it, so with implicit throws
-        # disabled the reachable guard in lowerBound() is misread as a dead catch.
+        # parseConstraints() throws UnexpectedValueException without declaring it.
         -
             identifier: catch.neverThrown
             path: src/PHPStan/Concerns/DetectsLaravelVersion.php

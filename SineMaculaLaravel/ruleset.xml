@@ -4,16 +4,8 @@
     <description>Sine Macula coding standard for Laravel projects.</description>
 
     <!--
-        Pull in the full framework-agnostic SineMacula standard so a Laravel project
-        references a single standard (`SineMaculaLaravel`) and gets both layers. The
-        sinemacula/coding-standards package must be installed alongside this one.
-
-        The Slevomat native/any type-hint requirements are dropped here and replaced
-        by the Laravel-aware SineMaculaLaravel.TypeHints sniffs below: those Slevomat
-        sniffs are inheritance-blind, so they force types onto members that override
-        an untyped framework declaration ($table, #[\Override] methods, …), which
-        fatals at class load. The traversable-specification checks (which require
-        `@param array<int, Foo>` and never fatal) are kept.
+        The native type-hint checks are inheritance-blind and force types that fatal
+        on an untyped framework override; the TypeHints sniffs replace them.
     -->
     <rule ref="SineMacula">
         <exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint"/>
@@ -24,18 +16,14 @@
         <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingAnyTypeHint"/>
     </rule>
 
-    <!--
-        A Blade template holds no PHP to check, so every one reports NoCodeFound.
-        Only that report is dropped: the template is still read for its location.
-    -->
+    <!-- Blade templates hold no PHP, but are still read for their location. -->
     <rule ref="Internal.NoCodeFound">
         <exclude-pattern>*.blade.php</exclude-pattern>
     </rule>
 
     <!--
         A translation string cannot be wrapped without changing what it says. The
-        locale directory is part of the pattern so a project that merely sits
-        under a directory named lang keeps the check.
+        locale segment keeps the check for a project that merely sits under lang/.
     -->
     <rule ref="Generic.Files.LineLength">
         <exclude-pattern>*/lang/[a-z]{2\,3}([_-][a-z0-9]{2\,4}){0\,2}/[^/]+$</exclude-pattern>
@@ -43,16 +31,8 @@
     </rule>
 
     <!--
-        Exempt the framework bases that declare public magic properties from the
-        readonly-public-property requirement. A subclass overrides them ($timestamps
-        and $incrementing on a model, $collects on a resource collection,
-        $withinTransaction on a migration, …), and they are declared non-readonly on
-        the base class - PHP forbids making an inherited property readonly, so the
-        requirement cannot be satisfied. The base sniff matches the immediate parent
-        name as written, so the bases are listed by short name.
-
-        A queued class or broadcast event is exempt only for the properties the
-        framework reads off it, which need a default and so cannot be readonly.
+        PHP forbids making an inherited non-readonly property readonly, and the
+        queue settings need a default. Parents are matched by short name.
     -->
     <rule ref="SineMacula.Classes.RequireReadonlyPublicProperty">
         <properties>
@@ -73,10 +53,7 @@
         </properties>
     </rule>
 
-    <!--
-        A policy's ability methods are named for the abilities the Gate checks
-        (viewAny, update, before, ...), so they cannot take a predicate prefix.
-    -->
+    <!-- Policy methods are named for the Gate abilities they answer. -->
     <rule ref="SineMacula.NamingConventions.BooleanMethodName">
         <properties>
             <property name="ignoredClassSuffixes" type="array">
@@ -84,10 +61,5 @@
             </property>
         </properties>
     </rule>
-
-    <!--
-        Laravel-specific sniffs live in this standard's Sniffs/ directory and are
-        auto-discovered by PHP_CodeSniffer - no <rule ref> lines are needed for them.
-    -->
 
 </ruleset>

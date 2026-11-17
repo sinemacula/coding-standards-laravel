@@ -13,11 +13,6 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesNamespace;
 /**
  * Disallow HTTP aborts in services.
  *
- * A class in the service layer must stay independent of HTTP: it throws domain
- * exceptions rather than aborting the request. Inside a class whose namespace
- * has a `Services` segment, this flags the `abort()` / `abort_if()` /
- * `abort_unless()` helpers and the instantiation of any `*HttpException`.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */

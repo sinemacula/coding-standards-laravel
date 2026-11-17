@@ -12,26 +12,6 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
 /**
  * Disallow service location in class bodies.
  *
- * Collaborators must be constructor-injected, not pulled from the container at
- * call time. This flags the `app()` / `resolve()` container helpers and the
- * `App::make()` facade inside a class. It targets production code, so it does
- * not fire in test files, in container-wiring classes (service providers and
- * registrars, whose job is to wire the container), or on a dynamic resolution
- * whose argument is a runtime variable rather than a literal class - a factory
- * that cannot be injected.
- *
- * It also does not fire in a class the framework constructs itself, which has
- * no injection point to use instead: a model factory is reached through
- * `Model::factory()`, so neither its constructor nor `definition()` can be
- * given a collaborator, and an API resource is built with `new` or
- * `::collection()` around the record it presents, and a toolkit resource's
- * `schema()` is static. Nor does it fire in a hook the framework calls without
- * the container on a class built with `new`: a queued job, mailable or
- * notification is rebuilt from its payload and its `failed()` called directly.
- * A queued listener is not among them, since the container builds it and its
- * constructor can take the collaborator. Helper names and the exempt sets are
- * configurable.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */
@@ -128,8 +108,7 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Whether the call is exempt: test code, a dynamic argument, or a place
-     * with no injection point to use instead.
+     * Whether the call is exempt from the rule.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -143,8 +122,7 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Whether the call sits where injection does not apply: a wiring class, a
-     * class the framework constructs, or a hook it calls without the container.
+     * Whether the call sits where injection does not apply.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -176,8 +154,7 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Determine whether the string is the `make`/`makeWith` of an `App::`
-     * facade call.
+     * Determine whether the token is an `App::make()` / `App::makeWith()` call.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -198,8 +175,7 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Whether the call resolves a runtime variable, or only fetches the
-     * container, which cannot be replaced by injection.
+     * Whether the call has a variable argument or none at all.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -235,8 +211,7 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Whether the enclosing class is one the framework constructs, so there is
-     * no constructor to inject through.
+     * Whether the enclosing class is one the framework constructs.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -255,8 +230,7 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Whether the token sits in a hook the framework calls without the
-     * container, on a class whose role leaves it no other injection point.
+     * Whether the token sits in a hook the framework calls without a container.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -277,8 +251,9 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Find the innermost class-like scope the token sits in, if it is a named
-     * class, so a class nested in a hook is judged on its own.
+     * Find the innermost class-like scope, if it is a named class.
+     *
+     * A class nested in a hook is judged on its own.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -298,8 +273,9 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Find the method of the class that the token sits in, if any: the scope
-     * nested directly in a class body can only be one of its methods.
+     * Find the class method the token sits in, if any.
+     *
+     * The scope nested directly in a class body can only be one of its methods.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $stackPtr
@@ -315,14 +291,7 @@ final class DisallowServiceLocationSniff implements Sniff
     }
 
     /**
-     * Whether the parent, as written, is one of the configured uninjectable
-     * bases.
-     *
-     * An entry containing a separator is matched against the parent resolved
-     * through the file's imports, so a base is identified by the class it
-     * actually names rather than by a word other classes happen to end with. A
-     * bare entry is matched against the short name, which is how a project
-     * names an intermediate base of its own.
+     * Whether the parent is one of the configured uninjectable bases.
      *
      * @param  \PHP_CodeSniffer\Files\File  $phpcsFile
      * @param  int  $classPtr
@@ -383,8 +352,7 @@ final class DisallowServiceLocationSniff implements Sniff
     /**
      * Whether the extended class short name is a configured wiring base.
      *
-     * Wiring bases are matched by short name alone: the set includes names such
-     * as Registrar that have no one qualified form to compare against.
+     * Matched by short name, since `Registrar` has no single qualified form.
      *
      * @param  false|string  $parent
      * @return bool

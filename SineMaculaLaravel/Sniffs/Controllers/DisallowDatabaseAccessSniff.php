@@ -11,11 +11,6 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\IdentifiesControllers;
 /**
  * Disallow direct database access in controllers.
  *
- * Controllers read through repositories and mutate through services, so they
- * must not query the database directly. Inside a `*Controller`, this flags
- * `DB::` facade calls and static calls on an Eloquent model (a class imported
- * from a `Models` namespace, so facades sharing method names are unaffected).
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */
@@ -137,9 +132,7 @@ final class DisallowDatabaseAccessSniff implements Sniff
         $tokens   = $phpcsFile->getTokens();
         $segments = [];
 
-        // PHP_CodeSniffer 4.x keeps an import as one T_NAME_QUALIFIED token
-        // rather than splitting it into T_STRING segments, so the name is
-        // exploded back into segments to find the Models marker and short name.
+        // phpcs 4.x keeps a qualified import as one token, so split it.
         $parts = [T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED];
 
         for ($i = $use + 1; isset($tokens[$i]) && $tokens[$i]['code'] !== T_SEMICOLON; $i++) {

@@ -11,19 +11,6 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ReadsDocblockTags;
 /**
  * Require a native type hint on class properties, Laravel-aware.
  *
- * Every class property must declare a native type - except one that overrides
- * an untyped parent declaration, which PHP forbids typing (it would fatal at
- * class load). A token-based sniff cannot resolve the parent class, so the
- * exemption is name-matched against the configurable `magicProperties` list,
- * which covers the framework base classes an application extends: models,
- * factories, commands, migrations, API resources, middleware, the kernels,
- * service providers and the exception handler. This replaces the Slevomat
- * PropertyTypeHint requirement, which is inheritance-blind.
- *
- * The list cannot know about third-party or application base classes, so
- * `@untypeable` on the property is the escape hatch for any other property
- * whose untyped parent declaration puts a native type out of reach.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */

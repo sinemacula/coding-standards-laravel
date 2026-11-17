@@ -11,10 +11,6 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\IdentifiesControllers;
 /**
  * Disallow inline validation in controllers.
  *
- * Request-shape validation belongs in a form request, not the controller. This
- * flags `validate()` method calls and `Validator::make()` inside a class named
- * `*Controller`; validation elsewhere (e.g. in a service) is left alone.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */

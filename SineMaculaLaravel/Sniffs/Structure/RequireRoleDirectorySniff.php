@@ -11,13 +11,6 @@ use SineMacula\CodingStandardsLaravel\Sniffs\Concerns\ResolvesRole;
 /**
  * Require a role class to live under its canonical directory.
  *
- * The inverse of the naming rule: a class whose role is resolved (chiefly by
- * identity - what it extends, implements, uses or is attributed with) must live
- * somewhere under that role's configured location, e.g. a controller under
- * `Http/Controllers`. Roles listed in `moduleRootRoles` may instead sit at the
- * package/module root (an entry-point `*ServiceProvider` at `src/`). Classes
- * with no role, or a role that configures no location, are left alone.
- *
  * @author      Ben Carey <bdmc@sinemacula.co.uk>
  * @copyright   2026 Sine Macula Limited
  */

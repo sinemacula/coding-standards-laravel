@@ -283,19 +283,51 @@ final readonly class RequireCacheExpiryRule implements Rule
      */
     private function argumentAt(array $args, array $names, int $position, Scope $scope): Arg|false|null
     {
-        $named = $this->namedArgument($args, $names[$position] ?? null);
+        $named      = $this->namedArgument($args, $names[$position] ?? null);
+        $positional = $this->positionalArgument($args, $position, $scope);
 
-        foreach ($args as $index => $arg) {
-            if ($arg->unpack) {
-                return $named instanceof Arg || $scope->getType($arg->value)->isIterableAtLeastOnce()->no() ? $named : false;
+        return $named instanceof Arg || $positional === null ? $named : $positional;
+    }
+
+    /**
+     * The argument passed at a position, null when none is, or false when an
+     * unpacked argument may supply it.
+     *
+     * @param  array<int, \PhpParser\Node\Arg>  $args
+     * @param  int  $position
+     * @param  \PHPStan\Analyser\Scope  $scope
+     * @return false|\PhpParser\Node\Arg|null
+     */
+    private function positionalArgument(array $args, int $position, Scope $scope): Arg|false|null
+    {
+        $at = 0;
+
+        foreach ($args as $arg) {
+            $size = $arg->unpack ? $this->listSize($arg, $scope) : ($arg->name === null ? 1 : 0);
+
+            if ($size === null || $at + $size > $position) {
+                return $arg->unpack ? false : $arg;
             }
 
-            if ($arg->name === null && $index === $position) {
-                return $arg;
-            }
+            $at += $size;
         }
 
-        return $named;
+        return null;
+    }
+
+    /**
+     * The number of values an unpacked list supplies, when certain.
+     *
+     * @param  \PhpParser\Node\Arg  $arg
+     * @param  \PHPStan\Analyser\Scope  $scope
+     * @return int|null
+     */
+    private function listSize(Arg $arg, Scope $scope): ?int
+    {
+        $type = $scope->getType($arg->value);
+        $size = $type->getArraySize()->getConstantScalarValues();
+
+        return $type->isList()->yes() && count($size) === 1 && is_int($size[0]) ? $size[0] : null;
     }
 
     /**

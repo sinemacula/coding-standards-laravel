@@ -128,6 +128,20 @@ class Writes
         Cache::put('k', 'v', ...[]);
         CACHE(['k' => 'v']);
         $this->either->put('k', 'v', ttl: 60);
+        Cache::put('k', 'v', ...[], ...[60]);
+        Cache::put(...['k', 'v']);
+        Cache::put(...['k', 'v', null]);
+        Cache::put('k', ...['v', 60]);
+        Cache::put(...['key' => 'k', 'value' => 'v']);
+        Cache::put(...$this->args());
+    }
+
+    /**
+     * @return list<mixed>
+     */
+    private function args(): array
+    {
+        return [];
     }
 }
 

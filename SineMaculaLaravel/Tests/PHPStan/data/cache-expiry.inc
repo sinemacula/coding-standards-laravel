@@ -123,6 +123,11 @@ class Writes
         Cache::store()->Lock(name: 'k');
         Cache::lock('k', 1);
         $this->repository->{$method}('k', 'v');
+        Cache::put(...['k', 'v'], ttl: null);
+        Cache::put(...['k', 'v'], ttl: 60);
+        Cache::put('k', 'v', ...[]);
+        CACHE(['k' => 'v']);
+        $this->either->put('k', 'v', ttl: 60);
     }
 }
 

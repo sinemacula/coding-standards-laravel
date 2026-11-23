@@ -76,6 +76,9 @@ final class RequireCacheExpiryRuleTest extends RuleTestCase
             [sprintf(self::NO_EXPIRY, 'cache'), 111],
             [sprintf(self::NO_EXPIRY, 'cache'), 112],
             [sprintf(self::NO_EXPIRY, 'Lock'), 123],
+            [sprintf(self::NO_EXPIRY, 'put'), 126],
+            [sprintf(self::NO_EXPIRY, 'put'), 128],
+            [sprintf(self::NO_EXPIRY, 'cache'), 129],
         ]);
     }
 

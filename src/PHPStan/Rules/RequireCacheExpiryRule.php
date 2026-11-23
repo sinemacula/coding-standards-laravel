@@ -130,18 +130,18 @@ final readonly class RequireCacheExpiryRule implements Rule
         if (
             $this->ttlPositionFor('put') === null
             || !$node->name instanceof Name
-            || $this->reflectionProvider->resolveFunctionName($node->name, $scope) !== 'cache'
+            || strtolower((string) $this->reflectionProvider->resolveFunctionName($node->name, $scope)) !== 'cache'
         ) {
             return [];
         }
 
-        $values = $this->argumentAt($node->getArgs(), self::HELPER_PARAMETERS, 0);
+        $values = $this->argumentAt($node->getArgs(), self::HELPER_PARAMETERS, 0, $scope);
 
         if (!$values instanceof Arg || !$scope->getType($values->value)->isArray()->yes()) {
             return [];
         }
 
-        $ttl = $this->argumentAt($node->getArgs(), self::HELPER_PARAMETERS, 1);
+        $ttl = $this->argumentAt($node->getArgs(), self::HELPER_PARAMETERS, 1, $scope);
 
         return $this->isMissingTtl($ttl, 'put', $scope) ? [$this->missingTtlError('cache')] : [];
     }
@@ -193,7 +193,7 @@ final readonly class RequireCacheExpiryRule implements Rule
 
         $args  = $node->getArgs();
         $names = $this->parameterNames($receiver, $method, $scope);
-        $ttl   = $this->argumentAt($args, $names, $this->arrayKeyPosition($key, $args, $names, $scope) ?? $position);
+        $ttl   = $this->argumentAt($args, $names, $this->arrayKeyPosition($key, $args, $names, $scope) ?? $position, $scope);
 
         return $this->isMissingTtl($ttl, $key, $scope) ? [$this->missingTtlError($method)] : [];
     }
@@ -266,7 +266,7 @@ final readonly class RequireCacheExpiryRule implements Rule
      */
     private function arrayKeyPosition(string $method, array $args, array $names, Scope $scope): ?int
     {
-        $key = in_array($method, self::ARRAY_KEY_METHODS, true) ? $this->argumentAt($args, $names, 0) : null;
+        $key = in_array($method, self::ARRAY_KEY_METHODS, true) ? $this->argumentAt($args, $names, 0, $scope) : null;
 
         return $key instanceof Arg && $scope->getType($key->value)->isArray()->yes() ? 1 : null;
     }
@@ -278,44 +278,47 @@ final readonly class RequireCacheExpiryRule implements Rule
      * @param  array<int, \PhpParser\Node\Arg>  $args
      * @param  array<int, string>  $names
      * @param  int  $position
+     * @param  \PHPStan\Analyser\Scope  $scope
      * @return false|\PhpParser\Node\Arg|null
      */
-    private function argumentAt(array $args, array $names, int $position): Arg|false|null
+    private function argumentAt(array $args, array $names, int $position, Scope $scope): Arg|false|null
     {
-        $name = $names[$position] ?? null;
+        $named = $this->namedArgument($args, $names[$position] ?? null);
 
         foreach ($args as $index => $arg) {
-            if ($this->isArgumentFor($arg, $index, $position, $name)) {
-                return $arg->unpack ? false : $arg;
+            if ($arg->unpack) {
+                return $named instanceof Arg || $scope->getType($arg->value)->isIterableAtLeastOnce()->no() ? $named : false;
+            }
+
+            if ($arg->name === null && $index === $position) {
+                return $arg;
             }
         }
 
-        return $name === null && $this->hasNamedArgument($args) ? false : null;
+        return $named;
     }
 
     /**
-     * Whether the argument supplies the position, or may as an unpacked one.
+     * The argument passed by a parameter's name, null when none is, or false
+     * when the name is unknown and a named argument may be it.
      *
-     * @param  \PhpParser\Node\Arg  $arg
-     * @param  int  $index
-     * @param  int  $position
-     * @param  string|null  $name
-     * @return bool
-     */
-    private function isArgumentFor(Arg $arg, int $index, int $position, ?string $name): bool
-    {
-        return $arg->unpack || ($arg->name === null ? $index === $position : $arg->name->toString() === $name);
-    }
-
-    /**
-     * Whether any argument is passed by name.
+     * A method on a union of receivers names a parameter `ttl|seconds`.
      *
      * @param  array<int, \PhpParser\Node\Arg>  $args
-     * @return bool
+     * @param  string|null  $name
+     * @return false|\PhpParser\Node\Arg|null
      */
-    private function hasNamedArgument(array $args): bool
+    private function namedArgument(array $args, ?string $name): Arg|false|null
     {
-        return array_filter($args, static fn (Arg $arg): bool => $arg->name !== null) !== [];
+        $named = array_filter($args, static fn (Arg $arg): bool => $arg->name !== null);
+
+        foreach ($named as $arg) {
+            if (in_array((string) $arg->name, explode('|', (string) $name), true)) {
+                return $arg;
+            }
+        }
+
+        return $name === null && $named !== [] ? false : null;
     }
 
     /**

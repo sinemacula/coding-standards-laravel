@@ -224,7 +224,7 @@ they cannot take a predicate prefix. `BooleanMethodName` leaves classes whose na
 | `sineMaculaLaravel.formRequestRules`           | A form request, recognised by its ancestry, has a `rules()` method, its own or inherited; tests are exempt.              |
 | `sineMaculaLaravel.factoryTimestamps`          | A factory `definition()` must not set `created_at` / `updated_at`.                                                       |
 | `sineMaculaLaravel.resourceFieldNaming`        | Field keys in a resource's `toArray()` result use snake_case, nested arrays included.                                    |
-| `sineMaculaLaravel.cacheExpiry`                | Opt-in: every cache write stores its key with a TTL.                                                                     |
+| `sineMaculaLaravel.cacheExpiry`                | Opt-in: a cache write the project lists passes a TTL, and one that never expires is not used.                            |
 
 #### What a model may carry
 
@@ -424,8 +424,8 @@ left alone. Without larastan, `app('cache')` is typed `mixed` and is not read, a
 scope since its implementations may apply a default TTL. A TTL that is only possibly `null`, or a closure, is taken as
 set.
 
-`increment()` and `decrement()` create a missing key without an expiry, but they stay out of the defaults: the correct
-counter pattern calls them too, after an `add()` that sets the TTL.
+On Redis, `increment()` and `decrement()` create a missing key without an expiry. They stay out of the defaults because
+the usual counter pattern calls them after an `add()` that sets the TTL:
 
 ```php
 Cache::add($key, 0, now()->addMinute());

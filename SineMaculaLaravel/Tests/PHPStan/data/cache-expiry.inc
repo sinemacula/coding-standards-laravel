@@ -115,13 +115,14 @@ class Writes
         cache('k');
     }
 
-    public function boundaries(): void
+    public function boundaries(string $method): void
     {
         $this->repository->set('k', 'v', 60);
         $this->repository->setMultiple(['k' => 'v'], 60);
         Registry::forever('k', 'v');
         Cache::store()->Lock(name: 'k');
         Cache::lock('k', 1);
+        $this->repository->{$method}('k', 'v');
     }
 }
 

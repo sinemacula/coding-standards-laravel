@@ -110,10 +110,6 @@ final readonly class RequireCacheExpiryRule implements Rule
     #[\Override]
     public function processNode(Node $node, Scope $scope): array
     {
-        if ($node->isFirstClassCallable()) {
-            return [];
-        }
-
         // A nullsafe call also reaches the rule as a plain method call.
         return match (true) {
             $node instanceof FuncCall                                => $this->helperErrors($node, $scope),

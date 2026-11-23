@@ -302,8 +302,8 @@ final readonly class RequireCacheExpiryRule implements Rule
     {
         $at = 0;
 
-        foreach ($args as $arg) {
-            $size = $arg->unpack ? $this->listSize($arg, $scope) : ($arg->name === null ? 1 : 0);
+        foreach (array_filter($args, static fn (Arg $arg): bool => $arg->name === null) as $arg) {
+            $size = $arg->unpack ? $this->listSize($arg, $scope) : 1;
 
             if ($size === null || $at + $size > $position) {
                 return $arg->unpack ? false : $arg;

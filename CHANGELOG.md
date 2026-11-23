@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/sinemacula/coding-standards-laravel/compare/v1.7.1...v1.8.0) (2026-11-23)
+
+
+### Features
+
+* **phpstan:** add an opt-in rule that reports cache writes without an expiry ([#164](https://github.com/sinemacula/coding-standards-laravel/issues/164)) ([0ac6b92](https://github.com/sinemacula/coding-standards-laravel/commit/0ac6b923fd0b11ee4fd970f47d788dc157cbc94d))
+
 ## [1.7.1](https://github.com/sinemacula/coding-standards-laravel/compare/v1.7.0...v1.7.1) (2026-11-10)
 
 

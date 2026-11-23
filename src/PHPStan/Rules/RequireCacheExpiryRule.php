@@ -18,6 +18,7 @@ use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleError;
 use PHPStan\Rules\RuleErrorBuilder;
+use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\IntegerRangeType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
@@ -135,15 +136,15 @@ final readonly class RequireCacheExpiryRule implements Rule
             return [];
         }
 
-        $values = $this->argumentAt($node->getArgs(), self::HELPER_PARAMETERS, 0, $scope);
+        $values = $this->argumentType($node->getArgs(), self::HELPER_PARAMETERS, 0, $scope);
 
-        if (!$values instanceof Arg || !$scope->getType($values->value)->isArray()->yes()) {
+        if (!$values instanceof Type || !$values->isArray()->yes()) {
             return [];
         }
 
-        $ttl = $this->argumentAt($node->getArgs(), self::HELPER_PARAMETERS, 1, $scope);
+        $ttl = $this->argumentType($node->getArgs(), self::HELPER_PARAMETERS, 1, $scope);
 
-        return $this->isMissingTtl($ttl, 'put', $scope) ? [$this->missingTtlError('cache')] : [];
+        return $this->isMissingTtl($ttl, 'put') ? [$this->missingTtlError('cache')] : [];
     }
 
     /**
@@ -191,11 +192,10 @@ final readonly class RequireCacheExpiryRule implements Rule
             return [];
         }
 
-        $args  = $node->getArgs();
         $names = $this->parameterNames($receiver, $method, $scope);
-        $ttl   = $this->argumentAt($args, $names, $this->arrayKeyPosition($key, $args, $names, $scope) ?? $position, $scope);
+        $ttl   = $this->ttlType($key, $node->getArgs(), $names, $position, $scope);
 
-        return $this->isMissingTtl($ttl, $key, $scope) ? [$this->missingTtlError($method)] : [];
+        return $this->isMissingTtl($ttl, $key) ? [$this->missingTtlError($method)] : [];
     }
 
     /**
@@ -256,57 +256,78 @@ final readonly class RequireCacheExpiryRule implements Rule
     }
 
     /**
-     * Position 1 when a method that takes an array of values is given one.
+     * The TTL's type, taken second when an array of values is put, or false
+     * when the key cannot tell which form the call takes.
      *
      * @param  string  $method
      * @param  array<int, \PhpParser\Node\Arg>  $args
      * @param  array<int, string>  $names
+     * @param  int  $position
      * @param  \PHPStan\Analyser\Scope  $scope
-     * @return int|null
+     * @return false|\PHPStan\Type\Type|null
      */
-    private function arrayKeyPosition(string $method, array $args, array $names, Scope $scope): ?int
+    private function ttlType(string $method, array $args, array $names, int $position, Scope $scope): false|Type|null
     {
-        $key = in_array($method, self::ARRAY_KEY_METHODS, true) ? $this->argumentAt($args, $names, 0, $scope) : null;
+        if (!in_array($method, self::ARRAY_KEY_METHODS, true)) {
+            return $this->argumentType($args, $names, $position, $scope);
+        }
 
-        return $key instanceof Arg && $scope->getType($key->value)->isArray()->yes() ? 1 : null;
+        $key     = $this->argumentType($args, $names, 0, $scope);
+        $isArray = $key instanceof Type ? $key->isArray() : null;
+
+        return match (true) {
+            $isArray?->yes() === true => $this->argumentType($args, $names, 1, $scope),
+            $isArray?->no()  === true => $this->argumentType($args, $names, $position, $scope),
+            default                   => false,
+        };
     }
 
     /**
-     * The argument for a parameter position, null when certainly absent, or
-     * false when an unpacked or unattributable named argument may supply it.
+     * The type of the argument for a parameter position, null when certainly
+     * absent, or false when an unpacked or unattributable named argument may
+     * supply it.
      *
      * @param  array<int, \PhpParser\Node\Arg>  $args
      * @param  array<int, string>  $names
      * @param  int  $position
      * @param  \PHPStan\Analyser\Scope  $scope
-     * @return false|\PhpParser\Node\Arg|null
+     * @return false|\PHPStan\Type\Type|null
      */
-    private function argumentAt(array $args, array $names, int $position, Scope $scope): Arg|false|null
+    private function argumentType(array $args, array $names, int $position, Scope $scope): false|Type|null
     {
         $named      = $this->namedArgument($args, $names[$position] ?? null);
-        $positional = $this->positionalArgument($args, $position, $scope);
+        $positional = $this->positionalType($args, $position, $scope);
 
-        return $named instanceof Arg || $positional === null ? $named : $positional;
+        if ($named instanceof Arg) {
+            return $scope->getType($named->value);
+        }
+
+        return $positional === null ? $named : $positional;
     }
 
     /**
-     * The argument passed at a position, null when none is, or false when an
-     * unpacked argument may supply it.
+     * The type passed at a position, reading into unpacked lists of known size,
+     * null when nothing is, or false when an unpacked argument may be.
      *
      * @param  array<int, \PhpParser\Node\Arg>  $args
      * @param  int  $position
      * @param  \PHPStan\Analyser\Scope  $scope
-     * @return false|\PhpParser\Node\Arg|null
+     * @return false|\PHPStan\Type\Type|null
      */
-    private function positionalArgument(array $args, int $position, Scope $scope): Arg|false|null
+    private function positionalType(array $args, int $position, Scope $scope): false|Type|null
     {
         $at = 0;
 
         foreach (array_filter($args, static fn (Arg $arg): bool => $arg->name === null) as $arg) {
-            $size = $arg->unpack ? $this->listSize($arg, $scope) : 1;
+            $type = $scope->getType($arg->value);
+            $size = $arg->unpack ? $this->listSize($type) : 1;
 
-            if ($size === null || $at + $size > $position) {
-                return $arg->unpack ? false : $arg;
+            if ($size === null) {
+                return false;
+            }
+
+            if ($at + $size > $position) {
+                return $arg->unpack ? $type->getOffsetValueType(new ConstantIntegerType($position - $at)) : $type;
             }
 
             $at += $size;
@@ -318,13 +339,11 @@ final readonly class RequireCacheExpiryRule implements Rule
     /**
      * The number of values an unpacked list supplies, when certain.
      *
-     * @param  \PhpParser\Node\Arg  $arg
-     * @param  \PHPStan\Analyser\Scope  $scope
+     * @param  \PHPStan\Type\Type  $type
      * @return int|null
      */
-    private function listSize(Arg $arg, Scope $scope): ?int
+    private function listSize(Type $type): ?int
     {
-        $type = $scope->getType($arg->value);
         $size = $type->getArraySize()->getConstantScalarValues();
 
         return $type->isList()->yes() && count($size) === 1 && is_int($size[0]) ? $size[0] : null;
@@ -356,21 +375,18 @@ final readonly class RequireCacheExpiryRule implements Rule
     /**
      * Whether the TTL is absent, certainly null, or for a lock never expires.
      *
-     * @param  false|\PhpParser\Node\Arg|null  $ttl
+     * @param  false|\PHPStan\Type\Type|null  $ttl
      * @param  string  $method
-     * @param  \PHPStan\Analyser\Scope  $scope
      * @return bool
      */
-    private function isMissingTtl(Arg|false|null $ttl, string $method, Scope $scope): bool
+    private function isMissingTtl(false|Type|null $ttl, string $method): bool
     {
-        if (!$ttl instanceof Arg) {
+        if (!$ttl instanceof Type) {
             return $ttl === null;
         }
 
-        $type = $scope->getType($ttl->value);
-
-        return $type->isNull()->yes()
-            || ($method === self::LOCK && IntegerRangeType::fromInterval(null, 0)->isSuperTypeOf($type)->yes());
+        return $ttl->isNull()->yes()
+            || ($method === self::LOCK && IntegerRangeType::fromInterval(null, 0)->isSuperTypeOf($ttl)->yes());
     }
 
     /**

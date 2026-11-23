@@ -115,7 +115,7 @@ class Writes
         cache('k');
     }
 
-    public function boundaries(string $method): void
+    public function boundaries(string $method, mixed $key): void
     {
         $this->repository->set('k', 'v', 60);
         $this->repository->setMultiple(['k' => 'v'], 60);
@@ -135,6 +135,8 @@ class Writes
         Cache::put(...['key' => 'k', 'value' => 'v']);
         Cache::put(...$this->args());
         $this->repository->remember(key: 'k', callback: fn () => 1);
+        Cache::put(...[['k' => 'v'], 60]);
+        Cache::put($key, 'v');
     }
 
     /**

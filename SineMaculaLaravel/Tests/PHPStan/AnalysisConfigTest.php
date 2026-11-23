@@ -8,6 +8,7 @@ use PHPStan\DependencyInjection\NeonAdapter;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 use SineMacula\CodingStandardsLaravel\PHPStan\Rules\DisallowModelBehaviourRule;
+use SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireCacheExpiryRule;
 
 /**
  * Tests the analysis config this package ships to consuming projects.
@@ -116,6 +117,30 @@ final class AnalysisConfigTest extends TestCase
 
         self::assertIsArray($shipped, 'The shipped config declares no modelHooks.');
         self::assertSame($default, $shipped);
+    }
+
+    /**
+     * Ships the cache expiry rule switched off, with the rule's own defaults.
+     *
+     * @return void
+     */
+    public function testShipsTheCacheExpiryRuleOffWithItsDefaults(): void
+    {
+        $config   = self::readConfig();
+        $shipped  = $config['parameters']['sineMaculaLaravel']['cacheExpiry'] ?? null;
+        $defaults = array_map(
+            static fn (string $name): mixed => (new \ReflectionParameter([RequireCacheExpiryRule::class, '__construct'], $name))
+                ->getDefaultValue(),
+            ['forbidden' => 'forbidden', 'requireTtl' => 'requireTtl'],
+        );
+
+        self::assertIsArray($shipped, 'The shipped config declares no cacheExpiry.');
+        self::assertFalse($shipped['enabled'] ?? null);
+        self::assertSame($defaults, array_intersect_key($shipped, $defaults));
+        self::assertSame(
+            '%sineMaculaLaravel.cacheExpiry.enabled%',
+            $config['conditionalTags'][RequireCacheExpiryRule::class]['phpstan.rules.rule'] ?? null,
+        );
     }
 
     /**

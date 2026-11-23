@@ -224,6 +224,7 @@ they cannot take a predicate prefix. `BooleanMethodName` leaves classes whose na
 | `sineMaculaLaravel.formRequestRules`           | A form request, recognised by its ancestry, has a `rules()` method, its own or inherited; tests are exempt.              |
 | `sineMaculaLaravel.factoryTimestamps`          | A factory `definition()` must not set `created_at` / `updated_at`.                                                       |
 | `sineMaculaLaravel.resourceFieldNaming`        | Field keys in a resource's `toArray()` result use snake_case, nested arrays included.                                    |
+| `sineMaculaLaravel.cacheExpiry`                | Opt-in: every cache write stores its key with a TTL.                                                                     |
 
 #### What a model may carry
 
@@ -387,6 +388,51 @@ A property is left alone where the attribute would not say the same thing:
 - a broadcast event's `$queue` and `$connection`, which the broadcaster reads before the attribute, so an
   inherited default would win over it;
 - a non-public or static property, which the framework never reads.
+
+#### Cache expiry
+
+`cacheExpiry` is off by default. It is for an application whose cache store also holds rate limits, locks and other
+state: under a `volatile-*` eviction policy only keys with a TTL can be evicted, and a store full of keys that never
+expire refuses every write. Turn it on in the project's own config:
+
+```neon
+parameters:
+    sineMaculaLaravel:
+        cacheExpiry:
+            enabled: true
+```
+
+`forever()`, `rememberForever()` and `sear()` are reported outright. `put()`, `add()`, `remember()`,
+`rememberWithWarmth()`, `putMany()`, `set()`, `setMultiple()` and `lock()` are reported when their TTL is missing or
+`null`, and a lock also when its TTL is a constant `0` or less. `cache([...])` is held to `put()`'s requirement. The
+lists live under `forbidden` and `requireTtl` (the method and its TTL's zero-based position); a plain key appends to
+them and `!` replaces them:
+
+```neon
+parameters:
+    sineMaculaLaravel:
+        cacheExpiry:
+            enabled: true
+            forbidden:
+                - increment
+                - decrement
+```
+
+A call is only read when its receiver is certainly a cache: the `Cache` facade, the `cache()` helper, or a value typed
+as the cache `Repository`, `Store` or `LockProvider` contracts or the `CacheManager`. A `put()` on an unrelated class is
+left alone. Without larastan, `app('cache')` is typed `mixed` and is not read, and a PSR-16 `CacheInterface` is out of
+scope since its implementations may apply a default TTL. A TTL that is only possibly `null`, or a closure, is taken as
+set.
+
+`increment()` and `decrement()` create a missing key without an expiry, but they stay out of the defaults: the correct
+counter pattern calls them too, after an `add()` that sets the TTL.
+
+```php
+Cache::add($key, 0, now()->addMinute());
+Cache::increment($key);
+```
+
+A deliberate exception is silenced with `@phpstan-ignore sineMaculaLaravel.cacheExpiry` and the reason.
 
 #### What the model and migration rules inspect
 

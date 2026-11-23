@@ -1,0 +1,8 @@
+parameters:
+    sineMaculaLaravel:
+        cacheExpiry:
+            enabled: true
+            forbidden:
+                - increment
+            requireTtl!:
+                put: 2

@@ -22,6 +22,23 @@ parameters:
             - getTable
             - getConnectionName
 
+        # Opt-in: for a store that evicts only keys with a TTL. `!` replaces a list.
+        cacheExpiry:
+            enabled: false
+            forbidden:
+                - forever
+                - rememberForever
+                - sear
+            requireTtl:
+                put: 2
+                add: 2
+                remember: 1
+                rememberWithWarmth: 1
+                putMany: 1
+                set: 2
+                setMultiple: 1
+                lock: 1
+
     # Pins the column scan to the project; unset, it resolves from the booted
     # application, which an isolated runner can boot elsewhere.
     databaseMigrationsPath:
@@ -54,6 +71,11 @@ parametersSchema:
         modelAttributes: listOf(string())
         minLaravelVersion: string()
         modelHooks: listOf(string())
+        cacheExpiry: structure([
+            enabled: bool()
+            forbidden: listOf(string())
+            requireTtl: arrayOf(int(), string())
+        ])
     ])
 
 rules:
@@ -68,6 +90,10 @@ rules:
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireRelationshipReturnTypeRule
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireSnakeCaseResourceFieldsRule
     - SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireSnakeCaseSchemaRule
+
+conditionalTags:
+    SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireCacheExpiryRule:
+        phpstan.rules.rule: %sineMaculaLaravel.cacheExpiry.enabled%
 
 # Registered as services so the parameters above can be injected.
 services:
@@ -90,3 +116,8 @@ services:
             minLaravelVersion: %sineMaculaLaravel.minLaravelVersion%
         tags:
             - phpstan.rules.rule
+    -
+        class: SineMacula\CodingStandardsLaravel\PHPStan\Rules\RequireCacheExpiryRule
+        arguments:
+            forbidden: %sineMaculaLaravel.cacheExpiry.forbidden%
+            requireTtl: %sineMaculaLaravel.cacheExpiry.requireTtl%

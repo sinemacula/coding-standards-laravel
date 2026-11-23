@@ -137,6 +137,9 @@ class Writes
         $this->repository->remember(key: 'k', callback: fn () => 1);
         Cache::put(...[['k' => 'v'], 60]);
         Cache::put($key, 'v');
+        $this->repository->add($key, 'v');
+        Cache::put('k', ...['v', null]);
+        $this->repository->add(...['key' => 'k', 'value' => 'v']);
     }
 
     /**

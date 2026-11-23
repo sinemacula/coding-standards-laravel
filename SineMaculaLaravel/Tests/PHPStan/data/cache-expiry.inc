@@ -114,4 +114,20 @@ class Writes
         cache(['k' => 'v'], default: 60);
         cache('k');
     }
+
+    public function boundaries(): void
+    {
+        $this->repository->set('k', 'v', 60);
+        $this->repository->setMultiple(['k' => 'v'], 60);
+        Registry::forever('k', 'v');
+        Cache::store()->Lock(name: 'k');
+        Cache::lock('k', 1);
+    }
+}
+
+class Registry
+{
+    public static function forever(string $key, mixed $value): void
+    {
+    }
 }
